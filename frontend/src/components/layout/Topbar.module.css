@@ -219,13 +219,36 @@
 }
 
 @media (max-width: 768px) {
+  .topbar {
+    padding: 10px 12px;
+    gap: 8px;
+  }
   .left, .right {
     width: auto;
+    gap: 8px;
   }
-  .searchContainer {
+  .logoText {
     display: none;
   }
   .menuButton {
     display: none;
+  }
+  .searchContainer {
+    display: flex;
+  }
+  .micButton {
+    display: none;
+  }
+  .iconButton {
+    width: 32px;
+    height: 32px;
+  }
+  .userProfileBtn {
+    width: 32px;
+    height: 32px;
+  }
+  .signInBtn {
+    padding: 6px 12px;
+    font-size: 0.85rem;
   }
 }
