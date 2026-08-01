@@ -200,6 +200,8 @@
   .videoCard {
     max-width: 400px;
     margin: 0 auto;
+    justify-self: center; /* Center in CSS grid */
+    width: 100%;
   }
 }
 
