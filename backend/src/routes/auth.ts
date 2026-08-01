@@ -2,7 +2,7 @@ import { Router, Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import User from '../models/User';
-import { auth } from '../middleware/auth';
+import { authMiddleware, AuthRequest } from '../middlewares/authMiddleware';
 
 const router = Router();
 
@@ -111,8 +111,11 @@ router.get('/check-username', async (req: Request, res: Response) => {
 });
 
 // Get current user profile
-router.get('/me', auth, async (req: Request, res: Response) => {
+router.get('/me', authMiddleware, async (req: AuthRequest, res: Response) => {
   try {
+    if (!req.user) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
     const user = await User.findById(req.user.id).select('-passwordHash');
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
