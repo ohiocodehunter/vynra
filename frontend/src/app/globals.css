@@ -195,3 +195,8 @@ button {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+
+/* Disable touch callouts for videos (iOS/Mobile) to prevent saving */
+video {
+  -webkit-touch-callout: none;
+}

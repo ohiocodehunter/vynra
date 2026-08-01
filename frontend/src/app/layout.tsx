@@ -18,6 +18,7 @@ export const metadata: Metadata = {
 };
 
 import { AuthProvider } from '@/context/AuthContext';
+import GlobalProtection from '@/components/layout/GlobalProtection';
 
 export default function RootLayout({
   children,
@@ -28,6 +29,7 @@ export default function RootLayout({
     <html lang="en" className={`${inter.variable} ${outfit.variable}`}>
       <body>
         <AuthProvider>
+          <GlobalProtection />
           {children}
         </AuthProvider>
       </body>
