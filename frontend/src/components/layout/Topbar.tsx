@@ -59,7 +59,7 @@ export default function Topbar() {
         </div>
 
         <div className={styles.right}>
-          <Link href="/studio" className={styles.iconButton} title="Create">
+          <Link href="/studio/upload" className={styles.iconButton} title="Create">
             <Upload size={20} />
           </Link>
           <button className={styles.iconButton}>

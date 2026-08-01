@@ -2,7 +2,8 @@
 
 import React from 'react';
 import { useAuth } from '@/context/AuthContext';
-import { LogOut, Settings, Globe, Video, User } from 'lucide-react';
+import { LogOut, Settings, Globe, Video, User, MonitorPlay } from 'lucide-react';
+import Link from 'next/link';
 import styles from './ProfileDropdown.module.css';
 
 interface ProfileDropdownProps {
@@ -39,18 +40,33 @@ export default function ProfileDropdown({ onClose, onOpenCreateChannel }: Profil
         <div className={styles.divider} />
 
         <ul className={styles.menuList}>
-          <li className={styles.menuItem}>
-            <Video size={18} className={styles.menuIcon} />
-            <span>Your Channel</span>
-          </li>
-          <li className={styles.menuItem} onClick={() => { onClose(); onOpenCreateChannel(); }}>
-            <User size={18} className={styles.menuIcon} />
-            <span>Create Channel</span>
-          </li>
-          <li className={styles.menuItem}>
-            <Settings size={18} className={styles.menuIcon} />
-            <span>Settings</span>
-          </li>
+          {user ? (
+            <>
+              <Link href={`/channel/${user.username}`} style={{ textDecoration: 'none', color: 'inherit' }} onClick={onClose}>
+                <li className={styles.menuItem}>
+                  <User size={18} className={styles.menuIcon} />
+                  <span>Your channel</span>
+                </li>
+              </Link>
+              <Link href="/studio" style={{ textDecoration: 'none', color: 'inherit' }} onClick={onClose}>
+                <li className={styles.menuItem}>
+                  <MonitorPlay size={18} className={styles.menuIcon} />
+                  <span>Vynra Studio</span>
+                </li>
+              </Link>
+              <Link href="/studio/settings" style={{ textDecoration: 'none', color: 'inherit' }} onClick={onClose}>
+                <li className={styles.menuItem}>
+                  <Settings size={18} className={styles.menuIcon} />
+                  <span>Settings</span>
+                </li>
+              </Link>
+            </>
+          ) : (
+            <li className={styles.menuItem} onClick={() => { onClose(); onOpenCreateChannel(); }}>
+              <User size={18} className={styles.menuIcon} />
+              <span>Create Channel</span>
+            </li>
+          )}
           <li className={styles.menuItem}>
             <Globe size={18} className={styles.menuIcon} />
             <span>Language: English</span>

@@ -8,6 +8,7 @@ import path from 'path';
 import { Server } from 'socket.io';
 import authRoutes from './routes/auth';
 import videoRoutes from './routes/video';
+import userRoutes from './routes/users';
 
 dotenv.config();
 
@@ -36,6 +37,7 @@ app.use('/uploads', express.static(path.join(__dirname, '../../uploads')));
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/videos', videoRoutes);
+app.use('/api/users', userRoutes);
 
 app.get('/health', (req, res) => {
   res.status(200).json({ status: 'ok', message: 'Vynra Backend is running smoothly.' });
