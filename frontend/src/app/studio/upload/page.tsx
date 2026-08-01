@@ -18,7 +18,9 @@ export default function StudioUpload() {
   const [description, setDescription] = useState('');
   
   const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const [uploadSuccess, setUploadSuccess] = useState(false);
+  const [processingStatus, setProcessingStatus] = useState('');
   const [videoId, setVideoId] = useState('');
   
   const inputRef = useRef<HTMLInputElement>(null);
@@ -28,6 +30,30 @@ export default function StudioUpload() {
       router.push('/');
     }
   }, [isAuthenticated, router]);
+
+  // Polling for processing status
+  useEffect(() => {
+    let intervalId: NodeJS.Timeout;
+    if (uploadSuccess && processingStatus === 'processing' && videoId) {
+      intervalId = setInterval(async () => {
+        try {
+          const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api'}/videos/${videoId}`);
+          if (response.ok) {
+            const data = await response.json();
+            if (data.status === 'published') {
+              setProcessingStatus('published');
+              clearInterval(intervalId);
+            }
+          }
+        } catch (e) {
+          console.error("Polling error", e);
+        }
+      }, 3000);
+    }
+    return () => {
+      if (intervalId) clearInterval(intervalId);
+    }
+  }, [uploadSuccess, processingStatus, videoId]);
 
   const handleDrag = (e: React.DragEvent) => {
     e.preventDefault();
@@ -74,40 +100,53 @@ export default function StudioUpload() {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
 
-  const handleUpload = async () => {
+  const handleUpload = () => {
     if (!videoFile || !title) return;
     
     setIsUploading(true);
+    setUploadProgress(0);
     
-    try {
-      const formData = new FormData();
-      formData.append('video', videoFile);
-      formData.append('title', title);
-      formData.append('description', description);
-      
-      const token = localStorage.getItem('token');
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api'}/videos/upload`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        },
-        body: formData
-      });
-      
-      if (!response.ok) {
-        throw new Error('Upload failed');
-      }
-      
-      const data = await response.json();
-      setVideoId(data.videoId);
-      setUploadSuccess(true);
-      
-    } catch (error) {
-      console.error(error);
-      alert('Error uploading video');
-    } finally {
-      setIsUploading(false);
+    const formData = new FormData();
+    formData.append('video', videoFile);
+    formData.append('title', title);
+    formData.append('description', description);
+    
+    const token = localStorage.getItem('token');
+    
+    // Use XMLHttpRequest for reliable upload progress
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api'}/videos/upload`);
+    if (token) {
+      xhr.setRequestHeader('Authorization', `Bearer ${token}`);
     }
+
+    xhr.upload.onprogress = (event) => {
+      if (event.lengthComputable) {
+        const percentComplete = Math.round((event.loaded / event.total) * 100);
+        setUploadProgress(percentComplete);
+      }
+    };
+
+    xhr.onload = () => {
+      setIsUploading(false);
+      if (xhr.status >= 200 && xhr.status < 300) {
+        const data = JSON.parse(xhr.responseText);
+        setVideoId(data.videoId);
+        setUploadSuccess(true);
+        setProcessingStatus('processing');
+      } else {
+        console.error('Upload failed', xhr.responseText);
+        alert('Error uploading video');
+      }
+    };
+
+    xhr.onerror = () => {
+      setIsUploading(false);
+      console.error('Upload failed (Network Error)');
+      alert('Error uploading video');
+    };
+
+    xhr.send(formData);
   };
 
   if (!user) return null;
@@ -116,23 +155,38 @@ export default function StudioUpload() {
     return (
       <div className={styles.uploadContainer}>
         <div className={styles.successMsg}>
-          <h2>Upload Started Successfully!</h2>
-          <p style={{ marginTop: '8px', color: 'var(--text-secondary)' }}>
-            Your video is now processing in the background. It will appear on your channel once finished.
-          </p>
-          <div style={{ marginTop: '24px', display: 'flex', gap: '16px', justifyContent: 'center' }}>
+          <h2>{processingStatus === 'published' ? 'Upload & Processing Complete!' : 'Video Uploaded! Processing in background...'}</h2>
+          
+          {processingStatus === 'processing' && (
+            <div style={{ marginTop: '20px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
+              <Loader2 size={32} className={styles.spinner} />
+              <p style={{ color: 'var(--text-secondary)' }}>
+                We are compressing your video and generating thumbnails. Please wait...
+              </p>
+            </div>
+          )}
+
+          {processingStatus === 'published' && (
+            <p style={{ marginTop: '8px', color: 'var(--text-secondary)' }}>
+              Your video is now live! You can view it on your channel.
+            </p>
+          )}
+
+          <div style={{ marginTop: '32px', display: 'flex', gap: '16px', justifyContent: 'center' }}>
             <button 
               className={styles.btnPrimary} 
               onClick={() => {
                 setUploadSuccess(false);
+                setProcessingStatus('');
                 setVideoFile(null);
                 setTitle('');
                 setDescription('');
+                setUploadProgress(0);
               }}
             >
               Upload Another
             </button>
-            <Link href={`/channel/${user.username}`} style={{ textDecoration: 'none' }}>
+            <Link href={`/channel/${user.channelName || user.username}`} style={{ textDecoration: 'none' }}>
               <button className={styles.btnPrimary} style={{ background: 'var(--bg-hover)', color: 'var(--text-primary)' }}>
                 Go to Channel
               </button>
@@ -205,19 +259,26 @@ export default function StudioUpload() {
           </div>
           
           <div className={styles.actions}>
-            <button 
-              className={styles.btnPrimary} 
-              onClick={handleUpload}
-              disabled={isUploading || !title.trim()}
-              style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
-            >
-              {isUploading ? (
-                <>
-                  <Loader2 size={18} className={styles.spin} />
-                  Uploading...
-                </>
-              ) : 'Upload'}
-            </button>
+            {isUploading ? (
+              <div style={{ width: '100%' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                  <span>Uploading...</span>
+                  <span>{uploadProgress}%</span>
+                </div>
+                <div style={{ width: '100%', height: '8px', background: 'var(--border)', borderRadius: '4px', overflow: 'hidden' }}>
+                  <div style={{ width: `${uploadProgress}%`, height: '100%', background: 'var(--primary)', transition: 'width 0.3s ease' }}></div>
+                </div>
+              </div>
+            ) : (
+              <button 
+                className={styles.btnPrimary} 
+                onClick={handleUpload}
+                disabled={!title.trim()}
+                style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
+              >
+                Upload
+              </button>
+            )}
           </div>
         </div>
       )}

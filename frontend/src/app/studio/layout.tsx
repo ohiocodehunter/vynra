@@ -14,7 +14,7 @@ export default function StudioLayout({
   const [showUpload, setShowUpload] = useState(false);
 
   return (
-    <div className={styles.studioContainer} data-theme="light">
+    <div className={styles.studioContainer}>
       <aside className={styles.sidebar}>
         <div className={styles.logoContainer}>
           <div className={styles.logoIcon}>
