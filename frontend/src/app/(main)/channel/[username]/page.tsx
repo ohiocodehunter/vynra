@@ -134,7 +134,7 @@ export default function ChannelPage() {
           videos.length > 0 ? (
             <div className={styles.grid}>
               {videos.map(video => (
-                <VideoCard key={video.id || video._id} video={video} />
+                <VideoCard key={video._id} video={video} />
               ))}
             </div>
           ) : (
