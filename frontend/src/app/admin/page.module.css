@@ -1,0 +1,232 @@
+.adminDashboard {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 24px;
+}
+
+.statCard {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  position: relative;
+  overflow: hidden;
+}
+
+.statTitle {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.statValue {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  font-family: var(--font-outfit);
+}
+
+.statChange {
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: 600;
+}
+
+.positive {
+  color: #34d399; /* Emerald */
+}
+
+.negative {
+  color: #f87171; /* Red */
+}
+
+.mainGrid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 24px;
+}
+
+.panelTitle {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.usersPanel, .reportsPanel, .storagePanel {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+}
+
+.panelHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.viewAllBtn {
+  color: var(--accent-primary);
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.usersTable {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.usersTable th {
+  text-align: left;
+  padding: 12px 16px;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.usersTable td {
+  padding: 16px;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  border-bottom: 1px solid rgba(255,255,255,0.02);
+}
+
+.usersTable tr:last-child td {
+  border-bottom: none;
+}
+
+.userCell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.cellAvatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: #6366f1;
+}
+
+.sideGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.donutChartContainer {
+  display: flex;
+  justify-content: center;
+  padding: 24px 0;
+}
+
+.donutPlaceholder {
+  width: 160px;
+  height: 160px;
+  border-radius: 50%;
+  background: conic-gradient(#fca5a5 0% 37%, #60a5fa 37% 83%, #34d399 83% 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.donutInner {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background-color: var(--bg-secondary);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.donutValue {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.donutLabel {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.legendList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.legendItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.legendColor {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.legendName {
+  flex-grow: 1;
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+}
+
+.legendValue {
+  color: var(--text-primary);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.storageHeader {
+  margin-bottom: 16px;
+}
+
+.storageValue {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  margin-top: 8px;
+}
+
+.storageBarContainer {
+  width: 100%;
+  height: 8px;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.storageBar {
+  height: 100%;
+  background-color: var(--accent-primary);
+  border-radius: 4px;
+}
+
+@media (max-width: 1024px) {
+  .mainGrid {
+    grid-template-columns: 1fr;
+  }
+}

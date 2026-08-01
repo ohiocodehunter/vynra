@@ -1,0 +1,228 @@
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 24px;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background-color: rgba(15, 15, 18, 0.8);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border-color);
+  flex-shrink: 0;
+}
+
+.left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  width: auto;
+}
+
+.menuButton {
+  background: transparent;
+  border: none;
+  color: var(--text-primary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  border-radius: 50%;
+  transition: background var(--transition-fast);
+}
+
+.menuButton:hover {
+  background: var(--bg-hover);
+}
+
+.logoContainer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+}
+
+.logoIcon {
+  width: 28px;
+  height: 28px;
+  background: var(--gradient-main);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.logoIcon svg {
+  width: 14px;
+  height: 14px;
+}
+
+.logoText {
+  font-family: var(--font-outfit);
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.center {
+  flex-grow: 1;
+  display: flex;
+  justify-content: center;
+  max-width: 600px;
+}
+
+.searchContainer {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  gap: 0.5rem;
+}
+
+.searchBox {
+  display: flex;
+  align-items: center;
+  flex-grow: 1;
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-full);
+  padding: 8px 16px;
+  transition: all var(--transition-fast);
+}
+
+.searchBox:focus-within {
+  border-color: var(--accent-primary);
+  background-color: var(--bg-hover);
+  box-shadow: 0 0 0 2px rgba(123, 97, 255, 0.2);
+}
+
+.searchIcon {
+  color: var(--text-muted);
+  margin-right: 12px;
+}
+
+.searchInput {
+  background: transparent;
+  border: none;
+  color: var(--text-primary);
+  font-size: 0.95rem;
+  width: 100%;
+  outline: none;
+}
+
+.searchInput::placeholder {
+  color: var(--text-muted);
+}
+
+.micButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.micButton:hover {
+  background-color: var(--bg-hover);
+}
+
+.right {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  width: 200px;
+}
+
+.iconButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: transparent;
+  border: none;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: background-color var(--transition-fast);
+}
+
+.iconButton:hover {
+  background-color: var(--bg-hover);
+}
+
+.profileWrapper {
+  position: relative;
+}
+
+.userProfileBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  overflow: hidden;
+  transition: transform 0.2s;
+}
+
+.userProfileBtn:hover {
+  transform: scale(1.05);
+}
+
+.userAvatar {
+  width: 100%;
+  height: 100%;
+  background-color: var(--accent-primary);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.avatarImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.signInBtn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: var(--radius-full);
+  background-color: rgba(123, 97, 255, 0.1);
+  color: var(--accent-primary);
+  border: 1px solid rgba(123, 97, 255, 0.2);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.signInBtn:hover {
+  background-color: rgba(123, 97, 255, 0.2);
+}
+
+@media (max-width: 768px) {
+  .left, .right {
+    width: auto;
+  }
+  .searchContainer {
+    display: none;
+  }
+}
