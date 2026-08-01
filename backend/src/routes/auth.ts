@@ -2,6 +2,7 @@ import { Router, Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import User from '../models/User';
+import { auth } from '../middleware/auth';
 
 const router = Router();
 
@@ -106,6 +107,20 @@ router.get('/check-username', async (req: Request, res: Response) => {
     res.json({ available: !existingUser });
   } catch (error) {
     res.status(500).json({ error: 'Server error checking username' });
+  }
+});
+
+// Get current user profile
+router.get('/me', auth, async (req: Request, res: Response) => {
+  try {
+    const user = await User.findById(req.user.id).select('-passwordHash');
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    res.json(user);
+  } catch (error) {
+    console.error('Error fetching current user:', error);
+    res.status(500).json({ error: 'Server error' });
   }
 });
 

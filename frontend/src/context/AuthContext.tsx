@@ -18,8 +18,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   
   useEffect(() => {
     const savedUser = localStorage.getItem('user');
+    const token = localStorage.getItem('token');
+    
     if (savedUser) {
       setUser(JSON.parse(savedUser));
+    }
+
+    // Refresh user data from API if we have a token
+    if (token) {
+      fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api'}/auth/me`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      })
+      .then(res => res.ok ? res.json() : null)
+      .then(data => {
+        if (data) {
+          setUser(data);
+          localStorage.setItem('user', JSON.stringify(data));
+        }
+      })
+      .catch(err => console.error('Failed to refresh user:', err));
     }
   }, []);
 
