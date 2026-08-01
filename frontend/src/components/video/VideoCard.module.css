@@ -14,7 +14,7 @@
   width: 100%;
   aspect-ratio: 16 / 9;
   border-radius: var(--radius-lg);
-  overflow: hidden;
+  /* overflow: x; */
   background-color: var(--bg-hover);
   transition:
     border-radius 0.3s cubic-bezier(0.16, 1, 0.3, 1),
