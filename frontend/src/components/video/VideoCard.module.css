@@ -6,7 +6,6 @@
   position: relative;
   text-decoration: none;
   width: 100%;
-  scrollbar-width: none;
 }
 
 .thumbnailContainer {
@@ -14,7 +13,7 @@
   width: 100%;
   aspect-ratio: 16 / 9;
   border-radius: var(--radius-lg);
-  /* overflow: x; */
+  overflow: hidden;
   background-color: var(--bg-hover);
   transition:
     border-radius 0.3s cubic-bezier(0.16, 1, 0.3, 1),
@@ -204,8 +203,6 @@
     margin: 0 auto;
     justify-self: center; /* Center in CSS grid */
     width: 100%;
-    margin-right: 320px;
-    scrollbar-width: none;
   }
 }
 

@@ -21,6 +21,12 @@
   overflow-x: hidden;
   padding: 12px 24px 24px 24px;
   position: relative;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.mainContent::-webkit-scrollbar {
+  display: none;
 }
 
 @media (max-width: 768px) {
