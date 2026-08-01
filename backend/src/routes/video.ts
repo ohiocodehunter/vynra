@@ -118,9 +118,9 @@ router.post('/upload', authMiddleware, upload.single('video'), async (req: AuthR
       }
     })();
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('Upload error:', error);
-    res.status(500).json({ error: 'Server error during upload' });
+    res.status(500).json({ error: error.message || 'Server error during upload', stack: error.stack });
   }
 });
 

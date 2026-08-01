@@ -19,8 +19,8 @@ export interface IVideo extends Document {
 const VideoSchema: Schema = new Schema({
   title: { type: String, required: true, trim: true },
   description: { type: String, default: '', trim: true },
-  url: { type: String, required: true },
-  thumbnailUrl: { type: String, required: true },
+  url: { type: String, default: '' },
+  thumbnailUrl: { type: String, default: '' },
   creator: { type: Schema.Types.ObjectId, ref: 'User', required: true },
   views: { type: Number, default: 0 },
   likes: { type: Number, default: 0 },
