@@ -144,7 +144,7 @@ router.get('/', async (req: Request, res: Response) => {
     }
 
     const videos = await Video.find(query)
-      .populate('creator', 'username avatarUrl')
+      .populate('creator', 'username channelName avatarUrl')
       .sort(sortOption)
       .limit(50);
     res.json(videos);
@@ -156,7 +156,7 @@ router.get('/', async (req: Request, res: Response) => {
 // Get a single video by ID
 router.get('/:id', async (req: Request, res: Response) => {
   try {
-    const video = await Video.findById(req.params.id).populate('creator', 'username avatarUrl subscribersCount');
+    const video = await Video.findById(req.params.id).populate('creator', 'username channelName avatarUrl subscribersCount');
     if (!video) {
       return res.status(404).json({ error: 'Video not found' });
     }

@@ -116,7 +116,7 @@ router.get('/channel/:username', async (req: Request, res: Response) => {
     }
     
     // Get their videos
-    const videos = await Video.find({ creator: user._id, status: 'ready' })
+    const videos = await Video.find({ creator: user._id, status: 'published' })
       .sort({ createdAt: -1 })
       .populate('creator', 'username avatarUrl');
       

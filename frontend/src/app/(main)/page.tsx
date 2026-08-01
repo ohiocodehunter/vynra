@@ -7,7 +7,9 @@ async function getVideos() {
     cache: 'no-store' 
   });
   if (!res.ok) {
-    throw new Error('Failed to fetch videos');
+    const text = await res.text();
+    console.error('Fetch videos failed:', res.status, res.statusText, text);
+    throw new Error(`Failed to fetch videos: ${res.status}`);
   }
   return res.json() as Promise<Video[]>;
 }
