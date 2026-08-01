@@ -11,6 +11,9 @@
   padding-bottom: 12px;
   margin-bottom: 12px;
   border-bottom: 1px solid var(--border-color);
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden; /* Ensure it never expands the parent */
 }
 
 .categoriesScroll {
@@ -19,6 +22,7 @@
   overflow-x: auto;
   scrollbar-width: none; /* Firefox */
   padding: 0 4px;
+  width: 100%;
 }
 
 .categoriesScroll::-webkit-scrollbar {
@@ -98,12 +102,5 @@
 @keyframes spin {
   100% {
     transform: rotate(360deg);
-  }
-}
-
-@media (max-width: 768px) {
-  .categoriesWrapper {
-    padding-left: 16px;
-    padding-right: 16px;
   }
 }

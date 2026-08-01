@@ -199,7 +199,6 @@
 @media (max-width: 480px) {
   .horizontal {
     height: 84px;
-    padding: 0 16px;
   }
   
   .horizontal .thumbnailContainer {
@@ -213,13 +212,5 @@
   
   .horizontal .videoMeta {
     font-size: 0.7rem;
-  }
-
-  .videoCard:not(.horizontal) .thumbnailContainer {
-    border-radius: 0;
-  }
-
-  .videoCard:not(.horizontal) .videoInfo {
-    padding: 0 16px;
   }
 }
