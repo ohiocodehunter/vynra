@@ -2,6 +2,7 @@
   /* Dark Theme Palette (Vynra Default) */
   --bg-primary: #0F0F12;
   --bg-secondary: #1A1A21;
+  --bg-surface: #1E1E26; /* Add surface color for modals/dropdowns */
   --bg-hover: #272732;
   --accent-primary: #7B61FF;
   --accent-secondary: #9B86FF;
@@ -37,6 +38,7 @@
 [data-theme="light"] {
   --bg-primary: #F7F9FF;
   --bg-secondary: #FFFFFF;
+  --bg-surface: #FFFFFF;
   --bg-hover: #F0F2F5;
   --accent-primary: #6C63FF;
   --accent-secondary: #8B5CF6;
