@@ -21,11 +21,16 @@ api.interceptors.request.use(
 );
 
 export interface User {
-  _id: string;
+  _id?: string;
+  id?: string; // Sometimes returned as id from backend
   username: string;
+  channelName?: string;
   email?: string;
   avatarUrl: string;
+  bannerUrl?: string;
+  bio?: string;
   subscribersCount?: number;
+  createdAt?: string;
 }
 
 export interface Video {

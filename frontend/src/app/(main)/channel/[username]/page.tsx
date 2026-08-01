@@ -83,7 +83,7 @@ export default function ChannelPage() {
           </div>
           
           <div className={styles.channelDetails}>
-            <h1 className={styles.channelName}>{user.username}</h1>
+            <h1 className={styles.channelName}>{user.channelName || user.username}</h1>
             <div className={styles.channelMeta}>
               <span>{user.subscribersCount || 0} subscribers</span>
               <span>•</span>

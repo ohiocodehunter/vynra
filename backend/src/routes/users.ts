@@ -44,12 +44,26 @@ router.get('/me', authMiddleware, async (req: AuthRequest, res: Response) => {
 router.put('/me', authMiddleware, upload.fields([{ name: 'avatar', maxCount: 1 }, { name: 'banner', maxCount: 1 }]), async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.user?.id;
-    const { username, bio } = req.body;
+    const { username, channelName, bio } = req.body;
     const files = req.files as { [fieldname: string]: Express.Multer.File[] };
 
     const updateData: any = {};
-    if (username) updateData.username = username;
+    if (channelName !== undefined) updateData.channelName = channelName;
     if (bio !== undefined) updateData.bio = bio;
+
+    if (username) {
+      const user = await User.findById(userId);
+      if (user && user.username !== username) {
+        if (user.usernameLastChanged) {
+          const daysSinceLastChange = (Date.now() - user.usernameLastChanged.getTime()) / (1000 * 60 * 60 * 24);
+          if (daysSinceLastChange < 14) {
+            return res.status(400).json({ error: `Username can only be changed once every 14 days. You have ${Math.ceil(14 - daysSinceLastChange)} days left.` });
+          }
+        }
+        updateData.username = username;
+        updateData.usernameLastChanged = new Date();
+      }
+    }
 
     // Handle avatar upload
     if (files && files['avatar'] && files['avatar'][0]) {

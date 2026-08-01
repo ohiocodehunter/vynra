@@ -23,6 +23,7 @@ router.post('/register', async (req: Request, res: Response) => {
     // Create new user
     const newUser = new User({
       username,
+      channelName: username,
       email,
       passwordHash
     });
@@ -41,6 +42,7 @@ router.post('/register', async (req: Request, res: Response) => {
       user: {
         id: newUser._id,
         username: newUser.username,
+        channelName: newUser.channelName,
         email: newUser.email,
         role: newUser.role,
         avatarUrl: newUser.avatarUrl
@@ -81,6 +83,7 @@ router.post('/login', async (req: Request, res: Response) => {
       user: {
         id: user._id,
         username: user.username,
+        channelName: user.channelName || user.username,
         email: user.email,
         role: user.role,
         avatarUrl: user.avatarUrl

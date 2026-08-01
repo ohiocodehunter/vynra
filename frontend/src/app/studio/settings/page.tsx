@@ -12,6 +12,7 @@ export default function StudioSettings() {
   const router = useRouter();
 
   const [username, setUsername] = useState('');
+  const [channelName, setChannelName] = useState('');
   const [bio, setBio] = useState('');
   const [avatarPreview, setAvatarPreview] = useState('');
   const [bannerPreview, setBannerPreview] = useState('');
@@ -30,6 +31,7 @@ export default function StudioSettings() {
 
     if (user) {
       setUsername(user.username || '');
+      setChannelName(user.channelName || user.username || '');
       setBio(user.bio || '');
       setAvatarPreview(user.avatarUrl || '');
       setBannerPreview(user.bannerUrl || '');
@@ -59,6 +61,7 @@ export default function StudioSettings() {
     try {
       const formData = new FormData();
       formData.append('username', username);
+      formData.append('channelName', channelName);
       formData.append('bio', bio);
       if (avatarFile) formData.append('avatar', avatarFile);
       if (bannerFile) formData.append('banner', bannerFile);
@@ -178,10 +181,27 @@ export default function StudioSettings() {
           <input 
             type="text" 
             className={styles.input} 
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
+            value={channelName}
+            onChange={(e) => setChannelName(e.target.value)}
             placeholder="Channel Name"
           />
+          <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '4px' }}>
+            Choose a channel name that represents you and your content. Changes made to your name and picture are visible only on Vynra.
+          </p>
+        </div>
+
+        <div className={styles.formGroup}>
+          <label className={styles.label}>Handle (Username)</label>
+          <input 
+            type="text" 
+            className={styles.input} 
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            placeholder="@username"
+          />
+          <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '4px' }}>
+            Choose your unique handle by adding letters and numbers. You can change your handle back within 14 days. Handes can be changed twice every 14 days.
+          </p>
         </div>
 
         <div className={styles.formGroup}>

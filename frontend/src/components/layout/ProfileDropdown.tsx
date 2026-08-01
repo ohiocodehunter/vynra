@@ -54,7 +54,7 @@ export default function ProfileDropdown({ onClose, onOpenCreateChannel }: Profil
                   <span>Vynra Studio</span>
                 </li>
               </Link>
-              <Link href="/studio/settings" style={{ textDecoration: 'none', color: 'inherit' }} onClick={onClose}>
+              <Link href="/studio/settings" style={{ textDecoration: 'none', color: 'inherit' }} target="_blank" onClick={onClose}>
                 <li className={styles.menuItem}>
                   <Settings size={18} className={styles.menuIcon} />
                   <span>Settings</span>
