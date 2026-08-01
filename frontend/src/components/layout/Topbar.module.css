@@ -225,4 +225,7 @@
   .searchContainer {
     display: none;
   }
+  .menuButton {
+    display: none;
+  }
 }
