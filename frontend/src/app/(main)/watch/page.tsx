@@ -4,6 +4,7 @@ import { ThumbsUp, ThumbsDown, Share2, Download, BookmarkPlus, Play, Volume2, Ma
 import { videoService, Video } from '@/lib/api';
 import Link from 'next/link';
 import VideoCard from '@/components/video/VideoCard';
+import ClientVideoPlayer from '@/components/video/ClientVideoPlayer';
 
 function formatDuration(seconds: number) {
   const m = Math.floor(seconds / 60);
@@ -39,14 +40,7 @@ export default async function WatchPage({ searchParams }: { searchParams: Promis
       <div className={styles.mainColumn}>
         {/* Real Video Player */}
         <div className={styles.videoPlayerContainer}>
-          <video 
-            src={video.url} 
-            poster={video.thumbnailUrl}
-            controls 
-            autoPlay 
-            className={styles.videoElement}
-            style={{ width: '100%', height: '100%', outline: 'none' }}
-          />
+          <ClientVideoPlayer url={video.url} poster={video.thumbnailUrl} />
         </div>
 
         {/* Video Metadata */}

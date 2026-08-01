@@ -9,6 +9,8 @@ export const compressVideo = (inputPath: string, outputPath: string): Promise<st
         '-c:v libx264',    // Use H.264 codec
         '-crf 28',         // Constant Rate Factor (28 is good compression/quality ratio)
         '-preset fast',    // Encoding speed preset
+        '-pix_fmt yuv420p',// Pixel format for broad mobile compatibility
+        '-profile:v main', // Main profile for better mobile support
         '-c:a aac',        // Audio codec
         '-b:a 128k'        // Audio bitrate
       ])

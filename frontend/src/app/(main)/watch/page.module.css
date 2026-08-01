@@ -458,3 +458,80 @@
     width: 100%;
   }
 }
+
+@media (max-width: 768px) {
+  .watchContainer {
+    gap: 16px;
+    padding: 0 8px; /* some padding so it doesn't touch the very edges of screen */
+  }
+
+  .videoTitle {
+    font-size: 1.25rem;
+  }
+
+  .videoActionsRow {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .actionButtons {
+    width: 100%;
+    overflow-x: auto;
+    padding-bottom: 8px; /* space for scrollbar */
+    /* Hide scrollbar for cleaner look */
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+  }
+
+  .actionButtons::-webkit-scrollbar {
+    display: none;
+  }
+
+  .channelInfo {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .addComment {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .upNextItem {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .upNextThumbnail {
+    width: 100%;
+    max-width: 320px;
+  }
+}
+
+@media (max-width: 480px) {
+  .watchContainer {
+    padding: 0;
+    margin: -16px -16px 0 -16px; /* offset the mainContent padding */
+    width: calc(100% + 32px); /* expand width to compensate */
+  }
+
+  .videoPlayerContainer {
+    border-radius: 0; /* Full bleed video on mobile */
+  }
+  
+  .videoMetadata {
+    padding: 0 16px;
+  }
+
+  .commentsSection {
+    padding: 0 16px;
+  }
+
+  .upNextHeader, .filtersRow, .upNextList {
+    padding: 0 16px;
+  }
+
+  .videoTitle {
+    font-size: 1.1rem;
+  }
+}
