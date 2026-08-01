@@ -54,19 +54,21 @@
   display: none !important;
 }
 
-.videoCard:hover .thumbnailContainer {
-  border-radius: 0px;
-  transform: scale(1.03) translateY(-4px);
-  z-index: 10;
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.8);
-}
+@media (hover: hover) and (pointer: fine) {
+  .videoCard:hover .thumbnailContainer {
+    border-radius: 0px;
+    transform: scale(1.03) translateY(-4px);
+    z-index: 10;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.8);
+  }
 
-.videoCard:hover .previewVideo {
-  opacity: 1;
-}
+  .videoCard:hover .previewVideo {
+    opacity: 1;
+  }
 
-.videoCard:hover .thumbnail {
-  opacity: 0;
+  .videoCard:hover .thumbnail {
+    opacity: 0;
+  }
 }
 
 .videoLoadingOverlay {
@@ -167,11 +169,13 @@
   border-radius: var(--radius-md);
 }
 
-.horizontal:hover .thumbnailContainer {
-  transform: scale(1.05); /* smaller scale for horizontal */
-  z-index: 10;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
-  border-radius: 0px;
+@media (hover: hover) and (pointer: fine) {
+  .horizontal:hover .thumbnailContainer {
+    transform: scale(1.05); /* smaller scale for horizontal */
+    z-index: 10;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+    border-radius: 0px;
+  }
 }
 
 .horizontal .videoInfo {
@@ -195,6 +199,7 @@
 @media (max-width: 480px) {
   .horizontal {
     height: 84px;
+    padding: 0 16px;
   }
   
   .horizontal .thumbnailContainer {
@@ -208,5 +213,13 @@
   
   .horizontal .videoMeta {
     font-size: 0.7rem;
+  }
+
+  .videoCard:not(.horizontal) .thumbnailContainer {
+    border-radius: 0;
+  }
+
+  .videoCard:not(.horizontal) .videoInfo {
+    padding: 0 16px;
   }
 }

@@ -3,6 +3,7 @@
   flex-direction: column;
   width: 100%;
   max-width: 100%;
+  min-width: 0;
 }
 
 .categoriesWrapper {
@@ -97,5 +98,12 @@
 @keyframes spin {
   100% {
     transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 768px) {
+  .categoriesWrapper {
+    padding-left: 16px;
+    padding-right: 16px;
   }
 }

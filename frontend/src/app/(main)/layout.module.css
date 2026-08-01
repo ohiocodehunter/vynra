@@ -24,7 +24,7 @@
 
 @media (max-width: 768px) {
   .mainContent {
-    padding: 16px;
+    padding: 0;
     padding-bottom: 80px; /* Space for BottomNav */
   }
 }
