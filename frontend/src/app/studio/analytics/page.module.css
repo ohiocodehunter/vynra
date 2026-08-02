@@ -1,0 +1,144 @@
+.container {
+  padding: 2rem;
+  max-width: 1200px;
+}
+
+.pageTitle {
+  font-size: 1.75rem;
+  font-weight: 600;
+  margin-bottom: 2rem;
+  color: var(--text-primary);
+}
+
+.overviewSection {
+  margin-bottom: 3rem;
+}
+
+.sectionTitle {
+  font-size: 1.25rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  margin-bottom: 1rem;
+}
+
+.metricsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+}
+
+.metricCard {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.metricCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  border-color: rgba(255,255,255,0.1);
+}
+
+.metricTitle {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.metricValue {
+  font-size: 2.5rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-top: 0.5rem;
+}
+
+.topVideosSection {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.topVideosHeader {
+  padding: 1.5rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.topVideosHeader h2 {
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.videoList {
+  display: flex;
+  flex-direction: column;
+}
+
+.videoItem {
+  display: flex;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--border-color);
+  transition: background 0.2s ease;
+  text-decoration: none;
+}
+
+.videoItem:last-child {
+  border-bottom: none;
+}
+
+.videoItem:hover {
+  background: var(--bg-elevated);
+}
+
+.rank {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  width: 40px;
+}
+
+.videoThumb {
+  width: 120px;
+  height: 68px;
+  background: var(--bg-tertiary);
+  border-radius: 4px;
+  margin-right: 1.5rem;
+  background-size: cover;
+  background-position: center;
+}
+
+.videoInfo {
+  flex-grow: 1;
+}
+
+.videoTitle {
+  font-weight: 500;
+  color: var(--text-primary);
+  margin-bottom: 0.25rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.videoViews {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+.emptyState {
+  padding: 3rem;
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 1.1rem;
+}

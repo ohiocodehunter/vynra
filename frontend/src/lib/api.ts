@@ -48,6 +48,8 @@ export interface Video {
   likedBy: string[];
   dislikedBy: string[];
   duration: number;
+  status?: string;
+  visibility?: 'public' | 'private' | 'unlisted';
   createdAt: string;
 }
 
@@ -122,6 +124,18 @@ export const playlistService = {
 export const studioService = {
   getStats: async (): Promise<any> => {
     const response = await api.get('/studio/stats');
+    return response.data;
+  },
+  getCreatorVideos: async (): Promise<Video[]> => {
+    const response = await api.get('/studio/videos');
+    return response.data;
+  },
+  updateVideo: async (id: string, data: Partial<Video>): Promise<Video> => {
+    const response = await api.put(`/videos/${id}`, data);
+    return response.data;
+  },
+  deleteVideo: async (id: string): Promise<{ message: string }> => {
+    const response = await api.delete(`/videos/${id}`);
     return response.data;
   }
 };

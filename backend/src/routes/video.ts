@@ -38,7 +38,7 @@ router.post('/upload', authMiddleware, upload.single('video'), async (req: AuthR
       return res.status(401).json({ error: 'Unauthorized' });
     }
 
-    const { title, description, tags } = req.body;
+    const { title, description, tags, visibility } = req.body;
     const inputPath = req.file.path;
     const fileId = uuidv4();
     const uploadDir = path.join(__dirname, '../../uploads');
@@ -56,6 +56,7 @@ router.post('/upload', authMiddleware, upload.single('video'), async (req: AuthR
       thumbnailUrl: '', // will update after upload
       creator: req.user.id,
       status: 'processing',
+      visibility: visibility || 'public',
       tags: tags ? JSON.parse(tags) : []
     });
     await video.save();
@@ -124,11 +125,10 @@ router.post('/upload', authMiddleware, upload.single('video'), async (req: AuthR
   }
 });
 
-// Get all videos (Home feed, Explore, Search)
 router.get('/', async (req: Request, res: Response) => {
   try {
     const { q, tag, sort } = req.query;
-    let query: any = { status: 'published' };
+    let query: any = { status: 'published', visibility: 'public' };
     
     if (q) {
       query.title = { $regex: q as string, $options: 'i' };
@@ -157,7 +157,7 @@ router.get('/', async (req: Request, res: Response) => {
 router.get('/liked', authMiddleware, async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.user?.id;
-    const videos = await Video.find({ likedBy: userId, status: 'published' })
+    const videos = await Video.find({ likedBy: userId, status: 'published', visibility: 'public' })
       .populate('creator', 'username channelName avatarUrl')
       .sort({ createdAt: -1 });
     res.json(videos);
@@ -252,6 +252,55 @@ router.post('/:id/dislike', authMiddleware, async (req: AuthRequest, res: Respon
     res.json(video);
   } catch (error) {
     res.status(500).json({ error: 'Server error disliking video' });
+  }
+});
+
+// Update a video (Title, Description, Tags, Visibility)
+router.put('/:id', authMiddleware, async (req: AuthRequest, res: Response) => {
+  try {
+    if (!req.user) return res.status(401).json({ error: 'Unauthorized' });
+
+    const video = await Video.findById(req.params.id);
+    if (!video) return res.status(404).json({ error: 'Video not found' });
+
+    // Check if the user is the creator
+    if (video.creator.toString() !== req.user.id) {
+      return res.status(403).json({ error: 'Not authorized to edit this video' });
+    }
+
+    const { title, description, tags, visibility } = req.body;
+
+    if (title !== undefined) video.title = title;
+    if (description !== undefined) video.description = description;
+    if (tags !== undefined) video.tags = Array.isArray(tags) ? tags : JSON.parse(tags);
+    if (visibility !== undefined) video.visibility = visibility;
+
+    await video.save();
+    res.json(video);
+  } catch (error) {
+    console.error('Error updating video:', error);
+    res.status(500).json({ error: 'Server error updating video' });
+  }
+});
+
+// Delete a video
+router.delete('/:id', authMiddleware, async (req: AuthRequest, res: Response) => {
+  try {
+    if (!req.user) return res.status(401).json({ error: 'Unauthorized' });
+
+    const video = await Video.findById(req.params.id);
+    if (!video) return res.status(404).json({ error: 'Video not found' });
+
+    // Check if the user is the creator
+    if (video.creator.toString() !== req.user.id) {
+      return res.status(403).json({ error: 'Not authorized to delete this video' });
+    }
+
+    await video.deleteOne();
+    res.json({ message: 'Video deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting video:', error);
+    res.status(500).json({ error: 'Server error deleting video' });
   }
 });
 

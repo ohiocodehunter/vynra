@@ -47,4 +47,22 @@ router.get('/stats', authMiddleware, async (req: AuthRequest, res: Response) => 
   }
 });
 
+// Get creator's videos (for Content page)
+router.get('/videos', authMiddleware, async (req: AuthRequest, res: Response) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    // Fetch all videos, regardless of visibility or status
+    const videos = await Video.find({ creator: req.user.id })
+      .sort({ createdAt: -1 });
+    
+    res.json(videos);
+  } catch (error) {
+    console.error('Error fetching creator videos:', error);
+    res.status(500).json({ error: 'Server error fetching videos' });
+  }
+});
+
 export default router;
