@@ -89,7 +89,7 @@ export default function VideoCard({
         <div className={styles.videoDetails}>
           <h3 className={styles.videoTitle}>{video.title}</h3>
           <p className={styles.videoMeta}>
-            {video.creator?.username || "Unknown"}
+            {video.creator?.username || "Upload by Dev"}
           </p>
           <p className={styles.videoMeta}>
             {video.views >= 1000

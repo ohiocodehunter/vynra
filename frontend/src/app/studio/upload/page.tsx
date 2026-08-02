@@ -37,11 +37,14 @@ export default function StudioUpload() {
     if (uploadSuccess && processingStatus === 'processing' && videoId) {
       intervalId = setInterval(async () => {
         try {
-          const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api'}/videos/${videoId}`);
+          const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api'}/videos/${videoId}?polling=true`);
           if (response.ok) {
             const data = await response.json();
             if (data.status === 'published') {
               setProcessingStatus('published');
+              clearInterval(intervalId);
+            } else if (data.status === 'error' || data.status === 'private') {
+              setProcessingStatus('error');
               clearInterval(intervalId);
             }
           }
@@ -166,6 +169,15 @@ export default function StudioUpload() {
             </div>
           )}
 
+          {processingStatus === 'error' && (
+            <div style={{ marginTop: '20px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px', color: '#ef4444' }}>
+              <X size={32} />
+              <p>
+                An error occurred during video processing. Please try uploading again.
+              </p>
+            </div>
+          )}
+
           {processingStatus === 'published' && (
             <p style={{ marginTop: '8px', color: 'var(--text-secondary)' }}>
               Your video is now live! You can view it on your channel.
@@ -265,8 +277,8 @@ export default function StudioUpload() {
                   <span>Uploading...</span>
                   <span>{uploadProgress}%</span>
                 </div>
-                <div style={{ width: '100%', height: '8px', background: 'var(--border)', borderRadius: '4px', overflow: 'hidden' }}>
-                  <div style={{ width: `${uploadProgress}%`, height: '100%', background: 'var(--primary)', transition: 'width 0.3s ease' }}></div>
+                <div style={{ width: '100%', height: '8px', background: 'var(--border-color)', borderRadius: '4px', overflow: 'hidden' }}>
+                  <div style={{ width: `${uploadProgress}%`, height: '100%', background: 'var(--accent-primary)', transition: 'width 0.3s ease' }}></div>
                 </div>
               </div>
             ) : (

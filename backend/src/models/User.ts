@@ -9,6 +9,9 @@ export interface IUser extends Document {
   bannerUrl?: string;
   bio?: string;
   subscribersCount: number;
+  subscriptions: mongoose.Types.ObjectId[];
+  history: { video: mongoose.Types.ObjectId; watchedAt: Date }[];
+  watchLater: mongoose.Types.ObjectId[];
   role: 'user' | 'admin';
   usernameLastChanged?: Date;
   createdAt: Date;
@@ -24,6 +27,12 @@ const UserSchema: Schema = new Schema({
   bannerUrl: { type: String, default: '' },
   bio: { type: String, default: '' },
   subscribersCount: { type: Number, default: 0 },
+  subscriptions: [{ type: Schema.Types.ObjectId, ref: 'User' }],
+  history: [{ 
+    video: { type: Schema.Types.ObjectId, ref: 'Video' },
+    watchedAt: { type: Date, default: Date.now }
+  }],
+  watchLater: [{ type: Schema.Types.ObjectId, ref: 'Video' }],
   role: { type: String, enum: ['user', 'admin'], default: 'user' },
   usernameLastChanged: { type: Date }
 }, { timestamps: true });

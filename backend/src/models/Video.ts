@@ -9,6 +9,8 @@ export interface IVideo extends Document {
   views: number;
   likes: number;
   dislikes: number;
+  likedBy: mongoose.Types.ObjectId[];
+  dislikedBy: mongoose.Types.ObjectId[];
   duration: number; // in seconds
   status: 'processing' | 'published' | 'private';
   tags: string[];
@@ -25,6 +27,8 @@ const VideoSchema: Schema = new Schema({
   views: { type: Number, default: 0 },
   likes: { type: Number, default: 0 },
   dislikes: { type: Number, default: 0 },
+  likedBy: [{ type: Schema.Types.ObjectId, ref: 'User' }],
+  dislikedBy: [{ type: Schema.Types.ObjectId, ref: 'User' }],
   duration: { type: Number, default: 0 },
   status: { type: String, enum: ['processing', 'published', 'private'], default: 'processing' },
   tags: [{ type: String }]

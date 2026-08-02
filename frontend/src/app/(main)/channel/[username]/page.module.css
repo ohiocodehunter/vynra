@@ -233,3 +233,37 @@
   margin-bottom: 8px;
   color: var(--text-primary);
 }
+
+.playlistsContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  width: 100%;
+}
+
+.playlistRow {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.playlistTitle {
+  font-family: var(--font-outfit);
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.playlistMeta {
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  margin-bottom: 16px;
+}
+
+.emptyPlaylist {
+  color: var(--text-muted);
+  padding: 16px;
+  background-color: var(--bg-hover);
+  border-radius: var(--radius-md);
+  text-align: center;
+}

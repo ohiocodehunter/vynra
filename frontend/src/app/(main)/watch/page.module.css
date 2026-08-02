@@ -363,12 +363,16 @@
 }
 
 .toggleSwitch {
-  width: 36px;
+  width: 40px;
   height: 20px;
-  background-color: var(--accent-primary);
+  background-color: var(--border-color);
   border-radius: 10px;
   position: relative;
-  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.toggleSwitch.active {
+  background-color: var(--accent-primary);
 }
 
 .toggleKnob {
@@ -378,7 +382,12 @@
   border-radius: 50%;
   position: absolute;
   top: 2px;
-  right: 2px;
+  left: 2px;
+  transition: transform 0.2s ease;
+}
+
+.toggleSwitch.active .toggleKnob {
+  transform: translateX(20px);
 }
 
 .filtersRow {

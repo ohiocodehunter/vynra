@@ -1,0 +1,41 @@
+.container {
+  padding: 24px;
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  display: block;
+}
+
+.header {
+  margin-bottom: 32px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  width: 100%;
+}
+
+.title {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+  color: #fff;
+}
+
+.subtitle {
+  font-size: 1rem;
+  color: #aaa;
+}
+
+.grid {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)) !important;
+  gap: 24px 16px !important;
+  width: 100% !important;
+  padding-bottom: 40px;
+}
+
+.loading, .emptyState {
+  text-align: center;
+  padding: 64px 20px;
+  color: #aaa;
+  font-size: 1.1rem;
+}

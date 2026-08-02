@@ -63,6 +63,54 @@ export default function InfiniteVideoGrid({ initialVideos }: Props) {
     return () => observer.disconnect();
   }, [loadMoreVideos]);
 
+  const [historyVideos, setHistoryVideos] = useState<Video[] | null>(null);
+
+  useEffect(() => {
+    if (activeCategory === 'Watched' && !historyVideos) {
+      const fetchHistory = async () => {
+        const token = localStorage.getItem('token');
+        if (token) {
+          try {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api'}/users/history`, {
+              headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (res.ok) {
+              const data = await res.json();
+              setHistoryVideos(data);
+            } else {
+              setHistoryVideos([]);
+            }
+          } catch (e) {
+            setHistoryVideos([]);
+          }
+        } else {
+          setHistoryVideos([]);
+        }
+      };
+      fetchHistory();
+    }
+  }, [activeCategory, historyVideos]);
+
+  const filteredVideos = React.useMemo(() => {
+    if (activeCategory === 'Watched') {
+      return historyVideos || [];
+    }
+    if (activeCategory === 'Recent') {
+      return [...videos].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    }
+    
+    if (activeCategory === 'All') return videos;
+    const lower = activeCategory.toLowerCase();
+    const result = videos.filter(v => 
+      v.title.toLowerCase().includes(lower) || 
+      (v.description && v.description.toLowerCase().includes(lower)) ||
+      (v.tags && v.tags.some(t => t.toLowerCase().includes(lower)))
+    );
+    
+    // Fallback: If no videos match this category (common with mock data), return a few random ones so the UI doesn't look completely empty
+    return result.length > 0 ? result : videos.slice(0, 3);
+  }, [videos, activeCategory, historyVideos]);
+
   return (
     <div className={styles.container}>
       {/* Category Pills */}
@@ -82,7 +130,7 @@ export default function InfiniteVideoGrid({ initialVideos }: Props) {
 
       {/* Main Video Grid */}
       <div className={styles.grid}>
-        {videos.map((video, idx) => (
+        {filteredVideos.map((video, idx) => (
           // Use index in key because we are appending duplicates for infinite scroll simulation
           <VideoCard key={`${video._id}-${idx}`} video={video} />
         ))}

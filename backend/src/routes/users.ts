@@ -130,4 +130,149 @@ router.get('/channel/:username', async (req: Request, res: Response) => {
   }
 });
 
+// Subscribe to a channel
+router.post('/subscribe/:id', authMiddleware, async (req: AuthRequest, res: Response) => {
+  try {
+    const userId = req.user?.id;
+    const channelId = req.params.id;
+    
+    if (userId === channelId) return res.status(400).json({ error: 'Cannot subscribe to yourself' });
+
+    const user = await User.findById(userId);
+    const channel = await User.findById(channelId);
+    
+    if (!user || !channel) return res.status(404).json({ error: 'User or channel not found' });
+
+    if (!user.subscriptions.includes(channel._id as any)) {
+      user.subscriptions.push(channel._id as any);
+      channel.subscribersCount += 1;
+      await Promise.all([user.save(), channel.save()]);
+    }
+    
+    res.json({ success: true, subscribersCount: channel.subscribersCount });
+  } catch (error) {
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// Unsubscribe from a channel
+router.post('/unsubscribe/:id', authMiddleware, async (req: AuthRequest, res: Response) => {
+  try {
+    const userId = req.user?.id;
+    const channelId = req.params.id;
+
+    const user = await User.findById(userId);
+    const channel = await User.findById(channelId);
+    
+    if (!user || !channel) return res.status(404).json({ error: 'User or channel not found' });
+
+    if (user.subscriptions.includes(channel._id as any)) {
+      user.subscriptions = user.subscriptions.filter(id => id.toString() !== channelId);
+      channel.subscribersCount = Math.max(0, channel.subscribersCount - 1);
+      await Promise.all([user.save(), channel.save()]);
+    }
+    
+    res.json({ success: true, subscribersCount: channel.subscribersCount });
+  } catch (error) {
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// Get user subscriptions
+router.get('/subscriptions', authMiddleware, async (req: AuthRequest, res: Response) => {
+  try {
+    const user = await User.findById(req.user?.id).populate('subscriptions', 'username channelName avatarUrl');
+    res.json(user?.subscriptions || []);
+  } catch (error) {
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// Add to history
+router.post('/history/:videoId', authMiddleware, async (req: AuthRequest, res: Response) => {
+  try {
+    const userId = req.user?.id;
+    const videoId = req.params.videoId;
+    
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ error: 'User not found' });
+
+    // Remove if already exists so we can push it to the top
+    user.history = user.history.filter(h => h.video.toString() !== videoId);
+    
+    // Add to top
+    user.history.unshift({ video: videoId as any, watchedAt: new Date() });
+    
+    // Limit history size to 100
+    if (user.history.length > 100) {
+      user.history = user.history.slice(0, 100);
+    }
+    
+    await user.save();
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// Get history
+router.get('/history', authMiddleware, async (req: AuthRequest, res: Response) => {
+  try {
+    const user = await User.findById(req.user?.id).populate({
+      path: 'history.video',
+      populate: { path: 'creator', select: 'username channelName avatarUrl' }
+    });
+    
+    // Filter out deleted videos from history
+    const historyVideos = user?.history
+      .filter(h => h.video) 
+      .map(h => ({
+        ...((h.video as any).toObject ? (h.video as any).toObject() : h.video),
+        watchedAt: h.watchedAt
+      })) || [];
+      
+    res.json(historyVideos);
+  } catch (error) {
+    res.status(500).json({ error: 'Server error fetching history' });
+  }
+});
+
+// Toggle Watch Later
+router.post('/watch-later/:videoId', authMiddleware, async (req: AuthRequest, res: Response) => {
+  try {
+    const userId = req.user?.id;
+    const videoId = req.params.videoId;
+    
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ error: 'User not found' });
+
+    const exists = user.watchLater.some(id => id.toString() === videoId);
+    if (exists) {
+      user.watchLater = user.watchLater.filter(id => id.toString() !== videoId);
+    } else {
+      user.watchLater.unshift(videoId as any);
+    }
+    
+    await user.save();
+    res.json({ success: true, added: !exists });
+  } catch (error) {
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// Get watch later
+router.get('/watch-later', authMiddleware, async (req: AuthRequest, res: Response) => {
+  try {
+    const user = await User.findById(req.user?.id).populate({
+      path: 'watchLater',
+      populate: { path: 'creator', select: 'username channelName avatarUrl' }
+    });
+    
+    const validVideos = user?.watchLater.filter(v => v) || [];
+    res.json(validVideos);
+  } catch (error) {
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
 export default router;

@@ -233,8 +233,19 @@
   .menuButton {
     display: none;
   }
+  .center {
+    flex-grow: 1;
+    justify-content: flex-start;
+  }
   .searchContainer {
     display: flex;
+    width: 100%;
+  }
+  .searchBox {
+    padding: 6px 12px;
+  }
+  .searchInput {
+    width: 100%;
   }
   .micButton {
     display: none;

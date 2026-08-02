@@ -8,6 +8,7 @@ import { Video as VideoIcon } from 'lucide-react';
 import VideoCard from '@/components/video/VideoCard';
 import Link from 'next/link';
 import { User, Video } from '@/lib/api';
+import ChannelPlaylists from './ChannelPlaylists';
 
 interface ChannelData {
   user: User;
@@ -122,6 +123,12 @@ export default function ChannelPage() {
           Shorts
         </div>
         <div 
+          className={`${styles.tab} ${activeTab === 'playlists' ? styles.activeTab : ''}`}
+          onClick={() => setActiveTab('playlists')}
+        >
+          Playlists
+        </div>
+        <div 
           className={`${styles.tab} ${activeTab === 'about' ? styles.activeTab : ''}`}
           onClick={() => setActiveTab('about')}
         >
@@ -156,6 +163,10 @@ export default function ChannelPage() {
           <div className={styles.emptyState}>
             <h2 className={styles.emptyTitle}>No shorts yet</h2>
           </div>
+        )}
+
+        {activeTab === 'playlists' && (
+          <ChannelPlaylists username={user.username} />
         )}
         
         {activeTab === 'about' && (

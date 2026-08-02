@@ -1,5 +1,7 @@
 .shortsContainer {
-  height: calc(100vh - 60px); /* Adjust based on topbar height */
+  flex-grow: 1;
+  height: calc(100vh - 106px); /* 70px topbar + 36px padding */
+  height: calc(100dvh - 106px);
   overflow-y: scroll;
   scroll-snap-type: y mandatory;
   display: flex;
@@ -12,6 +14,13 @@
 
 .shortsContainer::-webkit-scrollbar {
   display: none;
+}
+
+@media (max-width: 768px) {
+  .shortsContainer {
+    height: calc(100vh - 166px); /* 70px topbar + 96px padding (includes 80px bottom nav) */
+    height: calc(100dvh - 166px);
+  }
 }
 
 .loading {
@@ -32,17 +41,21 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 1rem 0;
+  box-sizing: border-box;
+  padding: 12px; /* Space around the video */
 }
 
 .videoContainer {
   position: relative;
-  height: calc(100vh - 100px); /* Adjust spacing */
-  aspect-ratio: 9/16;
+  height: 100%;
+  width: 100%;
+  max-width: 450px; /* Constrain on desktop, fill on mobile */
   background: black;
   border-radius: 16px;
   overflow: hidden;
   box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  display: flex;
+  flex-direction: column;
 }
 
 .videoPlayer {
@@ -60,9 +73,11 @@
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 40%);
+  background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 25%, rgba(0,0,0,0.4) 100%);
   padding: 1.5rem;
   pointer-events: none; /* Let clicks pass to video */
+  z-index: 10;
+  box-sizing: border-box;
 }
 
 .volumeIndicator {
@@ -98,6 +113,7 @@
   justify-content: flex-end;
   pointer-events: auto;
   padding-right: 60px; /* Space for actions */
+  z-index: 10;
 }
 
 .creatorInfo {
@@ -160,12 +176,13 @@
 
 .actions {
   position: absolute;
-  right: 1rem;
-  bottom: 1.5rem;
+  right: 8px;
+  bottom: 2.5rem;
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
   pointer-events: auto;
+  z-index: 20;
 }
 
 .actionBtn {
@@ -199,4 +216,104 @@
   font-size: 0.75rem;
   font-weight: 500;
   text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+}
+/* Append these to the existing page.module.css */
+
+.activeAction {
+  color: var(--accent-primary) !important;
+}
+
+.moreMenu {
+  position: absolute;
+  bottom: 100%;
+  right: 0;
+  margin-bottom: 8px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  z-index: 100;
+  white-space: nowrap;
+  box-shadow: var(--shadow-lg);
+}
+
+.moreMenu button {
+  background: transparent;
+  border: none;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  font-size: 0.9rem;
+}
+
+.moreMenu button:hover {
+  background: var(--bg-hover);
+}
+
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  z-index: 1000;
+}
+
+.commentModal {
+  background: var(--bg-primary);
+  width: 100%;
+  max-width: 600px;
+  height: 60vh;
+  border-radius: 16px 16px 0 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 -5px 20px rgba(0,0,0,0.5);
+  animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+.modalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.modalHeader h3 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.closeBtn {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 1.2rem;
+  cursor: pointer;
+}
+
+.commentContent {
+  flex-grow: 1;
+  overflow-y: auto;
+  padding: 0 16px;
 }

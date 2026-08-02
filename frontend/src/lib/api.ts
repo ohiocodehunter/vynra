@@ -42,7 +42,29 @@ export interface Video {
   creator: User;
   views: number;
   likes: number;
+  dislikes: number;
+  likedBy: string[];
+  dislikedBy: string[];
   duration: number;
+  createdAt: string;
+}
+
+export interface Comment {
+  _id: string;
+  text: string;
+  author: User;
+  video: string;
+  likes: number;
+  dislikes: number;
+  createdAt: string;
+}
+
+export interface Playlist {
+  _id: string;
+  name: string;
+  creator: string | User;
+  videos: Video[];
+  isPublic: boolean;
   createdAt: string;
 }
 
@@ -53,6 +75,51 @@ export const videoService = {
   },
   getVideoById: async (id: string): Promise<Video> => {
     const response = await api.get(`/videos/${id}`);
+    return response.data;
+  },
+  likeVideo: async (id: string): Promise<Video> => {
+    const response = await api.post(`/videos/${id}/like`);
+    return response.data;
+  },
+  dislikeVideo: async (id: string): Promise<Video> => {
+    const response = await api.post(`/videos/${id}/dislike`);
+    return response.data;
+  }
+};
+
+export const commentService = {
+  getComments: async (videoId: string): Promise<Comment[]> => {
+    const response = await api.get(`/comments/${videoId}`);
+    return response.data;
+  },
+  postComment: async (videoId: string, text: string): Promise<Comment> => {
+    const response = await api.post(`/comments/${videoId}`, { text });
+    return response.data;
+  }
+};
+
+export const playlistService = {
+  getUserPlaylists: async (username: string): Promise<Playlist[]> => {
+    const response = await api.get(`/playlists/user/${username}`);
+    return response.data;
+  },
+  createPlaylist: async (name: string, isPublic: boolean = true): Promise<Playlist> => {
+    const response = await api.post('/playlists', { name, isPublic });
+    return response.data;
+  },
+  addVideoToPlaylist: async (playlistId: string, videoId: string): Promise<Playlist> => {
+    const response = await api.post(`/playlists/${playlistId}/add`, { videoId });
+    return response.data;
+  },
+  removeVideoFromPlaylist: async (playlistId: string, videoId: string): Promise<Playlist> => {
+    const response = await api.post(`/playlists/${playlistId}/remove`, { videoId });
+    return response.data;
+  }
+};
+
+export const studioService = {
+  getStats: async (): Promise<any> => {
+    const response = await api.get('/studio/stats');
     return response.data;
   }
 };

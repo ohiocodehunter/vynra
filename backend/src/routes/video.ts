@@ -96,8 +96,8 @@ router.post('/upload', authMiddleware, upload.single('video'), async (req: AuthR
           }
         } else {
           // Serve locally if no R2
-          finalVideoUrl = `${process.env.FRONTEND_URL || 'http://localhost:5000'}/uploads/processed_${fileId}.mp4`;
-          finalThumbUrl = `${process.env.FRONTEND_URL || 'http://localhost:5000'}/uploads/thumbnails/${thumbnailFilename}`;
+          finalVideoUrl = `${process.env.BACKEND_URL || 'http://localhost:5001'}/uploads/processed_${fileId}.mp4`;
+          finalThumbUrl = `${process.env.BACKEND_URL || 'http://localhost:5001'}/uploads/thumbnails/${thumbnailFilename}`;
         }
 
         // Clean up original temp file
@@ -153,6 +153,19 @@ router.get('/', async (req: Request, res: Response) => {
   }
 });
 
+// Get liked videos
+router.get('/liked', authMiddleware, async (req: AuthRequest, res: Response) => {
+  try {
+    const userId = req.user?.id;
+    const videos = await Video.find({ likedBy: userId, status: 'published' })
+      .populate('creator', 'username channelName avatarUrl')
+      .sort({ createdAt: -1 });
+    res.json(videos);
+  } catch (error) {
+    res.status(500).json({ error: 'Server error fetching liked videos' });
+  }
+});
+
 // Get a single video by ID
 router.get('/:id', async (req: Request, res: Response) => {
   try {
@@ -160,14 +173,85 @@ router.get('/:id', async (req: Request, res: Response) => {
     if (!video) {
       return res.status(404).json({ error: 'Video not found' });
     }
-    
-    // Increment views (naive implementation, should use debouncing/redis in prod)
-    video.views += 1;
-    await video.save();
+    const isPolling = req.query.polling === 'true';
+    if (!isPolling && video.status === 'published') {
+      // Increment views (naive implementation, should use debouncing/redis in prod)
+      video.views += 1;
+      await video.save();
+    }
     
     res.json(video);
   } catch (error) {
     res.status(500).json({ error: 'Server error fetching video' });
+  }
+});
+// Toggle Like a video
+router.post('/:id/like', authMiddleware, async (req: AuthRequest, res: Response) => {
+  try {
+    if (!req.user) return res.status(401).json({ error: 'Unauthorized' });
+    
+    const video = await Video.findById(req.params.id);
+    if (!video) return res.status(404).json({ error: 'Video not found' });
+
+    const userId = req.user.id;
+    const hasLiked = video.likedBy.some(id => id.toString() === userId);
+    const hasDisliked = video.dislikedBy.some(id => id.toString() === userId);
+
+    if (hasLiked) {
+      // Remove like
+      video.likedBy = video.likedBy.filter(id => id.toString() !== userId);
+      video.likes = Math.max(0, video.likes - 1);
+    } else {
+      // Add like
+      video.likedBy.push(userId as any);
+      video.likes += 1;
+      
+      // Remove dislike if exists
+      if (hasDisliked) {
+        video.dislikedBy = video.dislikedBy.filter(id => id.toString() !== userId);
+        video.dislikes = Math.max(0, video.dislikes - 1);
+      }
+    }
+
+    await video.save();
+    res.json(video);
+  } catch (error) {
+    res.status(500).json({ error: 'Server error liking video' });
+  }
+});
+
+// Toggle Dislike a video
+router.post('/:id/dislike', authMiddleware, async (req: AuthRequest, res: Response) => {
+  try {
+    if (!req.user) return res.status(401).json({ error: 'Unauthorized' });
+    
+    const video = await Video.findById(req.params.id);
+    if (!video) return res.status(404).json({ error: 'Video not found' });
+
+    const userId = req.user.id;
+    const hasLiked = video.likedBy.some(id => id.toString() === userId);
+    const hasDisliked = video.dislikedBy.some(id => id.toString() === userId);
+
+    if (hasDisliked) {
+      // Remove dislike
+      video.dislikedBy = video.dislikedBy.filter(id => id.toString() !== userId);
+      video.dislikes = Math.max(0, video.dislikes - 1);
+    } else {
+      // Add dislike
+      video.dislikedBy.push(userId as any);
+      video.dislikes += 1;
+      
+      // Remove like if exists
+      if (hasLiked) {
+        video.likedBy = video.likedBy.filter(id => id.toString() !== userId);
+        video.likes = Math.max(0, video.likes - 1);
+      }
+    }
+
+    await video.save();
+    res.json(video);
+  } catch (error) {
+    res.status(500).json({ error: 'Server error disliking video' });
   }
 });
 

@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   Home,
   Compass,
@@ -19,6 +19,33 @@ import { useSidebar } from "@/context/SidebarContext";
 
 export default function Sidebar() {
   const { isCollapsed } = useSidebar();
+  const [subscriptions, setSubscriptions] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchSubscriptions = async () => {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        setLoading(false);
+        return;
+      }
+      try {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api'}/users/subscriptions`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setSubscriptions(data);
+        }
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchSubscriptions();
+  }, []);
 
   return (
     <aside
@@ -76,22 +103,38 @@ export default function Sidebar() {
 
       <div className={styles.navSection}>
         <h4 className={styles.sectionTitle}>Your Channels</h4>
-        <div className={styles.channelItem}>
-          <div className={styles.channelAvatar}></div>
-          <span>TechFlow</span>
-        </div>
-        <div className={styles.channelItem}>
-          <div className={styles.channelAvatar}></div>
-          <span>DesignHub</span>
-        </div>
-        <div className={styles.channelItem}>
-          <div className={styles.channelAvatar}></div>
-          <span>Travelista</span>
-        </div>
-        <button className={styles.showMoreBtn}>
-          <ChevronDown size={16} />
-          <span>Show more</span>
-        </button>
+        
+        {loading ? (
+          <div style={{ padding: '0 16px', color: '#aaa', fontSize: '0.9rem' }}>Loading...</div>
+        ) : subscriptions.length > 0 ? (
+          <>
+            {subscriptions.map(sub => (
+              <Link href={`/channel/${sub.username}`} key={sub._id} className={styles.channelItem} style={{ textDecoration: 'none', color: 'inherit' }}>
+                <div 
+                  className={styles.channelAvatar} 
+                  style={{ 
+                    backgroundImage: `url(${sub.avatarUrl})`,
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center'
+                  }}
+                >
+                  {!sub.avatarUrl && (sub.username?.charAt(0).toUpperCase() || 'U')}
+                </div>
+                <span>{sub.username}</span>
+              </Link>
+            ))}
+            {subscriptions.length > 3 && (
+              <button className={styles.showMoreBtn}>
+                <ChevronDown size={16} />
+                <span>Show more</span>
+              </button>
+            )}
+          </>
+        ) : (
+          <div style={{ padding: '8px 16px', color: '#888', fontSize: '0.9rem' }}>
+            No subscriptions
+          </div>
+        )}
       </div>
       <div className={styles.spacer}></div>
     </aside>

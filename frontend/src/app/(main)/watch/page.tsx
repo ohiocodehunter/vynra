@@ -5,6 +5,10 @@ import { videoService, Video } from '@/lib/api';
 import Link from 'next/link';
 import VideoCard from '@/components/video/VideoCard';
 import ClientVideoPlayer from '@/components/video/ClientVideoPlayer';
+import AutoplayToggle from '@/components/video/AutoplayToggle';
+
+import VideoActions from '@/components/video/VideoActions';
+import CommentsSection from '@/components/video/CommentsSection';
 
 function formatDuration(seconds: number) {
   const m = Math.floor(seconds / 60);
@@ -35,12 +39,14 @@ export default async function WatchPage({ searchParams }: { searchParams: Promis
   const relatedVideos = allVideos.filter(v => v._id !== video?._id);
   const shuffledRelated = relatedVideos.sort(() => 0.5 - Math.random());
   const upNextVideos = shuffledRelated.slice(0, 15);
+  const nextVideoId = upNextVideos.length > 0 ? upNextVideos[0]._id : undefined;
+
   return (
     <div className={styles.watchContainer}>
       <div className={styles.mainColumn}>
         {/* Real Video Player */}
         <div className={styles.videoPlayerContainer}>
-          <ClientVideoPlayer url={video.url} poster={video.thumbnailUrl} />
+          <ClientVideoPlayer url={video.url} poster={video.thumbnailUrl} nextVideoId={nextVideoId} videoId={video._id} />
         </div>
 
         {/* Video Metadata */}
@@ -49,34 +55,17 @@ export default async function WatchPage({ searchParams }: { searchParams: Promis
           
           <div className={styles.videoActionsRow}>
             <div className={styles.channelInfo}>
-              <div className={styles.channelAvatar} style={{ backgroundImage: `url(${video.creator.avatarUrl})`, backgroundSize: 'cover' }}></div>
-              <div className={styles.channelText}>
-                <div className={styles.channelName}>{video.creator.username}</div>
-                <div className={styles.subCount}>{video.creator.subscribersCount || 0} subscribers</div>
-              </div>
+              <Link href={`/channel/${video.creator?.username || 'ohiocodehunter'}`} style={{ display: 'flex', alignItems: 'center', gap: '12px', textDecoration: 'none', color: 'inherit' }}>
+                <div className={styles.channelAvatar} style={{ backgroundImage: `url(${video.creator?.avatarUrl || ''})`, backgroundSize: 'cover' }}></div>
+                <div className={styles.channelText}>
+                  <div className={styles.channelName}>{video.creator?.username || 'Upload by Dev'}</div>
+                  <div className={styles.subCount}>{video.creator?.subscribersCount || 0} subscribers</div>
+                </div>
+              </Link>
               <button className="btn-primary">Subscribe</button>
             </div>
             
-            <div className={styles.actionButtons}>
-              <div className={styles.actionGroup}>
-                <button className={styles.actionBtn}>
-                  <ThumbsUp size={18} /> {video.likes || 0}
-                </button>
-                <div className={styles.actionDivider}></div>
-                <button className={styles.actionBtn}>
-                  <ThumbsDown size={18} />
-                </button>
-              </div>
-              <button className={styles.actionBtn}>
-                <Share2 size={18} /> Share
-              </button>
-              <button className={styles.actionBtn}>
-                <Download size={18} /> Download
-              </button>
-              <button className={styles.actionBtn}>
-                <BookmarkPlus size={18} /> Save
-              </button>
-            </div>
+            <VideoActions initialVideo={video} />
           </div>
 
           <div className={styles.descriptionBox}>
@@ -87,26 +76,15 @@ export default async function WatchPage({ searchParams }: { searchParams: Promis
           </div>
         </div>
 
-        {/* Comments Section (Placeholder for now) */}
-        <div className={styles.commentsSection}>
-          <h3 className={styles.commentsTitle}>Comments <span className={styles.commentCount}>0</span></h3>
-          <div className={styles.addComment}>
-            <div className={styles.userAvatar}></div>
-            <input type="text" placeholder="Add a comment..." className={styles.commentInput} />
-          </div>
-        </div>
+        {/* Comments Section */}
+        <CommentsSection videoId={video._id} />
       </div>
 
       {/* Up Next Sidebar */}
       <div className={styles.upNextColumn}>
         <div className={styles.upNextHeader}>
           <h3>Up next</h3>
-          <div className={styles.autoplayToggle}>
-            <span className={styles.autoplayText}>Autoplay</span>
-            <div className={styles.toggleSwitch}>
-              <div className={styles.toggleKnob}></div>
-            </div>
-          </div>
+          <AutoplayToggle />
         </div>
         
         <div className={styles.filtersRow}>
