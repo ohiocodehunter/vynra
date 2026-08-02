@@ -7,8 +7,12 @@ import { Compass, Flame, Music, Gamepad2, Trophy, Lightbulb } from 'lucide-react
 export const dynamic = 'force-dynamic';
 
 export default async function ExplorePage() {
-  // Fetch popular videos
-  const videos = await videoService.getAllVideos({ sort: 'popular' });
+  let videos: Video[] = [];
+  try {
+    videos = await videoService.getAllVideos({ sort: 'popular' });
+  } catch (error) {
+    console.error('Failed to fetch explore videos:', error);
+  }
 
   return (
     <div className={styles.container}>

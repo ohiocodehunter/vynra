@@ -38,6 +38,8 @@ export default function InfiniteVideoGrid({ initialVideos }: Props) {
       }
     } catch (error) {
       console.error('Failed to load more videos', error);
+      // Disable infinite scrolling temporarily to avoid a tight loop of network errors when backend is offline
+      setHasMore(false);
     } finally {
       setLoading(false);
     }

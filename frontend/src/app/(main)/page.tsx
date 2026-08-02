@@ -3,15 +3,20 @@ import styles from './page.module.css';
 import { Video } from '@/lib/api';
 
 async function getVideos() {
-  const res = await fetch(`${(typeof window !== 'undefined' ? '/api' : (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api'))}/videos`, { 
-    cache: 'no-store' 
-  });
-  if (!res.ok) {
-    const text = await res.text();
-    console.error('Fetch videos failed:', res.status, res.statusText, text);
-    throw new Error(`Failed to fetch videos: ${res.status}`);
+  try {
+    const res = await fetch(`${(typeof window !== 'undefined' ? '/api' : (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api'))}/videos`, { 
+      cache: 'no-store' 
+    });
+    if (!res.ok) {
+      const text = await res.text();
+      console.error('Fetch videos failed:', res.status, res.statusText, text);
+      return [];
+    }
+    return (await res.json()) as Video[];
+  } catch (error) {
+    console.error('Fetch videos connection error:', error);
+    return [];
   }
-  return res.json() as Promise<Video[]>;
 }
 
 function formatDuration(seconds: number) {
