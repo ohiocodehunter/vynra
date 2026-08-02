@@ -9,6 +9,8 @@ import { useSidebar } from '@/context/SidebarContext';
 import AuthModal from '@/components/auth/AuthModal';
 import ProfileDropdown from './ProfileDropdown';
 import CreateChannelModal from '@/components/channel/CreateChannelModal';
+import NotificationDropdown from './NotificationDropdown';
+import MessageDropdown from './MessageDropdown';
 import styles from './Topbar.module.css';
 
 export default function Topbar() {
@@ -16,6 +18,8 @@ export default function Topbar() {
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
   const [showCreateChannelModal, setShowCreateChannelModal] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [showMessages, setShowMessages] = useState(false);
   
   const router = useRouter();
   const { user, isAuthenticated } = useAuth();
@@ -25,6 +29,14 @@ export default function Topbar() {
     e.preventDefault();
     if (searchQuery.trim()) {
       router.push(`/results?q=${encodeURIComponent(searchQuery)}`);
+    }
+  };
+
+  const handleAuthAction = (action: () => void) => {
+    if (isAuthenticated) {
+      action();
+    } else {
+      setShowAuthModal(true);
     }
   };
 
@@ -63,15 +75,29 @@ export default function Topbar() {
           <Link href="/studio/upload" className={styles.iconButton} title="Create" target="_blank">
             <Upload size={20} />
           </Link>
-          <button className={styles.iconButton}>
-            <Bell size={20} />
-          </button>
-          <button className={styles.iconButton}>
-            <MessageSquare size={20} />
-          </button>
+          
+          <div className={styles.dropdownWrapper} style={{ position: 'relative' }}>
+            <button 
+              className={styles.iconButton} 
+              onClick={() => handleAuthAction(() => setShowNotifications(!showNotifications))}
+            >
+              <Bell size={20} />
+            </button>
+            {showNotifications && <NotificationDropdown onClose={() => setShowNotifications(false)} />}
+          </div>
+
+          <div className={styles.dropdownWrapper} style={{ position: 'relative' }}>
+            <button 
+              className={styles.iconButton} 
+              onClick={() => handleAuthAction(() => setShowMessages(!showMessages))}
+            >
+              <MessageSquare size={20} />
+            </button>
+            {showMessages && <MessageDropdown onClose={() => setShowMessages(false)} />}
+          </div>
           
           {isAuthenticated ? (
-            <div className={styles.profileWrapper}>
+            <div className={styles.profileWrapper} style={{ position: 'relative' }}>
               <button 
                 className={styles.userProfileBtn} 
                 onClick={() => setShowProfileDropdown(!showProfileDropdown)}
