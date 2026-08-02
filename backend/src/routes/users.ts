@@ -198,7 +198,7 @@ router.post('/history/:videoId', authMiddleware, async (req: AuthRequest, res: R
     if (!user) return res.status(404).json({ error: 'User not found' });
 
     // Remove if already exists so we can push it to the top
-    user.history = user.history.filter(h => h.video.toString() !== videoId);
+    user.history = user.history.filter(h => h.video.toString() !== videoId.toString());
     
     // Add to top
     user.history.unshift({ video: videoId as any, watchedAt: new Date() });
@@ -223,13 +223,21 @@ router.get('/history', authMiddleware, async (req: AuthRequest, res: Response) =
       populate: { path: 'creator', select: 'username channelName avatarUrl' }
     });
     
-    // Filter out deleted videos from history
-    const historyVideos = user?.history
+    // Filter out deleted videos and remove duplicates (keep most recent)
+    const seenVideos = new Set();
+    const historyVideos = (user?.history || [])
       .filter(h => h.video) 
       .map(h => ({
         ...((h.video as any).toObject ? (h.video as any).toObject() : h.video),
         watchedAt: h.watchedAt
-      })) || [];
+      }))
+      .filter(video => {
+        if (seenVideos.has(video._id.toString())) {
+          return false;
+        }
+        seenVideos.add(video._id.toString());
+        return true;
+      });
       
     res.json(historyVideos);
   } catch (error) {
