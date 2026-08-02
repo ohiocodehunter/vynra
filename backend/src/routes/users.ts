@@ -283,4 +283,27 @@ router.get('/watch-later', authMiddleware, async (req: AuthRequest, res: Respons
   }
 });
 
+// Search users (channels)
+router.get('/search', async (req: Request, res: Response) => {
+  try {
+    const { q } = req.query;
+    if (!q || typeof q !== 'string') {
+      return res.json([]);
+    }
+    
+    // Search by username or channelName (case-insensitive)
+    const regex = new RegExp(q, 'i');
+    const users = await User.find({
+      $or: [{ username: regex }, { channelName: regex }]
+    })
+    .select('username channelName avatarUrl subscribersCount bio')
+    .limit(5); // Only return top 5 channels
+    
+    res.json(users);
+  } catch (error) {
+    console.error('Error searching channels:', error);
+    res.status(500).json({ error: 'Server error searching channels' });
+  }
+});
+
 export default router;

@@ -7,7 +7,7 @@ import styles from './page.module.css';
 import { Video as VideoIcon } from 'lucide-react';
 import VideoCard from '@/components/video/VideoCard';
 import Link from 'next/link';
-import { User, Video } from '@/lib/api';
+import { User, Video, userService } from '@/lib/api';
 import ChannelPlaylists from './ChannelPlaylists';
 
 interface ChannelData {
@@ -23,6 +23,9 @@ export default function ChannelPage() {
   const [channelData, setChannelData] = useState<ChannelData | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('videos');
+  const [isSubscribed, setIsSubscribed] = useState(false);
+  const [subscriberCount, setSubscriberCount] = useState(0);
+  const [isSubscribing, setIsSubscribing] = useState(false);
 
   useEffect(() => {
     const fetchChannel = async () => {
@@ -31,6 +34,20 @@ export default function ChannelPage() {
         if (response.ok) {
           const data = await response.json();
           setChannelData(data);
+          setSubscriberCount(data.user.subscribersCount || 0);
+          
+          if (currentUser && currentUser.subscriptions) {
+            setIsSubscribed(currentUser.subscriptions.includes(data.user._id));
+          } else if (currentUser) {
+            // Fallback: check if we need to fetch subscriptions if they aren't on currentUser
+            const meRes = await fetch(`${(typeof window !== 'undefined' ? '/api' : (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api'))}/users/me`, {
+              headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+            });
+            if (meRes.ok) {
+              const meData = await meRes.json();
+              setIsSubscribed(meData.subscriptions?.includes(data.user._id) || false);
+            }
+          }
         }
       } catch (error) {
         console.error('Error fetching channel:', error);
@@ -66,6 +83,26 @@ export default function ChannelPage() {
     (currentUser.id === (user._id || user.id) || currentUser.username === user.username)
   );
 
+  const handleSubscribeToggle = async () => {
+    if (!currentUser) return;
+    setIsSubscribing(true);
+    try {
+      if (isSubscribed) {
+        const res = await userService.unsubscribeFromChannel(user._id || user.id!);
+        setIsSubscribed(false);
+        setSubscriberCount(res.subscribersCount);
+      } else {
+        const res = await userService.subscribeToChannel(user._id || user.id!);
+        setIsSubscribed(true);
+        setSubscriberCount(res.subscribersCount);
+      }
+    } catch (error) {
+      console.error('Failed to toggle subscription', error);
+    } finally {
+      setIsSubscribing(false);
+    }
+  };
+
   return (
     <div>
       <div className={styles.channelHeader}>
@@ -89,7 +126,7 @@ export default function ChannelPage() {
           <div className={styles.channelDetails}>
             <h1 className={styles.channelName}>{user.channelName || user.username}</h1>
             <div className={styles.channelMeta}>
-              <span>{user.subscribersCount || 0} subscribers</span>
+              <span>{subscriberCount} subscribers</span>
               <span>•</span>
               <span>{videos.length} videos</span>
             </div>
@@ -102,10 +139,19 @@ export default function ChannelPage() {
                 <Link href="/studio/settings" className={styles.editProfileBtn}>
                   Customize channel
                 </Link>
-              ) : (
-                <button className={styles.subscribeBtn}>
-                  Subscribe
+              ) : currentUser ? (
+                <button 
+                  className={`${styles.subscribeBtn} ${isSubscribed ? styles.subscribed : ''}`}
+                  onClick={handleSubscribeToggle}
+                  disabled={isSubscribing}
+                  style={isSubscribed ? { backgroundColor: 'var(--bg-secondary)', color: 'var(--text-primary)' } : {}}
+                >
+                  {isSubscribed ? 'Subscribed' : 'Subscribe'}
                 </button>
+              ) : (
+                <Link href="/">
+                  <button className={styles.subscribeBtn}>Sign in to Subscribe</button>
+                </Link>
               )}
             </div>
           </div>

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { X, Plus, Check } from 'lucide-react';
-import { playlistService, Playlist } from '@/lib/api';
+import { playlistService, userService, Playlist, Video } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
 import styles from './SaveToPlaylistModal.module.css';
 
@@ -18,6 +18,7 @@ export default function SaveToPlaylistModal({ videoId, onClose }: SaveToPlaylist
   const [isCreating, setIsCreating] = useState(false);
   const [newPlaylistName, setNewPlaylistName] = useState('');
   const [isPublic, setIsPublic] = useState(true);
+  const [inWatchLater, setInWatchLater] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -28,8 +29,14 @@ export default function SaveToPlaylistModal({ videoId, onClose }: SaveToPlaylist
   const fetchPlaylists = async () => {
     try {
       if (!user?.username) return;
-      const data = await playlistService.getUserPlaylists(user.username);
+      const [data, watchLaterData] = await Promise.all([
+        playlistService.getUserPlaylists(user.username),
+        userService.getWatchLaterList()
+      ]);
       setPlaylists(data);
+      // Check if video is in watch later list
+      const isWatchLater = watchLaterData.some(v => v._id === videoId || (typeof v === 'string' && v === videoId));
+      setInWatchLater(isWatchLater);
     } catch (error) {
       console.error('Failed to fetch playlists', error);
     } finally {
@@ -49,6 +56,15 @@ export default function SaveToPlaylistModal({ videoId, onClose }: SaveToPlaylist
       fetchPlaylists(); // Refresh to get updated state
     } catch (error) {
       console.error('Failed to toggle playlist', error);
+    }
+  };
+
+  const toggleWatchLater = async () => {
+    try {
+      await userService.toggleWatchLater(videoId);
+      setInWatchLater(!inWatchLater);
+    } catch (error) {
+      console.error('Failed to toggle watch later', error);
     }
   };
 
@@ -82,8 +98,16 @@ export default function SaveToPlaylistModal({ videoId, onClose }: SaveToPlaylist
         <div className={styles.content}>
           {isLoading ? (
             <div className={styles.loading}>Loading playlists...</div>
-          ) : playlists.length > 0 ? (
+          ) : (
             <ul className={styles.playlistList}>
+              {/* Watch Later Row */}
+              <li className={styles.playlistItem} onClick={toggleWatchLater}>
+                <div className={`${styles.checkbox} ${inWatchLater ? styles.checked : ''}`}>
+                  {inWatchLater && <Check size={14} />}
+                </div>
+                <span className={styles.playlistName}>Watch Later</span>
+              </li>
+              
               {playlists.map((playlist) => {
                 const hasVideo = playlist.videos?.some(v => v._id === videoId || (typeof v === 'string' && v === videoId));
                 return (
@@ -97,8 +121,6 @@ export default function SaveToPlaylistModal({ videoId, onClose }: SaveToPlaylist
                 );
               })}
             </ul>
-          ) : (
-            <div className={styles.emptyState}>You don't have any playlists yet.</div>
           )}
         </div>
 

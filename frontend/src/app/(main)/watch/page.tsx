@@ -9,6 +9,7 @@ import AutoplayToggle from '@/components/video/AutoplayToggle';
 
 import VideoActions from '@/components/video/VideoActions';
 import CommentsSection from '@/components/video/CommentsSection';
+import SubscribeButton from '@/components/video/SubscribeButton';
 
 function formatDuration(seconds: number) {
   const m = Math.floor(seconds / 60);
@@ -62,7 +63,7 @@ export default async function WatchPage({ searchParams }: { searchParams: Promis
                   <div className={styles.subCount}>{video.creator?.subscribersCount || 0} subscribers</div>
                 </div>
               </Link>
-              <button className="btn-primary">Subscribe</button>
+              <SubscribeButton channelId={video.creator?._id || ''} />
             </div>
             
             <VideoActions initialVideo={video} />

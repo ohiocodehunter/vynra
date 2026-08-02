@@ -30,6 +30,7 @@ export interface User {
   bannerUrl?: string;
   bio?: string;
   subscribersCount?: number;
+  subscriptions?: string[];
   createdAt?: string;
 }
 
@@ -121,6 +122,29 @@ export const playlistService = {
 export const studioService = {
   getStats: async (): Promise<any> => {
     const response = await api.get('/studio/stats');
+    return response.data;
+  }
+};
+
+export const userService = {
+  subscribeToChannel: async (id: string): Promise<{ success: boolean; subscribersCount: number }> => {
+    const response = await api.post(`/users/subscribe/${id}`);
+    return response.data;
+  },
+  unsubscribeFromChannel: async (id: string): Promise<{ success: boolean; subscribersCount: number }> => {
+    const response = await api.post(`/users/unsubscribe/${id}`);
+    return response.data;
+  },
+  searchChannels: async (q: string): Promise<User[]> => {
+    const response = await api.get('/users/search', { params: { q } });
+    return response.data;
+  },
+  getWatchLaterList: async (): Promise<Video[]> => {
+    const response = await api.get('/users/watch-later');
+    return response.data;
+  },
+  toggleWatchLater: async (videoId: string): Promise<{ watchLater: string[] }> => {
+    const response = await api.post(`/users/watch-later/${videoId}`);
     return response.data;
   }
 };

@@ -1,7 +1,8 @@
 import React from 'react';
 import Link from 'next/link';
-import { videoService, Video } from '@/lib/api';
+import { videoService, userService, Video, User } from '@/lib/api';
 import styles from './page.module.css';
+import SubscribeButton from '@/components/video/SubscribeButton';
 
 // Using async component since Next.js 15+ searchParams is async
 export default async function ResultsPage({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
@@ -11,13 +12,62 @@ export default async function ResultsPage({ searchParams }: { searchParams: Prom
     return <div className={styles.container}><h2>Please enter a search term.</h2></div>;
   }
 
-  // Fetch videos based on search query
-  const videos = await videoService.getAllVideos({ q });
+  // Fetch videos and channels based on search query
+  let videos: Video[] = [];
+  let channels: User[] = [];
+  
+  try {
+    const [videosData, channelsData] = await Promise.all([
+      videoService.getAllVideos({ q }),
+      userService.searchChannels(q)
+    ]);
+    videos = videosData;
+    channels = channelsData;
+  } catch (error) {
+    console.error('Error fetching search results:', error);
+  }
 
   return (
     <div className={styles.container}>
       <h1 className={styles.title}>Results for "{q}"</h1>
       
+      {channels.length > 0 && (
+        <div style={{ marginBottom: '2rem' }}>
+          <h2 className={styles.sectionTitle}>Channels</h2>
+          <div className={styles.channelList}>
+            {channels.map((channel) => (
+              <div key={channel._id || channel.username} className={styles.channelCard}>
+                <Link href={`/channel/${channel.username}`} style={{ display: 'contents' }}>
+                  <div 
+                    className={styles.channelAvatar} 
+                    style={{ 
+                      backgroundImage: `url(${channel.avatarUrl || ''})`, 
+                      backgroundSize: 'cover',
+                      backgroundPosition: 'center',
+                      backgroundColor: 'var(--bg-tertiary)'
+                    }} 
+                  />
+                  <div className={styles.channelInfo}>
+                    <h3 className={styles.channelName}>{channel.channelName || channel.username}</h3>
+                    <div className={styles.channelMeta}>
+                      @{channel.username} • {channel.subscribersCount || 0} subscribers
+                    </div>
+                    {channel.bio && <p className={styles.channelBio}>{channel.bio}</p>}
+                  </div>
+                </Link>
+                <div style={{ paddingLeft: '1rem' }}>
+                  <SubscribeButton 
+                    channelId={channel._id || ''} 
+                    className={styles.subscribeBtn} 
+                    subscribedClassName=""
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {videos.length === 0 ? (
         <div className={styles.emptyState}>No videos found matching your search.</div>
       ) : (
