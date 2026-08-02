@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Video } from "@/lib/api";
-import { Loader2 } from "lucide-react";
+import { Loader2, BadgeCheck } from "lucide-react";
 import styles from "./VideoCard.module.css";
 
 interface VideoCardProps {
@@ -48,6 +48,8 @@ export default function VideoCard({
     setIsHovered(false);
   };
 
+  const isNew = (new Date().getTime() - new Date(video.createdAt).getTime()) < (3 * 24 * 60 * 60 * 1000);
+
   return (
     <a
       href={`/watch?v=${video._id}`}
@@ -61,6 +63,7 @@ export default function VideoCard({
           className={styles.thumbnail}
           style={{ backgroundImage: `url(${video.thumbnailUrl})` }}
         />
+        {isNew && <div className={styles.newBadge}>New</div>}
         {isHovered && (
           <video
             src={video.url}
@@ -92,14 +95,18 @@ export default function VideoCard({
         )}
         <div className={styles.videoDetails}>
           <h3 className={styles.videoTitle}>{video.title}</h3>
-          <p className={styles.videoMeta}>
-            {video.creator?.username || "Upload by Dev"}
-          </p>
-          <p className={styles.videoMeta}>
+          <div className={styles.creatorRow}>
+            <p className={styles.videoMetaChannel}>
+              {video.creator?.username || "Upload by Dev"}
+            </p>
+            {/* Mock Verified Icon for premium feel */}
+            <BadgeCheck size={14} className={styles.verifiedIcon} />
+          </div>
+          <p className={styles.videoMetaViews}>
             {video.views >= 1000
               ? Math.floor(video.views / 1000) + "K"
               : video.views}{" "}
-            views
+            views • 2 days ago
           </p>
         </div>
       </div>

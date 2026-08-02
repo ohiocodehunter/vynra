@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
-import { Search, Bell, Mic, Upload, LogIn, Menu } from 'lucide-react';
+import { Search, Bell, Mic, Upload, LogIn, Menu, MessageSquare } from 'lucide-react';
 import { useSidebar } from '@/context/SidebarContext';
 import AuthModal from '@/components/auth/AuthModal';
 import ProfileDropdown from './ProfileDropdown';
@@ -46,11 +46,12 @@ export default function Topbar() {
               <Search size={20} className={styles.searchIcon} />
               <input 
                 type="text" 
-                placeholder="Search" 
+                placeholder="⌕ Search videos, creators, playlists..." 
                 className={styles.searchInput}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
+              <span className={styles.cmdKey}>⌘K</span>
             </div>
             <button type="button" className={styles.micButton}>
               <Mic size={20} />
@@ -64,6 +65,9 @@ export default function Topbar() {
           </Link>
           <button className={styles.iconButton}>
             <Bell size={20} />
+          </button>
+          <button className={styles.iconButton}>
+            <MessageSquare size={20} />
           </button>
           
           {isAuthenticated ? (

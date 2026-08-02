@@ -27,24 +27,24 @@
 }
 
 .categoriesScroll::-webkit-scrollbar {
-  display: none; /* Safari and Chrome */
+  display: none;
 }
 
 .categoryPill {
-  background-color: var(--bg-secondary);
+  white-space: nowrap;
+  padding: 8px 16px;
+  background-color: var(--bg-hover);
   color: var(--text-primary);
   border: none;
-  border-radius: 8px;
-  padding: 6px 12px;
-  font-size: 0.9rem;
+  border-radius: var(--radius-full);
+  font-size: 0.95rem;
   font-weight: 500;
   cursor: pointer;
-  white-space: nowrap;
-  transition: all var(--transition-fast);
+  transition: var(--transition-premium);
 }
 
 .categoryPill:hover {
-  background-color: var(--bg-hover);
+  background-color: var(--border-color);
 }
 
 .categoryPill.active {
@@ -52,10 +52,72 @@
   color: var(--bg-primary);
 }
 
+/* Feed Layout styling */
+.feedLayout {
+  display: flex;
+  flex-direction: column;
+  gap: 3rem;
+  padding-bottom: 4rem;
+}
+
+.sectionHeading {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 1.25rem;
+}
+
+/* Hero Section */
+.heroSection {
+  width: 100%;
+}
+
+.heroWrapper {
+  width: 100%;
+  max-width: 800px; /* Keep it constrained so it doesn't look stretched out too much */
+}
+
+/* Row Scroll */
+.rowSection {
+  width: 100%;
+}
+
+.rowScroll {
+  display: flex;
+  gap: 1.5rem;
+  overflow-x: auto;
+  padding-bottom: 1rem;
+  scroll-snap-type: x mandatory;
+}
+
+.rowScroll::-webkit-scrollbar {
+  height: 6px;
+}
+
+.rowScroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.rowScroll::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 3px;
+}
+
+.rowItem {
+  min-width: 320px;
+  max-width: 360px;
+  scroll-snap-align: start;
+}
+
+/* Grid Layout */
+.gridSection {
+  width: 100%;
+}
+
 .grid {
   display: grid;
-  grid-template-columns: repeat(1, 1fr);
-  gap: 24px 16px;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 2rem 1.5rem;
   padding-bottom: 40px;
   width: 100%;
 }

@@ -85,16 +85,18 @@
   align-items: center;
   flex-grow: 1;
   background-color: var(--bg-secondary);
+  background-color: var(--bg-surface);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-full);
-  padding: 8px 16px;
-  transition: all var(--transition-fast);
+  padding: 0 16px;
+  flex: 1;
+  height: 40px;
+  transition: var(--transition-premium);
 }
 
 .searchBox:focus-within {
   border-color: var(--accent-primary);
-  background-color: var(--bg-hover);
-  box-shadow: 0 0 0 2px rgba(123, 97, 255, 0.2);
+  box-shadow: 0 0 0 2px rgba(124, 92, 255, 0.2);
 }
 
 .searchIcon {
@@ -106,13 +108,27 @@
   background: transparent;
   border: none;
   color: var(--text-primary);
-  font-size: 0.95rem;
+  font-size: 1rem;
   width: 100%;
   outline: none;
 }
 
 .searchInput::placeholder {
   color: var(--text-muted);
+}
+
+.cmdKey {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-hover);
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-radius: 4px;
+  padding: 2px 6px;
+  border: 1px solid var(--border-color);
+  margin-left: 8px;
 }
 
 .micButton {
@@ -122,11 +138,10 @@
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background-color: var(--bg-secondary);
-  border: 1px solid var(--border-color);
+  background-color: var(--bg-surface);
   color: var(--text-primary);
   cursor: pointer;
-  transition: all var(--transition-fast);
+  transition: var(--transition-premium);
 }
 
 .micButton:hover {

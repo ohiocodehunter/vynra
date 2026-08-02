@@ -89,18 +89,66 @@ export default function HomeFeed() {
         </div>
       </div>
 
-      {/* Main Video Grid */}
+      {/* Main Content Area */}
       {loading ? (
         <div className={styles.loaderContainer}>
           <Loader2 className={styles.spinner} size={32} />
         </div>
-      ) : (
-        <div className={styles.grid}>
-          {filteredVideos.map((video) => (
-            <VideoCard key={video._id} video={video} />
-          ))}
+      ) : filteredVideos.length > 0 ? (
+        <div className={styles.feedLayout}>
+          
+          {/* 1. Hero Section (Featured Video) */}
+          {filteredVideos[0] && (
+            <div className={styles.heroSection}>
+              <h2 className={styles.sectionHeading}>Featured</h2>
+              <div className={styles.heroWrapper}>
+                <VideoCard video={filteredVideos[0]} layout="vertical" />
+              </div>
+            </div>
+          )}
+
+          {/* 2. Trending Row */}
+          {filteredVideos.length > 1 && (
+            <div className={styles.rowSection}>
+              <h2 className={styles.sectionHeading}>Trending</h2>
+              <div className={styles.rowScroll}>
+                {filteredVideos.slice(1, 5).map((video) => (
+                  <div key={video._id} className={styles.rowItem}>
+                    <VideoCard video={video} />
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* 3. Recommended Row */}
+          {filteredVideos.length > 5 && (
+            <div className={styles.rowSection}>
+              <h2 className={styles.sectionHeading}>Recommended for You</h2>
+              <div className={styles.rowScroll}>
+                {filteredVideos.slice(5, 9).map((video) => (
+                  <div key={video._id} className={styles.rowItem}>
+                    <VideoCard video={video} />
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* 4. Latest Grid */}
+          {filteredVideos.length > 9 && (
+            <div className={styles.gridSection}>
+              <h2 className={styles.sectionHeading}>Latest</h2>
+              <div className={styles.grid}>
+                {filteredVideos.slice(9).map((video) => (
+                  <VideoCard key={video._id} video={video} />
+                ))}
+              </div>
+            </div>
+          )}
+          
         </div>
-      )}
+      ) : null}
       
       {!loading && filteredVideos.length > 0 && (
         <p className={styles.endMessage}>You have seen it all!</p>

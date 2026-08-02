@@ -4,15 +4,15 @@
   --bg-secondary: #1A1A21;
   --bg-surface: #1E1E26; /* Add surface color for modals/dropdowns */
   --bg-hover: #272732;
-  --accent-primary: #7B61FF;
-  --accent-secondary: #9B86FF;
+  --accent-primary: #7C5CFF;
+  --accent-secondary: #9A7DFF;
   --text-primary: #FFFFFF;
   --text-secondary: #A0A0AB;
   --text-muted: #6B6B78;
   --border-color: #272732;
   
   /* Gradients & Lighting */
-  --gradient-main: linear-gradient(135deg, #7B61FF 0%, #B48EFF 100%);
+  --gradient-main: linear-gradient(135deg, #7C5CFF 0%, #B48EFF 100%);
   --gradient-text: linear-gradient(90deg, #FFFFFF, #A0A0AB);
   --glass-bg: rgba(26, 26, 33, 0.6);
   --glass-border: rgba(255, 255, 255, 0.05);
@@ -20,7 +20,7 @@
   /* Shadows */
   --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
   --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -2px rgba(0, 0, 0, 0.2);
-  --shadow-glow: 0 0 20px rgba(123, 97, 255, 0.3);
+  --shadow-glow: 0 0 20px rgba(124, 92, 255, 0.3);
   
   /* Radii */
   --radius-sm: 8px;
@@ -32,6 +32,7 @@
   /* Transitions */
   --transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
   --transition-smooth: 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+  --transition-premium: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
 /* Light Theme for Studio */
