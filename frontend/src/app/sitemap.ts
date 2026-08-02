@@ -39,6 +39,25 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified: new Date(),
       changeFrequency: 'weekly',
       priority: 0.5,
+    },
+    // SEO Optimized Channel Routes
+    {
+      url: `${baseUrl}/channel/ohiocodehunter`,
+      lastModified: new Date(),
+      changeFrequency: 'daily',
+      priority: 0.9,
+    },
+    {
+      url: `${baseUrl}/channel/Karan-OCH`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly',
+      priority: 0.8,
+    },
+    {
+      url: `${baseUrl}/results?q=vynra`,
+      lastModified: new Date(),
+      changeFrequency: 'always',
+      priority: 0.7,
     }
   ]
 }

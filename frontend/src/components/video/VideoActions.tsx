@@ -64,7 +64,8 @@ export default function VideoActions({ initialVideo }: VideoActionsProps) {
             onClick={handleLike}
             disabled={isLikeLoading}
           >
-            <ThumbsUp size={18} fill={hasLiked ? 'currentColor' : 'none'} /> {video.likes || 0}
+            <ThumbsUp size={18} fill={hasLiked ? 'currentColor' : 'none'} style={{ transform: 'translate(-2px, -1px)' }} /> 
+            <span>{video.likes || 0}</span>
           </button>
           <div className={styles.actionDivider}></div>
           <button 

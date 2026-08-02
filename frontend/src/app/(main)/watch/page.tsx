@@ -10,6 +10,7 @@ import AutoplayToggle from '@/components/video/AutoplayToggle';
 import VideoActions from '@/components/video/VideoActions';
 import CommentsSection from '@/components/video/CommentsSection';
 import SubscribeButton from '@/components/video/SubscribeButton';
+import UpNextSidebar from '@/components/video/UpNextSidebar';
 
 function formatDuration(seconds: number) {
   const m = Math.floor(seconds / 60);
@@ -82,23 +83,7 @@ export default async function WatchPage({ searchParams }: { searchParams: Promis
       </div>
 
       {/* Up Next Sidebar */}
-      <div className={styles.upNextColumn}>
-        <div className={styles.upNextHeader}>
-          <h3>Up next</h3>
-          <AutoplayToggle />
-        </div>
-        
-        <div className={styles.filtersRow}>
-          <button className={`${styles.filterBtn} ${styles.active}`}>All</button>
-          <button className={styles.filterBtn}>Related</button>
-        </div>
-
-        <div className={styles.upNextList}>
-          {upNextVideos.map(upNext => (
-            <VideoCard key={upNext._id} video={upNext} layout="horizontal" />
-          ))}
-        </div>
-      </div>
+      <UpNextSidebar currentVideo={video} allVideos={allVideos} />
     </div>
   );
 }

@@ -22,7 +22,7 @@ router.get('/:videoId', async (req: Request, res: Response) => {
 // Post a comment
 router.post('/:videoId', authMiddleware, async (req: AuthRequest, res: Response) => {
   try {
-    const { text } = req.body;
+    const { text, parentCommentId } = req.body;
     
     if (!text || text.trim() === '') {
       return res.status(400).json({ error: 'Comment text is required' });
@@ -38,13 +38,38 @@ router.post('/:videoId', authMiddleware, async (req: AuthRequest, res: Response)
       return res.status(404).json({ error: 'Video not found' });
     }
     
-    const comment = new Comment({
+    const commentData: any = {
       text: text.trim(),
       author: req.user.id,
       video: req.params.videoId
-    });
+    };
+
+    if (parentCommentId) {
+      const parentComment = await Comment.findById(parentCommentId);
+      if (parentComment) {
+        commentData.parentComment = parentCommentId;
+      }
+    }
     
+    const comment = new Comment(commentData);
     await comment.save();
+    
+    // Create Notification if it's a reply to someone else
+    if (parentCommentId) {
+      const parentComment = await Comment.findById(parentCommentId);
+      // Don't notify if user replies to their own comment
+      if (parentComment && parentComment.author.toString() !== req.user.id) {
+        // We import Notification inside here to avoid circular dependency if any, or just import at top. Let's assume it's imported at top.
+        const Notification = require('../models/Notification').default;
+        await Notification.create({
+          recipient: parentComment.author,
+          sender: req.user.id,
+          type: 'COMMENT_REPLY',
+          video: req.params.videoId,
+          comment: comment._id
+        });
+      }
+    }
     
     // Populate author info before returning
     await comment.populate('author', 'username channelName avatarUrl');

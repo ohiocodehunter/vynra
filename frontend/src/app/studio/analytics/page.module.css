@@ -142,3 +142,82 @@
   color: var(--text-secondary);
   font-size: 1.1rem;
 }
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+  .container {
+    padding: 1rem;
+  }
+
+  .pageTitle {
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .metricValue {
+    font-size: 2rem;
+  }
+
+  .videoItem {
+    padding: 1rem;
+    gap: 0.5rem;
+  }
+
+  .rank {
+    width: 30px;
+    font-size: 1.1rem;
+  }
+
+  .videoThumb {
+    width: 100px;
+    height: 56px;
+    margin-right: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .metricsGrid {
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+
+  .metricCard {
+    padding: 1rem;
+  }
+
+  .metricTitle {
+    font-size: 0.8rem;
+  }
+
+  .metricValue {
+    font-size: 1.5rem;
+  }
+
+  .topVideosHeader {
+    padding: 1rem;
+  }
+
+  .videoItem {
+    padding: 1rem;
+    gap: 0.25rem;
+  }
+
+  .rank {
+    width: 24px;
+    font-size: 1rem;
+  }
+
+  .videoThumb {
+    width: 80px;
+    height: 45px;
+    margin-right: 0.75rem;
+  }
+
+  .videoTitle {
+    font-size: 0.85rem;
+  }
+
+  .videoViews {
+    font-size: 0.8rem;
+  }
+}

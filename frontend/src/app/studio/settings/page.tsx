@@ -14,6 +14,10 @@ export default function StudioSettings() {
   const [username, setUsername] = useState('');
   const [channelName, setChannelName] = useState('');
   const [bio, setBio] = useState('');
+  const [region, setRegion] = useState('');
+  const [twitter, setTwitter] = useState('');
+  const [instagram, setInstagram] = useState('');
+  const [website, setWebsite] = useState('');
   const [avatarPreview, setAvatarPreview] = useState('');
   const [bannerPreview, setBannerPreview] = useState('');
   
@@ -33,6 +37,10 @@ export default function StudioSettings() {
       setUsername(user.username || '');
       setChannelName(user.channelName || user.username || '');
       setBio(user.bio || '');
+      setRegion(user.region || '');
+      setTwitter(user.socialLinks?.twitter || '');
+      setInstagram(user.socialLinks?.instagram || '');
+      setWebsite(user.socialLinks?.website || '');
       setAvatarPreview(user.avatarUrl || '');
       setBannerPreview(user.bannerUrl || '');
     }
@@ -63,6 +71,8 @@ export default function StudioSettings() {
       formData.append('username', username);
       formData.append('channelName', channelName);
       formData.append('bio', bio);
+      formData.append('region', region);
+      formData.append('socialLinks', JSON.stringify({ twitter, instagram, website }));
       if (avatarFile) formData.append('avatar', avatarFile);
       if (bannerFile) formData.append('banner', bannerFile);
 
@@ -143,8 +153,8 @@ export default function StudioSettings() {
 
       <div className={styles.card}>
         <h2 className={styles.cardTitle}>Banner Image</h2>
-        <div className={styles.imageUploadSection}>
-          <div style={{ flexGrow: 1 }}>
+        <div className={styles.bannerUploadSection}>
+          <div className={styles.bannerPreviewContainer}>
             <div className={styles.bannerPreview}>
               {bannerPreview ? (
                 <img src={bannerPreview} alt="Banner Preview" className={styles.bannerImg} />
@@ -153,7 +163,7 @@ export default function StudioSettings() {
               )}
             </div>
           </div>
-          <div className={styles.uploadInfo} style={{ flexBasis: '40%' }}>
+          <div className={styles.uploadInfo}>
             <div className={styles.uploadTitle}>This image will appear across the top of your channel.</div>
             <div className={styles.uploadDesc}>
               For the best results on all devices, use an image that's at least 2048 x 1152 pixels and 6MB or less.
@@ -215,12 +225,67 @@ export default function StudioSettings() {
         </div>
       </div>
 
+      <div className={styles.card}>
+        <h2 className={styles.cardTitle}>Additional Details</h2>
+        
+        <div className={styles.formGroup}>
+          <label className={styles.label}>Region / Country</label>
+          <input 
+            type="text" 
+            className={styles.input} 
+            value={region}
+            onChange={(e) => setRegion(e.target.value)}
+            placeholder="e.g., United States"
+          />
+        </div>
+
+        <h3 style={{ fontSize: '1.1rem', fontWeight: 600, marginTop: '24px', marginBottom: '16px' }}>Social Links</h3>
+
+        <div className={styles.formGroup}>
+          <label className={styles.label}>Twitter URL</label>
+          <input 
+            type="url" 
+            className={styles.input} 
+            value={twitter}
+            onChange={(e) => setTwitter(e.target.value)}
+            placeholder="https://twitter.com/yourhandle"
+          />
+        </div>
+
+        <div className={styles.formGroup}>
+          <label className={styles.label}>Instagram URL</label>
+          <input 
+            type="url" 
+            className={styles.input} 
+            value={instagram}
+            onChange={(e) => setInstagram(e.target.value)}
+            placeholder="https://instagram.com/yourhandle"
+          />
+        </div>
+
+        <div className={styles.formGroup}>
+          <label className={styles.label}>Website URL</label>
+          <input 
+            type="url" 
+            className={styles.input} 
+            value={website}
+            onChange={(e) => setWebsite(e.target.value)}
+            placeholder="https://yourwebsite.com"
+          />
+        </div>
+      </div>
+
       <div className={styles.actions}>
         <button 
           className={styles.btnSecondary} 
           onClick={() => {
             setUsername(user.username || '');
+            setChannelName(user.channelName || user.username || '');
             setBio(user.bio || '');
+            setRegion(user.region || '');
+            setTwitter(user.socialLinks?.twitter || '');
+            setInstagram(user.socialLinks?.instagram || '');
+            setWebsite(user.socialLinks?.website || '');
             setAvatarPreview(user.avatarUrl || '');
             setBannerPreview(user.bannerUrl || '');
             setAvatarFile(null);

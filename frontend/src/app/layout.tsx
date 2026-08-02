@@ -19,14 +19,6 @@ export const metadata: Metadata = {
   authors: [{ name: "Karan OCH", url: "https://vynra.ohiocodehunter.com" }],
   creator: "Karan OCH (ohiocodehunter)",
   publisher: "ohiocodehunter",
-  icons: {
-    icon: [
-      { url: '/favicon.ico' },
-      { url: '/favicon.ico', type: 'image/x-icon' }
-    ],
-    shortcut: '/favicon.ico',
-    apple: '/favicon.ico',
-  },
   openGraph: {
     title: 'Vynra | Premium Video Platform by Karan OCH',
     description: 'A next-generation, premium video sharing experience by ohiocodehunter.',

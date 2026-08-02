@@ -4,13 +4,12 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
-import { Search, Bell, Mic, Upload, LogIn, Menu, MessageSquare } from 'lucide-react';
+import { Search, Bell, Mic, Upload, LogIn, Menu } from 'lucide-react';
 import { useSidebar } from '@/context/SidebarContext';
 import AuthModal from '@/components/auth/AuthModal';
 import ProfileDropdown from './ProfileDropdown';
 import CreateChannelModal from '@/components/channel/CreateChannelModal';
 import NotificationDropdown from './NotificationDropdown';
-import MessageDropdown from './MessageDropdown';
 import styles from './Topbar.module.css';
 
 export default function Topbar() {
@@ -19,7 +18,6 @@ export default function Topbar() {
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
   const [showCreateChannelModal, setShowCreateChannelModal] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
-  const [showMessages, setShowMessages] = useState(false);
   
   const router = useRouter();
   const { user, isAuthenticated } = useAuth();
@@ -58,7 +56,7 @@ export default function Topbar() {
               <Search size={20} className={styles.searchIcon} />
               <input 
                 type="text" 
-                placeholder="⌕ Search videos, creators, playlists..." 
+                placeholder="Search videos, creators, playlists..." 
                 className={styles.searchInput}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -84,16 +82,6 @@ export default function Topbar() {
               <Bell size={20} />
             </button>
             {showNotifications && <NotificationDropdown onClose={() => setShowNotifications(false)} />}
-          </div>
-
-          <div className={styles.dropdownWrapper} style={{ position: 'relative' }}>
-            <button 
-              className={styles.iconButton} 
-              onClick={() => handleAuthAction(() => setShowMessages(!showMessages))}
-            >
-              <MessageSquare size={20} />
-            </button>
-            {showMessages && <MessageDropdown onClose={() => setShowMessages(false)} />}
           </div>
           
           {isAuthenticated ? (

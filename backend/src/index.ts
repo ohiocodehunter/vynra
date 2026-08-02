@@ -12,6 +12,7 @@ import userRoutes from './routes/users';
 import playlistRoutes from './routes/playlists';
 import commentRoutes from './routes/comments';
 import studioRoutes from './routes/studio';
+import notificationRoutes from './routes/notifications';
 
 dotenv.config();
 
@@ -44,6 +45,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/playlists', playlistRoutes);
 app.use('/api/comments', commentRoutes);
 app.use('/api/studio', studioRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 app.get('/health', (req, res) => {
   res.status(200).json({ status: 'ok', message: 'Vynra Backend is running smoothly.' });

@@ -8,7 +8,6 @@ import ShortPlayer from './ShortPlayer';
 export default function ShortsPage() {
   const [shorts, setShorts] = useState<Video[]>([]);
   const [loading, setLoading] = useState(true);
-  const [isMuted, setIsMuted] = useState(true);
   const containerRef = useRef<HTMLDivElement>(null);
   
   useEffect(() => {
@@ -55,18 +54,12 @@ export default function ShortsPage() {
     return <div className={styles.loading}>No shorts found.</div>;
   }
 
-  const handleMuteToggle = () => {
-    setIsMuted(prev => !prev);
-  };
-
   return (
     <div className={styles.shortsContainer} ref={containerRef}>
       {shorts.map((short) => (
         <ShortPlayer 
           key={short._id} 
           short={short} 
-          isMuted={isMuted} 
-          onMuteToggle={handleMuteToggle} 
         />
       ))}
     </div>

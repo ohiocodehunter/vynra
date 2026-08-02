@@ -29,6 +29,12 @@ export interface User {
   avatarUrl: string;
   bannerUrl?: string;
   bio?: string;
+  region?: string;
+  socialLinks?: {
+    twitter?: string;
+    instagram?: string;
+    website?: string;
+  };
   subscribersCount?: number;
   subscriptions?: string[];
   role?: 'user' | 'admin';
@@ -59,6 +65,7 @@ export interface Comment {
   text: string;
   author: User;
   video: string;
+  parentComment?: string;
   likes: number;
   dislikes: number;
   createdAt: string;
@@ -97,8 +104,8 @@ export const commentService = {
     const response = await api.get(`/comments/${videoId}`);
     return response.data;
   },
-  postComment: async (videoId: string, text: string): Promise<Comment> => {
-    const response = await api.post(`/comments/${videoId}`, { text });
+  postComment: async (videoId: string, text: string, parentCommentId?: string): Promise<Comment> => {
+    const response = await api.post(`/comments/${videoId}`, { text, parentCommentId });
     return response.data;
   }
 };
@@ -160,6 +167,32 @@ export const userService = {
   },
   toggleWatchLater: async (videoId: string): Promise<{ watchLater: string[] }> => {
     const response = await api.post(`/users/watch-later/${videoId}`);
+    return response.data;
+  }
+};
+
+export interface Notification {
+  _id: string;
+  recipient: string;
+  sender: User;
+  type: 'NEW_VIDEO' | 'COMMENT_REPLY';
+  video?: Video;
+  comment?: Comment;
+  isRead: boolean;
+  createdAt: string;
+}
+
+export const notificationService = {
+  getNotifications: async (): Promise<Notification[]> => {
+    const response = await api.get('/notifications');
+    return response.data;
+  },
+  markAsRead: async (id: string): Promise<Notification> => {
+    const response = await api.put(`/notifications/${id}/read`);
+    return response.data;
+  },
+  markAllAsRead: async (): Promise<{ success: boolean }> => {
+    const response = await api.put('/notifications/read-all');
     return response.data;
   }
 };

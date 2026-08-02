@@ -67,6 +67,16 @@
   align-items: flex-start;
 }
 
+.bannerUploadSection {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.bannerPreviewContainer {
+  width: 100%;
+}
+
 @media (max-width: 768px) {
   .imageUploadSection {
     flex-direction: column;
@@ -219,3 +229,55 @@
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
+
+/* =======================================
+   RESPONSIVE QUERIES FOR SETTINGS
+   ======================================= */
+
+@media (max-width: 768px) {
+  .settingsContainer {
+    padding: 16px;
+  }
+
+  .pageTitle {
+    font-size: 1.5rem;
+    margin-bottom: 24px;
+  }
+
+  .card {
+    padding: 20px;
+    margin-bottom: 24px;
+  }
+
+  .cardTitle {
+    font-size: 1.25rem;
+    margin-bottom: 16px;
+  }
+
+  .imageUploadSection {
+    flex-direction: column;
+    gap: 16px;
+    align-items: center;
+    text-align: center;
+  }
+  
+  .uploadInfo {
+    width: 100%;
+  }
+
+  .bannerPreview {
+    height: 120px;
+  }
+
+  .actions {
+    flex-direction: column-reverse;
+    gap: 12px;
+    margin-top: 24px;
+  }
+  
+  .btnPrimary, .btnSecondary {
+    width: 100%;
+    justify-content: center;
+  }
+}
+

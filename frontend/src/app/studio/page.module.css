@@ -83,6 +83,7 @@
   display: grid;
   grid-template-columns: 2fr 1fr;
   gap: 24px;
+  min-width: 0;
 }
 
 .chartPanel {
@@ -93,6 +94,7 @@
   display: flex;
   flex-direction: column;
   gap: 24px;
+  min-width: 0;
 }
 
 .chartHeader {
@@ -117,6 +119,7 @@
   flex-direction: column;
   gap: 16px;
   padding: 16px 0;
+  min-width: 0;
 }
 
 .lineChart {
@@ -136,6 +139,7 @@
   border: 1px solid var(--border-color);
   border-radius: var(--radius-lg);
   padding: 24px;
+  min-width: 0;
 }
 
 .panelTitle {
@@ -170,6 +174,7 @@
   justify-content: space-between;
   align-items: center;
   min-width: 0;
+  gap: 8px;
 }
 
 .topVideoTitle {
@@ -178,17 +183,55 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  margin-right: 12px;
+  flex: 1;
+  min-width: 0;
 }
 
 .topVideoViews {
   font-size: 0.85rem;
   color: var(--text-secondary);
   font-weight: 500;
+  flex-shrink: 0;
 }
 
 @media (max-width: 1024px) {
   .mainGrid {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .studioDashboard {
+    gap: 24px;
+  }
+  
+  .statsGrid {
+    gap: 16px;
+  }
+
+  .mainGrid {
+    gap: 16px;
+  }
+
+  .statCard, .chartPanel, .topVideosPanel {
+    padding: 16px;
+  }
+
+  .statValue {
+    font-size: 1.5rem;
+  }
+
+  .metricValue {
+    font-size: 1.25rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .statsGrid {
+    grid-template-columns: 1fr;
+  }
+  
+  .pageTitle {
+    font-size: 1.25rem;
   }
 }

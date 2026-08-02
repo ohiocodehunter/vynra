@@ -8,6 +8,12 @@ export interface IUser extends Document {
   avatarUrl?: string;
   bannerUrl?: string;
   bio?: string;
+  region?: string;
+  socialLinks?: {
+    twitter?: string;
+    instagram?: string;
+    website?: string;
+  };
   subscribersCount: number;
   subscriptions: mongoose.Types.ObjectId[];
   history: { video: mongoose.Types.ObjectId; watchedAt: Date }[];
@@ -26,6 +32,12 @@ const UserSchema: Schema = new Schema({
   avatarUrl: { type: String, default: '' },
   bannerUrl: { type: String, default: '' },
   bio: { type: String, default: '' },
+  region: { type: String, default: '' },
+  socialLinks: {
+    twitter: { type: String, default: '' },
+    instagram: { type: String, default: '' },
+    website: { type: String, default: '' }
+  },
   subscribersCount: { type: Number, default: 0 },
   subscriptions: [{ type: Schema.Types.ObjectId, ref: 'User' }],
   history: [{ 

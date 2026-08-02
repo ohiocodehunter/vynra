@@ -113,6 +113,25 @@ router.post('/upload', authMiddleware, upload.single('video'), async (req: AuthR
         video.status = 'published';
         await video.save();
         
+        // 6. Notify Subscribers
+        if (video.visibility === 'public') {
+          const Notification = require('../models/Notification').default;
+          // Find all users who have the creator in their subscriptions array
+          const subscribers = await User.find({ subscriptions: video.creator }).select('_id');
+          
+          if (subscribers.length > 0) {
+            const notifications = subscribers.map(sub => ({
+              recipient: sub._id,
+              sender: video.creator,
+              type: 'NEW_VIDEO',
+              video: video._id
+            }));
+            
+            // Bulk insert notifications
+            await Notification.insertMany(notifications);
+          }
+        }
+        
       } catch (err) {
         console.error('Background processing failed:', err);
         video.status = 'private'; // or error state

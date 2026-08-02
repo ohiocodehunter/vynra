@@ -66,7 +66,7 @@ export default function StudioDashboard() {
             </div>
           </div>
           <div className={styles.chartContainer}>
-            <svg viewBox="0 0 500 100" className={styles.lineChart}>
+            <svg viewBox="0 0 500 100" className={styles.lineChart} preserveAspectRatio="none">
               <path d="M0,80 Q20,90 40,70 T80,50 T120,60 T160,20 T200,40 T240,10 T280,30 T320,60 T360,40 T400,20 T440,50 T480,10 L500,20" 
                     fill="none" stroke="#6C63FF" strokeWidth="3" />
               <circle cx="0" cy="80" r="4" fill="#6C63FF" />

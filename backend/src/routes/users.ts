@@ -44,12 +44,20 @@ router.get('/me', authMiddleware, async (req: AuthRequest, res: Response) => {
 router.put('/me', authMiddleware, upload.fields([{ name: 'avatar', maxCount: 1 }, { name: 'banner', maxCount: 1 }]), async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.user?.id;
-    const { username, channelName, bio } = req.body;
+    const { username, channelName, bio, region, socialLinks } = req.body;
     const files = req.files as { [fieldname: string]: Express.Multer.File[] };
 
     const updateData: any = {};
     if (channelName !== undefined) updateData.channelName = channelName;
     if (bio !== undefined) updateData.bio = bio;
+    if (region !== undefined) updateData.region = region;
+    if (socialLinks !== undefined) {
+      try {
+        updateData.socialLinks = typeof socialLinks === 'string' ? JSON.parse(socialLinks) : socialLinks;
+      } catch (e) {
+        console.error('Failed to parse social links');
+      }
+    }
 
     if (username) {
       const user = await User.findById(userId);

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Home, MonitorPlay, PlusCircle, Tv, ListVideo } from 'lucide-react';
+import { Home, MonitorPlay, Tv, ListVideo } from 'lucide-react';
 import styles from './BottomNav.module.css';
 import Link from 'next/link';
 
@@ -13,9 +13,6 @@ export default function BottomNav() {
       <Link href="/shorts" className={styles.navItem}>
         <MonitorPlay size={24} />
         <span>Shorts</span>
-      </Link>
-      <Link href="/create" className={styles.navItemMain}>
-        <PlusCircle size={40} className={styles.mainIcon} />
       </Link>
       <Link href="/subscriptions" className={styles.navItem}>
         <Tv size={24} />

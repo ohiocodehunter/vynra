@@ -147,9 +147,25 @@
   gap: 12px;
 }
 
+.horizontal.videoCard {
+  flex-direction: row;
+  align-items: flex-start;
+  padding: 8px;
+  gap: 12px;
+}
+
+.horizontal.videoCard .thumbnailContainer {
+  width: 168px;
+  flex-shrink: 0;
+  border-radius: var(--radius-md);
+}
+
 .horizontal .videoInfo {
   flex-direction: column;
   gap: 4px;
+  min-width: 0; /* Prevent text overflow */
+  margin-top: 0;
+  padding-right: 0;
 }
 
 .creatorAvatar {
@@ -215,25 +231,17 @@
   overflow: hidden;
 }
 
-@media (hover: hover) and (pointer: fine) {
-  .horizontal:hover .thumbnailContainer {
-    transform: scale(1.05);
-    z-index: 10;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
-  }
-}
-
-.horizontal .videoInfo {
-  margin-top: 0;
-  padding-right: 0;
-}
-
 .horizontal .videoTitle {
   font-size: 0.95rem;
   line-height: 1.3;
 }
 
-.horizontal .videoMeta {
+.videoMetaViews {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.horizontal .videoMetaViews {
   font-size: 0.75rem;
 }
 
@@ -241,24 +249,33 @@
   display: none;
 }
 
+@media (hover: hover) and (pointer: fine) {
+  .horizontal.videoCard:hover .thumbnailContainer {
+    transform: scale(1.05);
+    z-index: 10;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  }
+}
 
 @media (max-width: 639px) {
   .videoCard {
-    max-width: 400px;
+    max-width: 100%;
     margin: 0 auto;
-    justify-self: center; /* Center in CSS grid */
+    justify-self: center;
     width: 100%;
   }
 }
 
 @media (max-width: 480px) {
-  .horizontal {
-    width: 400px;
-    height: 84px;
+  .horizontal.videoCard {
+    width: 100%;
+    height: auto;
+    padding: 8px 0;
+    gap: 8px;
   }
   
-  .horizontal .thumbnailContainer {
-    width: 140px;
+  .horizontal.videoCard .thumbnailContainer {
+    width: 120px;
   }
   
   .horizontal .videoTitle {
@@ -266,7 +283,11 @@
     -webkit-line-clamp: 2;
   }
   
-  .horizontal .videoMeta {
-    font-size: 0.7rem;
+  .horizontal .videoMetaViews {
+    font-size: 0.75rem;
+  }
+  
+  .horizontal .videoMetaChannel {
+    font-size: 0.8rem;
   }
 }

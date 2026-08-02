@@ -155,6 +155,7 @@
 .actionBtn {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
   padding: 8px 16px;
   background-color: var(--bg-secondary);
@@ -168,6 +169,15 @@
 .actionGroup .actionBtn {
   border-radius: 0;
   background-color: transparent;
+}
+
+/* Optical centering for curved edges */
+.actionGroup .actionBtn:first-child {
+  padding-left: 12px;
+}
+
+.actionGroup .actionBtn:last-child {
+  padding-right: 12px;
 }
 
 .actionGroup .actionBtn:hover {
@@ -404,11 +414,28 @@
   color: var(--text-secondary);
   font-size: 0.85rem;
   white-space: nowrap;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.filterBtn:hover {
+  background-color: rgba(255, 255, 255, 0.15);
+  transform: translateY(-1px);
+}
+
+.filterBtn:active {
+  transform: scale(0.95);
 }
 
 .filterBtn.active {
   background-color: var(--text-primary);
   color: var(--bg-primary);
+  font-weight: 500;
+}
+
+.filterBtn.active:hover {
+  background-color: rgba(255, 255, 255, 0.9);
 }
 
 .upNextList {
