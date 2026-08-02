@@ -61,7 +61,10 @@ export default function ChannelPage() {
   }
 
   const { user, videos } = channelData;
-  const isOwner = currentUser?.id === user.id || currentUser?.username === user.username;
+  const isOwner = Boolean(
+    currentUser && 
+    (currentUser.id === (user._id || user.id) || currentUser.username === user.username)
+  );
 
   return (
     <div>
