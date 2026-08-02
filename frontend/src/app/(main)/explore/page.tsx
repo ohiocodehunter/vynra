@@ -1,6 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { videoService, Video } from '@/lib/api';
+import VideoCard from '@/components/video/VideoCard';
 import styles from './page.module.css';
 import { Compass, Flame, Music, Gamepad2, Trophy, Lightbulb } from 'lucide-react';
 
@@ -48,27 +49,9 @@ export default async function ExplorePage() {
 
       <section className={styles.section}>
         <h2 className={styles.sectionTitle}>Trending Videos</h2>
-        <div className={styles.videoGrid}>
+        <div className={styles.grid}>
           {videos.map((video) => (
-            <Link href={`/watch?v=${video._id}`} key={video._id} className={styles.videoCard}>
-              <div className={styles.thumbnailContainer}>
-                <div 
-                  className={styles.thumbnail} 
-                  style={{ backgroundImage: `url(${video.thumbnailUrl})`, backgroundSize: 'cover', backgroundPosition: 'center' }} 
-                />
-                <div className={styles.timestamp}>
-                  {Math.floor(video.duration / 60)}:
-                  {Math.floor(video.duration % 60) < 10 ? '0' : ''}{Math.floor(video.duration % 60)}
-                </div>
-              </div>
-              <div className={styles.videoInfo}>
-                <h3 className={styles.videoTitle}>{video.title}</h3>
-                <p className={styles.videoCreator}>{video.creator?.username || 'Unknown'}</p>
-                <p className={styles.videoStats}>
-                  {video.views >= 1000 ? Math.floor(video.views / 1000) + 'K' : video.views} views
-                </p>
-              </div>
-            </Link>
+            <VideoCard key={video._id} video={video} />
           ))}
         </div>
       </section>

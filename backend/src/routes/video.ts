@@ -212,6 +212,30 @@ router.get('/liked', authMiddleware, async (req: AuthRequest, res: Response) => 
   }
 });
 
+// Get videos from subscribed channels
+router.get('/subscriptions', authMiddleware, async (req: AuthRequest, res: Response) => {
+  try {
+    const user = await User.findById(req.user?.id);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    const videos = await Video.find({
+      creator: { $in: user.subscriptions },
+      status: 'published',
+      visibility: 'public'
+    })
+      .populate('creator', 'username channelName avatarUrl')
+      .sort({ createdAt: -1 })
+      .limit(100);
+
+    res.json(videos);
+  } catch (error) {
+    console.error('Error fetching subscription videos:', error);
+    res.status(500).json({ error: 'Server error fetching subscription videos' });
+  }
+});
+
 // Get a single video by ID
 router.get('/:id', async (req: Request, res: Response) => {
   try {
