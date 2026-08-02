@@ -1,15 +1,29 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { LayoutDashboard, PlaySquare, BarChart2, MessageSquare, Users, ListVideo, DollarSign, Settings, Send, Video as VideoIcon, Bell } from 'lucide-react';
 import styles from './layout.module.css';
 import Link from 'next/link';
+import { useAuth } from '@/context/AuthContext';
+import { useRouter } from 'next/navigation';
 
 export default function StudioLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const { isAuthenticated, isLoading } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated) {
+      router.push('/');
+    }
+  }, [isLoading, isAuthenticated, router]);
+
+  if (isLoading || !isAuthenticated) {
+    return null; // or a loading spinner
+  }
 
   return (
     <div className={styles.studioContainer}>

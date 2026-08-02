@@ -1,13 +1,32 @@
-import React from 'react';
+'use client';
+
+import React, { useEffect } from 'react';
 import { LayoutDashboard, Users, Video, Grid, AlertTriangle, MessageSquare, BarChart, Settings, HardDrive } from 'lucide-react';
 import styles from './layout.module.css';
 import Link from 'next/link';
+import { useAuth } from '@/context/AuthContext';
+import { useRouter } from 'next/navigation';
 
 export default function AdminLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const { user, isAuthenticated, isLoading } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!isLoading) {
+      if (!isAuthenticated || user?.role !== 'admin') {
+        router.push('/');
+      }
+    }
+  }, [isLoading, isAuthenticated, user, router]);
+
+  if (isLoading || !isAuthenticated || user?.role !== 'admin') {
+    return null;
+  }
+
   return (
     <div className={styles.adminContainer}>
       <aside className={styles.sidebar}>
