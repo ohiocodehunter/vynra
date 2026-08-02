@@ -83,7 +83,11 @@ export default function VideoCard({
       <div className={styles.videoInfo}>
         {layout === "vertical" && (
           <div className={styles.creatorAvatar}>
-            {video.creator?.username?.charAt(0) || "U"}
+            {video.creator?.avatarUrl ? (
+              <img src={video.creator.avatarUrl} alt={video.creator.username} className={styles.avatarImage} />
+            ) : (
+              video.creator?.username?.charAt(0) || "U"
+            )}
           </div>
         )}
         <div className={styles.videoDetails}>

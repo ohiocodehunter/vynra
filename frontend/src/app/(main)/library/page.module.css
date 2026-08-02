@@ -1,0 +1,74 @@
+.container {
+  padding: 32px;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.title {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 32px;
+  color: var(--text-primary);
+}
+
+.sectionGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 24px;
+}
+
+.libraryCard {
+  display: flex;
+  align-items: center;
+  background-color: var(--bg-secondary);
+  border-radius: 12px;
+  padding: 24px;
+  text-decoration: none;
+  color: var(--text-primary);
+  transition: transform 0.2s, background-color 0.2s;
+}
+
+.libraryCard:hover {
+  transform: translateY(-2px);
+  background-color: var(--bg-hover);
+}
+
+.iconWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.05);
+  margin-right: 20px;
+  color: var(--accent-primary);
+  flex-shrink: 0;
+}
+
+.cardContent {
+  flex-grow: 1;
+}
+
+.cardContent h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0 0 4px 0;
+}
+
+.cardContent p {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.arrow {
+  color: var(--text-secondary);
+  opacity: 0.5;
+  transition: opacity 0.2s;
+}
+
+.libraryCard:hover .arrow {
+  opacity: 1;
+}
