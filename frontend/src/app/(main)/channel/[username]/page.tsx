@@ -27,7 +27,7 @@ export default function ChannelPage() {
   useEffect(() => {
     const fetchChannel = async () => {
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api'}/users/channel/${username}`);
+        const response = await fetch(`${(typeof window !== 'undefined' ? '/api' : (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api'))}/users/channel/${username}`);
         if (response.ok) {
           const data = await response.json();
           setChannelData(data);

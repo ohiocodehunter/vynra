@@ -61,7 +61,7 @@ export default function ClientVideoPlayer({ url, poster, nextVideoId, videoId }:
         historyRecorded = true;
         const token = localStorage.getItem('token');
         if (token) {
-          fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api'}/users/history/${videoId}`, {
+          fetch(`${(typeof window !== 'undefined' ? '/api' : (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api'))}/users/history/${videoId}`, {
             method: 'POST',
             headers: { 'Authorization': `Bearer ${token}` }
           }).catch(console.error);

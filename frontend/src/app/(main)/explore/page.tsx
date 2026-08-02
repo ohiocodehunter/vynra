@@ -4,6 +4,8 @@ import { videoService, Video } from '@/lib/api';
 import styles from './page.module.css';
 import { Compass, Flame, Music, Gamepad2, Trophy, Lightbulb } from 'lucide-react';
 
+export const dynamic = 'force-dynamic';
+
 export default async function ExplorePage() {
   // Fetch popular videos
   const videos = await videoService.getAllVideos({ sort: 'popular' });

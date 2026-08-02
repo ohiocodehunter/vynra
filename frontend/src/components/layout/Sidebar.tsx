@@ -32,7 +32,7 @@ export default function Sidebar() {
         return;
       }
       try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api'}/users/subscriptions`, {
+        const res = await fetch(`${(typeof window !== 'undefined' ? '/api' : (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api'))}/users/subscriptions`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         if (res.ok) {

@@ -3,7 +3,7 @@ import styles from './page.module.css';
 import { Video } from '@/lib/api';
 
 async function getVideos() {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api'}/videos`, { 
+  const res = await fetch(`${(typeof window !== 'undefined' ? '/api' : (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api'))}/videos`, { 
     cache: 'no-store' 
   });
   if (!res.ok) {

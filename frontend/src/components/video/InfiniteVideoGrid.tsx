@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import VideoCard from './VideoCard';
-import { Video } from '@/lib/api';
+import { Video, videoService } from '@/lib/api';
 import styles from './InfiniteVideoGrid.module.css';
 import { Loader2 } from 'lucide-react';
 
@@ -25,11 +25,8 @@ export default function InfiniteVideoGrid({ initialVideos }: Props) {
     if (loading || !hasMore) return;
     setLoading(true);
     try {
-      // For now, since we don't have true pagination in backend, 
-      // we'll just mock infinite scroll by appending the same videos shuffled
-      // In production: fetch(`/api/videos?page=${page + 1}`)
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api'}/videos`);
-      const newVideos = await res.json();
+      // Fetch more videos using the properly configured videoService
+      const newVideos = await videoService.getAllVideos();
       
       if (newVideos.length === 0 || page > 5) {
         setHasMore(false);
@@ -71,7 +68,7 @@ export default function InfiniteVideoGrid({ initialVideos }: Props) {
         const token = localStorage.getItem('token');
         if (token) {
           try {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api'}/users/history`, {
+            const res = await fetch(`${(typeof window !== 'undefined' ? '/api' : (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api'))}/users/history`, {
               headers: { 'Authorization': `Bearer ${token}` }
             });
             if (res.ok) {

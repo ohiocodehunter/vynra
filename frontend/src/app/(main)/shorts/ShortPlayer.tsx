@@ -105,7 +105,7 @@ export default function ShortPlayer({ short, isMuted, onMuteToggle }: ShortPlaye
           onPlay={(e) => {
             const token = localStorage.getItem('token');
             if (token) {
-              fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api'}/users/history/${short._id}`, {
+              fetch(`${(typeof window !== 'undefined' ? '/api' : (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api'))}/users/history/${short._id}`, {
                 method: 'POST',
                 headers: { 'Authorization': `Bearer ${token}` }
               }).catch(console.error);

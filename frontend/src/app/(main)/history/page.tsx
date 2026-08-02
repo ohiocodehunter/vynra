@@ -20,7 +20,7 @@ export default function HistoryPage() {
       }
       
       try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api'}/users/history`, {
+        const res = await fetch(`${(typeof window !== 'undefined' ? '/api' : (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api'))}/users/history`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         

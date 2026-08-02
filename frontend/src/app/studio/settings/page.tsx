@@ -67,7 +67,7 @@ export default function StudioSettings() {
       if (bannerFile) formData.append('banner', bannerFile);
 
       const token = localStorage.getItem('token');
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api'}/users/me`, {
+      const response = await fetch(`${(typeof window !== 'undefined' ? '/api' : (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api'))}/users/me`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`
