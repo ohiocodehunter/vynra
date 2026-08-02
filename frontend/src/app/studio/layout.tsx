@@ -1,11 +1,12 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { LayoutDashboard, PlaySquare, BarChart2, MessageSquare, Users, DollarSign, Settings, Send, Video as VideoIcon, Bell, Menu, X } from 'lucide-react';
+import { LayoutDashboard, PlaySquare, BarChart2, MessageSquare, Users, DollarSign, Settings, Send, Video as VideoIcon, Menu, X, Bell } from 'lucide-react';
 import styles from './layout.module.css';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
+import NotificationDropdown from '@/components/layout/NotificationDropdown';
 
 export default function StudioLayout({
   children,
@@ -14,7 +15,10 @@ export default function StudioLayout({
 }) {
   const { isAuthenticated, isLoading, user } = useAuth();
   const router = useRouter();
+  const pathname = usePathname();
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+
+  const [showNotifications, setShowNotifications] = useState(false);
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -38,9 +42,7 @@ export default function StudioLayout({
       <aside className={`${styles.sidebar} ${isMobileSidebarOpen ? styles.sidebarOpen : ''}`}>
         <div className={styles.logoContainer}>
           <div className={styles.logoIcon}>
-            <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <polygon points="5 3 19 12 5 21 5 3"></polygon>
-            </svg>
+            <img src="/favicon.ico" alt="Vynra Studio" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
           </div>
           <span className={styles.logoText}>Studio</span>
           
@@ -50,27 +52,27 @@ export default function StudioLayout({
         </div>
 
         <nav className={styles.navSection}>
-          <Link href="/studio" className={`${styles.navItem} ${styles.active}`} onClick={closeSidebar}>
+          <Link href="/studio" className={`${styles.navItem} ${pathname === '/studio' ? styles.active : ''}`} onClick={closeSidebar}>
             <LayoutDashboard size={20} />
             <span>Dashboard</span>
           </Link>
-          <Link href="/studio/content" className={styles.navItem} onClick={closeSidebar}>
+          <Link href="/studio/content" className={`${styles.navItem} ${pathname === '/studio/content' ? styles.active : ''}`} onClick={closeSidebar}>
             <PlaySquare size={20} />
             <span>Content</span>
           </Link>
-          <Link href="/studio/analytics" className={styles.navItem} onClick={closeSidebar}>
+          <Link href="/studio/analytics" className={`${styles.navItem} ${pathname === '/studio/analytics' ? styles.active : ''}`} onClick={closeSidebar}>
             <BarChart2 size={20} />
             <span>Analytics</span>
           </Link>
-          <Link href="/studio/comments" className={styles.navItem} onClick={closeSidebar}>
+          <Link href="/studio/comments" className={`${styles.navItem} ${pathname === '/studio/comments' ? styles.active : ''}`} onClick={closeSidebar}>
             <MessageSquare size={20} />
             <span>Comments</span>
           </Link>
-          <Link href="/studio/subscribers" className={styles.navItem} onClick={closeSidebar}>
+          <Link href="/studio/subscribers" className={`${styles.navItem} ${pathname === '/studio/subscribers' ? styles.active : ''}`} onClick={closeSidebar}>
             <Users size={20} />
             <span>Subscribers</span>
           </Link>
-          <Link href="/studio/monetization" className={styles.navItem} onClick={closeSidebar}>
+          <Link href="/studio/monetization" className={`${styles.navItem} ${pathname === '/studio/monetization' ? styles.active : ''}`} onClick={closeSidebar}>
             <DollarSign size={20} />
             <span>Monetization</span>
           </Link>
@@ -79,11 +81,11 @@ export default function StudioLayout({
         <div className={styles.spacer}></div>
 
         <nav className={styles.navSection}>
-          <Link href="/studio/settings" className={styles.navItem} onClick={closeSidebar}>
+          <Link href="/studio/settings" className={`${styles.navItem} ${pathname === '/studio/settings' ? styles.active : ''}`} onClick={closeSidebar}>
             <Settings size={20} />
             <span>Settings</span>
           </Link>
-          <Link href="/studio/feedback" className={styles.navItem} onClick={closeSidebar}>
+          <Link href="/studio/feedback" className={`${styles.navItem} ${pathname === '/studio/feedback' ? styles.active : ''}`} onClick={closeSidebar}>
             <Send size={20} />
             <span>Send feedback</span>
           </Link>
@@ -117,9 +119,14 @@ export default function StudioLayout({
                 <span className={styles.createBtnText}>Create</span>
               </button>
             </Link>
-            <button className={styles.iconBtn}>
-              <Bell size={20} />
-            </button>
+            <div style={{ position: 'relative' }}>
+              <button className={styles.iconBtn} onClick={() => setShowNotifications(!showNotifications)}>
+                <Bell size={20} />
+              </button>
+              {showNotifications && (
+                <NotificationDropdown onClose={() => setShowNotifications(false)} />
+              )}
+            </div>
           </div>
         </div>
         <div className={styles.pageContent}>

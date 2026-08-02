@@ -146,6 +146,10 @@ export const studioService = {
     const response = await api.get('/studio/subscribers');
     return response.data;
   },
+  sendFeedback: async (data: { subject: string; message: string }) => {
+    const response = await api.post('/studio/feedback', data);
+    return response.data;
+  },
   updateVideo: async (id: string, data: Partial<Video>): Promise<Video> => {
     const response = await api.put(`/videos/${id}`, data);
     return response.data;

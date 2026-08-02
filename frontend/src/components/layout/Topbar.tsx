@@ -46,6 +46,9 @@ export default function Topbar() {
             <Menu size={24} />
           </button>
           <Link href="/" className={styles.logoContainer}>
+            <div className={styles.logoIcon}>
+              <img src="/favicon.ico" alt="Vynra" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
+            </div>
             <span className={styles.logoText}>Vynra</span>
           </Link>
         </div>

@@ -110,4 +110,32 @@ router.get('/subscribers', authMiddleware, async (req: AuthRequest, res: Respons
   }
 });
 
+// Submit feedback
+router.post('/feedback', authMiddleware, async (req: AuthRequest, res: Response) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    const { subject, message } = req.body;
+    
+    if (!subject || !message) {
+      return res.status(400).json({ error: 'Subject and message are required' });
+    }
+
+    const Feedback = require('../models/Feedback').default;
+    const feedback = new Feedback({
+      user: req.user.id,
+      subject,
+      message
+    });
+
+    await feedback.save();
+    res.status(201).json(feedback);
+  } catch (error) {
+    console.error('Error submitting feedback:', error);
+    res.status(500).json({ error: 'Server error submitting feedback' });
+  }
+});
+
 export default router;

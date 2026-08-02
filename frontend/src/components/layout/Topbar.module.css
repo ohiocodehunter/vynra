@@ -47,11 +47,12 @@
 .logoIcon {
   width: 28px;
   height: 28px;
-  background: var(--gradient-main);
-  border-radius: 8px;
+  background: transparent;
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow: hidden;
 }
 
 .logoIcon svg {

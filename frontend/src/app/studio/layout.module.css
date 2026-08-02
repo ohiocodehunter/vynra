@@ -30,11 +30,12 @@
 .logoIcon {
   width: 32px;
   height: 32px;
-  background: var(--gradient-main);
-  border-radius: 8px;
+  background: transparent;
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow: hidden;
 }
 
 .logoIcon svg {
@@ -62,19 +63,31 @@
   padding: 12px 16px;
   border-radius: var(--radius-md);
   color: var(--text-secondary);
-  font-size: 0.9rem;
+  font-size: 0.95rem;
   font-weight: 500;
-  transition: all var(--transition-fast);
+  transition: var(--transition-premium);
+  border-left: 3px solid transparent;
 }
 
 .navItem:hover {
   background-color: var(--bg-hover);
   color: var(--text-primary);
+  transform: translateX(4px);
+}
+
+.navItem:hover svg {
+  filter: drop-shadow(0 0 8px rgba(124, 92, 255, 0.5));
 }
 
 .navItem.active {
-  background-color: rgba(108, 99, 255, 0.1);
+  background-color: rgba(124, 92, 255, 0.15);
+  color: var(--text-primary);
+  border-left: 3px solid var(--accent-primary);
+}
+
+.navItem.active svg {
   color: var(--accent-primary);
+  filter: drop-shadow(0 0 10px rgba(124, 92, 255, 0.6));
 }
 
 .spacer {
