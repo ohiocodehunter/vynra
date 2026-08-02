@@ -4,7 +4,8 @@ import path from 'path';
 import fs from 'fs';
 import { v4 as uuidv4 } from 'uuid';
 import Video from '../models/Video';
-import { authMiddleware, AuthRequest } from '../middlewares/authMiddleware';
+import User from '../models/User';
+import { authMiddleware, optionalAuthMiddleware, AuthRequest } from '../middlewares/authMiddleware';
 import { compressVideo, generateThumbnail, getVideoDuration } from '../services/ffmpeg';
 import { uploadFileToR2 } from '../services/r2';
 
@@ -125,7 +126,7 @@ router.post('/upload', authMiddleware, upload.single('video'), async (req: AuthR
   }
 });
 
-router.get('/', async (req: Request, res: Response) => {
+router.get('/', optionalAuthMiddleware, async (req: AuthRequest, res: Response) => {
   try {
     const { q, tag, sort } = req.query;
     let query: any = { status: 'published', visibility: 'public' };
@@ -143,12 +144,57 @@ router.get('/', async (req: Request, res: Response) => {
       sortOption = { views: -1 };
     }
 
-    const videos = await Video.find(query)
+    // Recommendation Engine Logic
+    let allVideos = await Video.find(query)
       .populate('creator', 'username channelName avatarUrl')
       .sort(sortOption)
-      .limit(50);
-    res.json(videos);
+      .limit(100);
+
+    // If user is authenticated, analyze history and re-rank
+    if (req.user && !q && !tag && sort !== 'popular') {
+      const user = await User.findById(req.user.id).populate('history.video');
+      
+      if (user && user.history && user.history.length > 0) {
+        // Collect tags from watch history
+        const tagCounts: { [key: string]: number } = {};
+        user.history.forEach((h: any) => {
+          if (h.video && h.video.tags) {
+            h.video.tags.forEach((t: string) => {
+              tagCounts[t] = (tagCounts[t] || 0) + 1;
+            });
+          }
+        });
+
+        // Get top 3 tags
+        const topTags = Object.entries(tagCounts)
+          .sort((a, b) => b[1] - a[1])
+          .slice(0, 3)
+          .map(t => t[0]);
+
+        if (topTags.length > 0) {
+          // Split videos into recommended and others
+          const recommendedVideos = allVideos.filter(v => 
+            v.tags && v.tags.some(t => topTags.includes(t))
+          );
+          
+          const otherVideos = allVideos.filter(v => 
+            !v.tags || !v.tags.some(t => topTags.includes(t))
+          );
+
+          // Randomize both groups slightly to keep feed fresh
+          const shuffle = (arr: any[]) => arr.sort(() => Math.random() - 0.5);
+          
+          allVideos = [...shuffle(recommendedVideos), ...shuffle(otherVideos)];
+        }
+      }
+    } else if (!q && !tag && sort !== 'popular') {
+       // Just randomize for guests on home page
+       allVideos = allVideos.sort(() => Math.random() - 0.5);
+    }
+
+    res.json(allVideos);
   } catch (error) {
+    console.error('Error fetching videos:', error);
     res.status(500).json({ error: 'Server error fetching videos' });
   }
 });
