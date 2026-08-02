@@ -55,7 +55,7 @@ export default function StudioSettings() {
   };
 
   const handleSave = async () => {
-    setIsLoading(true);
+    setIsSaving(true);
     setMessage({ text: '', type: '' });
     
     try {
