@@ -40,6 +40,7 @@ export interface Video {
   url: string;
   thumbnailUrl: string;
   creator: User;
+  tags?: string[];
   views: number;
   likes: number;
   dislikes: number;

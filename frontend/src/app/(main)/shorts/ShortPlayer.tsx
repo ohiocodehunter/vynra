@@ -25,7 +25,7 @@ export default function ShortPlayer({ short, isMuted, onMuteToggle }: ShortPlaye
     // Check if user has liked this video
     const checkInteraction = async () => {
       try {
-        const response = await videoService.getVideo(short._id);
+        const response = await videoService.getVideoById(short._id) as any;
         if (response.userInteraction) {
           setUserAction(response.userInteraction as 'like' | 'dislike');
         }
@@ -50,10 +50,10 @@ export default function ShortPlayer({ short, isMuted, onMuteToggle }: ShortPlaye
   const handleLike = async (e: React.MouseEvent) => {
     e.stopPropagation();
     try {
-      const action = userAction === 'like' ? 'none' : 'like';
-      await videoService.likeVideo(short._id, action);
+      await videoService.likeVideo(short._id);
       
-      setUserAction(action === 'like' ? 'like' : null);
+      const action = userAction === 'like' ? null : 'like';
+      setUserAction(action);
       if (action === 'like') {
         setLikes(prev => prev + 1);
       } else if (userAction === 'like') {
