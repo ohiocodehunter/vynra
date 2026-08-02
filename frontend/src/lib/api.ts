@@ -31,6 +31,7 @@ export interface User {
   bio?: string;
   subscribersCount?: number;
   subscriptions?: string[];
+  role?: 'user' | 'admin';
   createdAt?: string;
 }
 
