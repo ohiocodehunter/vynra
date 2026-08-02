@@ -10,7 +10,7 @@ interface Props {
   initialVideos: Video[];
 }
 
-const CATEGORIES = ['All', 'Music', 'Gaming', 'Live', 'Mixes', 'Podcasts', 'News', 'Recent', 'Watched'];
+const CATEGORIES = ['All', 'Music', 'Gaming', 'Live', 'Mixes', 'Podcasts', 'News', 'Watched'];
 
 export default function InfiniteVideoGrid({ initialVideos }: Props) {
   const [videos, setVideos] = useState<Video[]>(initialVideos);
@@ -93,9 +93,6 @@ export default function InfiniteVideoGrid({ initialVideos }: Props) {
   const filteredVideos = React.useMemo(() => {
     if (activeCategory === 'Watched') {
       return historyVideos || [];
-    }
-    if (activeCategory === 'Recent') {
-      return [...videos].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
     }
     
     if (activeCategory === 'All') return videos;
