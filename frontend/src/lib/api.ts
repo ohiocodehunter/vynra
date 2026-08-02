@@ -138,6 +138,14 @@ export const studioService = {
     const response = await api.get('/studio/videos');
     return response.data;
   },
+  getStudioComments: async (): Promise<Comment[]> => {
+    const response = await api.get('/studio/comments');
+    return response.data;
+  },
+  getStudioSubscribers: async (): Promise<User[]> => {
+    const response = await api.get('/studio/subscribers');
+    return response.data;
+  },
   updateVideo: async (id: string, data: Partial<Video>): Promise<Video> => {
     const response = await api.put(`/videos/${id}`, data);
     return response.data;

@@ -65,4 +65,49 @@ router.get('/videos', authMiddleware, async (req: AuthRequest, res: Response) =>
   }
 });
 
+// Get creator's comments (across all videos)
+router.get('/comments', authMiddleware, async (req: AuthRequest, res: Response) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    // First find all videos by this creator
+    const videos = await Video.find({ creator: req.user.id }).select('_id');
+    const videoIds = videos.map(v => v._id);
+
+    // Now find comments on these videos, populate author and video info
+    const Comment = require('../models/Comment').default;
+    const comments = await Comment.find({ video: { $in: videoIds } })
+      .populate('author', 'username channelName avatarUrl')
+      .populate('video', 'title thumbnailUrl')
+      .sort({ createdAt: -1 });
+
+    res.json(comments);
+  } catch (error) {
+    console.error('Error fetching creator comments:', error);
+    res.status(500).json({ error: 'Server error fetching comments' });
+  }
+});
+
+// Get creator's subscribers
+router.get('/subscribers', authMiddleware, async (req: AuthRequest, res: Response) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    const User = require('../models/User').default;
+    // Find users whose subscriptions array contains this creator's ID
+    const subscribers = await User.find({ subscriptions: req.user.id })
+      .select('username channelName avatarUrl subscribersCount createdAt')
+      .sort({ createdAt: -1 });
+
+    res.json(subscribers);
+  } catch (error) {
+    console.error('Error fetching creator subscribers:', error);
+    res.status(500).json({ error: 'Server error fetching subscribers' });
+  }
+});
+
 export default router;

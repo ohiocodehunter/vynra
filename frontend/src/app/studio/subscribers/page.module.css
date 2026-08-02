@@ -48,6 +48,112 @@
   line-height: 1.6;
 }
 
+.loading {
+  text-align: center;
+  color: var(--text-secondary);
+  padding: 40px;
+  font-size: 1.1rem;
+}
+
+.subscribersGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 24px;
+}
+
+.subscriberCard {
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.subscriberCard:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.subscriberHeader {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--gradient-main);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 1.25rem;
+  font-weight: 600;
+  overflow: hidden;
+}
+
+.avatarImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.subscriberInfo {
+  display: flex;
+  flex-direction: column;
+}
+
+.subscriberName {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 2px 0;
+}
+
+.subscriberHandle {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  margin-bottom: 4px;
+}
+
+.subscriberCount {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.subscriberFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-color);
+}
+
+.joinedDate {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+.viewChannelBtn {
+  text-decoration: none;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--accent-primary);
+  padding: 6px 12px;
+  background: rgba(124, 92, 255, 0.1);
+  border-radius: 20px;
+  transition: background 0.2s;
+}
+
+.viewChannelBtn:hover {
+  background: rgba(124, 92, 255, 0.2);
+}
+
 @media (max-width: 768px) {
   .pageTitle {
     font-size: 1.5rem;
