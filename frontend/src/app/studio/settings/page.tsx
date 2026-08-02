@@ -8,7 +8,7 @@ import { useRouter } from 'next/navigation';
 import api from '@/lib/api';
 
 export default function StudioSettings() {
-  const { user, isAuthenticated, login } = useAuth();
+  const { user, isAuthenticated, isLoading, login } = useAuth();
   const router = useRouter();
 
   const [username, setUsername] = useState('');
@@ -20,11 +20,11 @@ export default function StudioSettings() {
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [bannerFile, setBannerFile] = useState<File | null>(null);
 
-  const [isLoading, setIsLoading] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [message, setMessage] = useState({ text: '', type: '' });
 
   useEffect(() => {
-    if (!isAuthenticated) {
+    if (!isLoading && !isAuthenticated) {
       router.push('/');
       return;
     }
@@ -95,7 +95,7 @@ export default function StudioSettings() {
     } catch (error: any) {
       setMessage({ text: error.message || 'An error occurred', type: 'error' });
     } finally {
-      setIsLoading(false);
+      setIsSaving(false);
     }
   };
 
@@ -226,16 +226,16 @@ export default function StudioSettings() {
             setAvatarFile(null);
             setBannerFile(null);
           }}
-          disabled={isLoading}
+          disabled={isSaving}
         >
           Cancel
         </button>
         <button 
           className={styles.btnPrimary} 
           onClick={handleSave}
-          disabled={isLoading}
+          disabled={isSaving}
         >
-          {isLoading ? (
+          {isSaving ? (
             <>
               <Loader2 size={18} className={styles.spin} />
               Saving...

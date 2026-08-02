@@ -9,12 +9,14 @@ interface AuthContextType {
   logout: () => void;
   checkUsername: (username: string) => Promise<boolean>;
   isAuthenticated: boolean;
+  isLoading: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   
   useEffect(() => {
     const savedUser = localStorage.getItem('user');
@@ -23,9 +25,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (savedUser) {
       setUser(JSON.parse(savedUser));
     }
-
-    // Refresh user data from API if we have a token
-    if (token) {
+    
+    if (!token) {
+      setIsLoading(false);
+    } else {
       fetch(`${(typeof window !== 'undefined' ? '/api' : (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api'))}/auth/me`, {
         headers: {
           'Authorization': `Bearer ${token}`
@@ -36,9 +39,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (data) {
           setUser(data);
           localStorage.setItem('user', JSON.stringify(data));
+        } else {
+          // Token invalid
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
+          setUser(null);
         }
       })
-      .catch(err => console.error('Failed to refresh user:', err));
+      .catch(err => console.error('Failed to refresh user:', err))
+      .finally(() => setIsLoading(false));
     }
   }, []);
 
@@ -65,7 +74,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, checkUsername, isAuthenticated: !!user }}>
+    <AuthContext.Provider value={{ user, login, logout, checkUsername, isAuthenticated: !!user, isLoading }}>
       {children}
     </AuthContext.Provider>
   );

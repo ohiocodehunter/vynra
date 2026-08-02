@@ -6,6 +6,16 @@
   position: relative;
   text-decoration: none;
   width: 100%;
+  transition: all var(--transition-premium);
+  border-radius: var(--radius-lg);
+  padding: 10px;
+  border: 1px solid transparent;
+}
+
+.videoCard:hover {
+  border-color: rgba(124, 92, 255, 0.4);
+  background: rgba(124, 92, 255, 0.02);
+  box-shadow: 0 4px 20px rgba(124, 92, 255, 0.1);
 }
 
 .thumbnailContainer {
@@ -42,8 +52,14 @@
   object-fit: cover;
   z-index: 1;
   opacity: 0;
-  transition: opacity 0.3s ease;
+  transition: opacity 0.5s ease-in-out;
   pointer-events: none;
+  animation: smoothFadeIn 0.5s ease-in-out forwards;
+}
+
+@keyframes smoothFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 .previewVideo::-webkit-media-controls {
@@ -54,13 +70,13 @@
   display: none !important;
 }
 
-@media (hover: hover) and (pointer: fine) {
-  .videoCard:hover .thumbnailContainer {
-  transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+.videoCard:hover .thumbnailContainer {
+  transform: translateY(-6px);
+  box-shadow: 0 12px 24px rgba(124, 92, 255, 0.25);
 }
 
 .videoCard:hover .thumbnail {
-  transform: scale(1.05);
+  opacity: 0;
 }
 
 .newBadge {
@@ -150,6 +166,31 @@
   flex-shrink: 0;
 }
 
+.creatorRow {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.verifiedIcon {
+  color: var(--text-secondary);
+  flex-shrink: 0;
+  margin-top: 1px; /* tiny nudge to align with text baseline */
+}
+
+.videoMetaChannel {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  font-weight: 400;
+  margin: 0;
+  line-height: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: color var(--transition-fast);
+}
+
 .avatarImage {
   width: 100%;
   height: 100%;
@@ -176,10 +217,9 @@
 
 @media (hover: hover) and (pointer: fine) {
   .horizontal:hover .thumbnailContainer {
-    transform: scale(1.05); /* smaller scale for horizontal */
+    transform: scale(1.05);
     z-index: 10;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
-    border-radius: 0px;
   }
 }
 

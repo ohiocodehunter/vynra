@@ -111,7 +111,12 @@ export default function Sidebar() {
         ) : subscriptions.length > 0 ? (
           <>
             {subscriptions.map(sub => (
-              <Link href={`/channel/${sub.username}`} key={sub._id} className={styles.channelItem} style={{ textDecoration: 'none', color: 'inherit' }}>
+              <Link 
+                href={`/channel/${sub.username}`} 
+                key={sub._id} 
+                className={`${styles.channelItem} ${pathname === `/channel/${sub.username}` ? styles.active : ''}`}
+                style={{ textDecoration: 'none', color: 'inherit' }}
+              >
                 <div 
                   className={styles.channelAvatar} 
                   style={{ 

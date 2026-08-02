@@ -43,7 +43,7 @@ export default function StudioAnalytics() {
     }
   }, [isAuthenticated]);
 
-  if (loading) {
+  if (loading || isLoading) {
     return <div className={styles.container}>Loading analytics...</div>;
   }
 

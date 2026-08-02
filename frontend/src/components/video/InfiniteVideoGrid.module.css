@@ -74,7 +74,8 @@
 
 .heroWrapper {
   width: 100%;
-  max-width: 800px; /* Keep it constrained so it doesn't look stretched out too much */
+  max-width: 600px;
+  padding-top: 8px;
 }
 
 /* Row Scroll */
@@ -86,6 +87,7 @@
   display: flex;
   gap: 1.5rem;
   overflow-x: auto;
+  padding-top: 8px; /* Prevents top clip on hover */
   padding-bottom: 1rem;
   scroll-snap-type: x mandatory;
 }
@@ -118,6 +120,7 @@
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
   gap: 2rem 1.5rem;
+  padding-top: 8px; /* Prevents top clip on hover */
   padding-bottom: 40px;
   width: 100%;
 }

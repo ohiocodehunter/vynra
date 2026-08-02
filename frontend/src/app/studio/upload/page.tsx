@@ -8,7 +8,7 @@ import { Upload as UploadIcon, FileVideo, X, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 
 export default function StudioUpload() {
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated, user, isLoading } = useAuth();
   const router = useRouter();
   
   const [dragActive, setDragActive] = useState(false);
@@ -26,10 +26,10 @@ export default function StudioUpload() {
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    if (!isAuthenticated) {
+    if (!isLoading && !isAuthenticated) {
       router.push('/');
     }
-  }, [isAuthenticated, router]);
+  }, [isAuthenticated, isLoading, router]);
 
   // Polling for processing status
   useEffect(() => {
@@ -203,6 +203,13 @@ export default function StudioUpload() {
                 Go to Channel
               </button>
             </Link>
+            {processingStatus === 'published' && videoId && (
+              <Link href={`/watch?v=${videoId}`} style={{ textDecoration: 'none' }}>
+                <button className={styles.btnPrimary} style={{ background: 'var(--accent-primary)', color: 'white' }}>
+                  View Video
+                </button>
+              </Link>
+            )}
           </div>
         </div>
       </div>

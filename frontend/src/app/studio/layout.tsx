@@ -1,17 +1,15 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import { LayoutDashboard, PlaySquare, BarChart2, MessageSquare, Users, ListVideo, DollarSign, Settings, Send, Video as VideoIcon, Bell } from 'lucide-react';
 import styles from './layout.module.css';
 import Link from 'next/link';
-import UploadModal from '@/components/studio/UploadModal';
 
 export default function StudioLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const [showUpload, setShowUpload] = useState(false);
 
   return (
     <div className={styles.studioContainer}>
@@ -84,10 +82,12 @@ export default function StudioLayout({
             <input type="text" placeholder="Search across your channel" />
           </div>
           <div className={styles.topbarActions}>
-            <button className={styles.createBtn} onClick={() => setShowUpload(true)}>
-              <VideoIcon size={20} />
-              <span>Create</span>
-            </button>
+            <Link href="/studio/upload" style={{ textDecoration: 'none' }}>
+              <button className={styles.createBtn}>
+                <VideoIcon size={20} />
+                <span>Create</span>
+              </button>
+            </Link>
             <button className={styles.iconBtn}>
               <Bell size={20} />
             </button>
@@ -97,8 +97,6 @@ export default function StudioLayout({
           {children}
         </div>
       </main>
-
-      {showUpload && <UploadModal onClose={() => setShowUpload(false)} />}
     </div>
   );
 }
