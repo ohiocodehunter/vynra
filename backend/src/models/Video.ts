@@ -7,6 +7,7 @@ export interface IVideo extends Document {
   thumbnailUrl: string;
   creator: mongoose.Types.ObjectId;
   views: number;
+  viewsHistory: { date: string; count: number }[];
   likes: number;
   dislikes: number;
   likedBy: mongoose.Types.ObjectId[];
@@ -26,6 +27,10 @@ const VideoSchema: Schema = new Schema({
   thumbnailUrl: { type: String, default: '' },
   creator: { type: Schema.Types.ObjectId, ref: 'User', required: true },
   views: { type: Number, default: 0 },
+  viewsHistory: [{
+    date: { type: String }, // Format: YYYY-MM-DD
+    count: { type: Number, default: 0 }
+  }],
   likes: { type: Number, default: 0 },
   dislikes: { type: Number, default: 0 },
   likedBy: [{ type: Schema.Types.ObjectId, ref: 'User' }],

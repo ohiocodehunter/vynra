@@ -33,12 +33,45 @@ router.get('/stats', authMiddleware, async (req: AuthRequest, res: Response) => 
       .limit(5)
       .select('title views thumbnailUrl');
 
+    // Generate date-wise analytics for the past 30 days based on REAL view history
+    const viewsHistoryMap = new Map<string, number>();
+    const today = new Date();
+    
+    // Initialize the last 30 days with 0 views
+    for (let i = 29; i >= 0; i--) {
+      const d = new Date(today);
+      d.setDate(d.getDate() - i);
+      const dateString = d.toISOString().split('T')[0]; // YYYY-MM-DD
+      viewsHistoryMap.set(dateString, 0);
+    }
+
+    // Aggregate real views from videos
+    videos.forEach(video => {
+      if (video.viewsHistory && Array.isArray(video.viewsHistory)) {
+        video.viewsHistory.forEach(record => {
+          if (viewsHistoryMap.has(record.date)) {
+            viewsHistoryMap.set(record.date, viewsHistoryMap.get(record.date)! + record.count);
+          }
+        });
+      }
+    });
+
+    // Format for the frontend chart
+    const viewsHistory = Array.from(viewsHistoryMap.entries()).map(([dateStr, count]) => {
+      const d = new Date(dateStr);
+      return {
+        date: d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+        views: count
+      };
+    });
+
     res.json({
       totalViews,
       totalLikes,
       totalWatchTimeHours,
       totalVideos: videos.length,
-      topVideos
+      topVideos,
+      viewsHistory
     });
 
   } catch (error) {

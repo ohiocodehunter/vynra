@@ -262,15 +262,29 @@ router.get('/:id', async (req: Request, res: Response) => {
     if (!video) {
       return res.status(404).json({ error: 'Video not found' });
     }
+
+    // Don't increment views if creator is watching their own video
     const isPolling = req.query.polling === 'true';
-    if (!isPolling && video.status === 'published') {
+    if (!isPolling && video.status === 'published' && (!req.user || req.user.id !== video.creator._id.toString())) {
       // Increment views (naive implementation, should use debouncing/redis in prod)
       video.views += 1;
+      
+      const todayString = new Date().toISOString().split('T')[0];
+      const historyEntry = video.viewsHistory?.find(h => h.date === todayString);
+      
+      if (historyEntry) {
+        historyEntry.count += 1;
+      } else {
+        if (!video.viewsHistory) video.viewsHistory = [];
+        video.viewsHistory.push({ date: todayString, count: 1 });
+      }
+      
       await video.save();
     }
     
     res.json(video);
   } catch (error) {
+    console.error('Error fetching video:', error);
     res.status(500).json({ error: 'Server error fetching video' });
   }
 });
