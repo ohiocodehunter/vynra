@@ -1,0 +1,143 @@
+.pageTitle {
+  font-size: 1.5rem;
+  margin-bottom: 2rem;
+  font-weight: 700;
+}
+
+.tableContainer {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.table th {
+  background: rgba(0, 0, 0, 0.3);
+  padding: 1rem;
+  color: #a0a0b0;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.table td {
+  padding: 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  vertical-align: middle;
+}
+
+.table tr:last-child td {
+  border-bottom: none;
+}
+
+.table tr:hover {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.userCell {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.channelName {
+  font-weight: 600;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.verifiedBadge {
+  background: #ff3333;
+  color: #fff;
+  font-size: 0.6rem;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.username {
+  color: #a0a0b0;
+  font-size: 0.85rem;
+}
+
+.roleAdmin {
+  background: rgba(255, 170, 0, 0.1);
+  color: #ffaa00;
+  padding: 0.25rem 0.75rem;
+  border-radius: 99px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.roleUser {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ccc;
+  padding: 0.25rem 0.75rem;
+  border-radius: 99px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.actions button {
+  padding: 0.4rem 0.8rem;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s ease;
+}
+
+.btnSuccess {
+  background: rgba(0, 200, 83, 0.1);
+  color: #00e676;
+  border: 1px solid rgba(0, 200, 83, 0.3) !important;
+}
+
+.btnSuccess:hover {
+  background: rgba(0, 200, 83, 0.2);
+}
+
+.btnWarning {
+  background: rgba(255, 170, 0, 0.1);
+  color: #ffaa00;
+  border: 1px solid rgba(255, 170, 0, 0.3) !important;
+}
+
+.btnWarning:hover {
+  background: rgba(255, 170, 0, 0.2);
+}
+
+.btnDanger {
+  background: rgba(255, 51, 51, 0.1);
+  color: #ff4d4d;
+  border: 1px solid rgba(255, 51, 51, 0.3) !important;
+}
+
+.btnDanger:hover {
+  background: rgba(255, 51, 51, 0.2);
+}

@@ -40,3 +40,29 @@ export const optionalAuthMiddleware = (req: AuthRequest, res: Response, next: Ne
   
   next();
 };
+
+export const activeUserMiddleware = async (req: AuthRequest, res: Response, next: NextFunction) => {
+  if (!req.user || !req.user.id) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+  
+  try {
+    const User = require('../models/User').default;
+    const user = await User.findById(req.user.id);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    
+    if (user.accountStatus === 'suspended') {
+      return res.status(403).json({ error: 'Account suspended. You cannot access this feature.' });
+    }
+    
+    if (user.accountStatus === 'banned') {
+      return res.status(403).json({ error: 'Account permanently banned. You cannot access this feature.' });
+    }
+    
+    next();
+  } catch (error) {
+    res.status(500).json({ error: 'Server error verifying account status' });
+  }
+};

@@ -1,8 +1,10 @@
 import { Router, Response } from 'express';
-import { authMiddleware, AuthRequest } from '../middlewares/authMiddleware';
+import { authMiddleware, activeUserMiddleware, AuthRequest } from '../middlewares/authMiddleware';
 import Video from '../models/Video';
 
 const router = Router();
+router.use(authMiddleware);
+router.use(activeUserMiddleware);
 
 // Get studio stats
 router.get('/stats', authMiddleware, async (req: AuthRequest, res: Response) => {

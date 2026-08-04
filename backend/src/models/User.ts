@@ -19,6 +19,9 @@ export interface IUser extends Document {
   history: { video: mongoose.Types.ObjectId; watchedAt: Date }[];
   watchLater: mongoose.Types.ObjectId[];
   role: 'user' | 'admin';
+  isVerified: boolean;
+  accountStatus: 'active' | 'suspended' | 'banned';
+  adminPasscodeHash?: string;
   usernameLastChanged?: Date;
   createdAt: Date;
   updatedAt: Date;
@@ -46,6 +49,9 @@ const UserSchema: Schema = new Schema({
   }],
   watchLater: [{ type: Schema.Types.ObjectId, ref: 'Video' }],
   role: { type: String, enum: ['user', 'admin'], default: 'user' },
+  isVerified: { type: Boolean, default: false },
+  accountStatus: { type: String, enum: ['active', 'suspended', 'banned'], default: 'active' },
+  adminPasscodeHash: { type: String },
   usernameLastChanged: { type: Date }
 }, { timestamps: true });
 

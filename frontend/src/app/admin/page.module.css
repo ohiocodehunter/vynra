@@ -1,232 +1,121 @@
-.adminDashboard {
+.container {
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  color: #fff;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 3rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.logo {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  box-shadow: 0 0 15px rgba(255, 0, 0, 0.3);
+}
+
+.header h1 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+
+.logoutBtn {
+  background: rgba(255, 51, 51, 0.1);
+  color: #ff4d4d;
+  border: 1px solid rgba(255, 51, 51, 0.3);
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.logoutBtn:hover {
+  background: rgba(255, 51, 51, 0.2);
+}
+
+.main {
   display: flex;
   flex-direction: column;
-  gap: 24px;
-  max-width: 1400px;
-  margin: 0 auto;
+  gap: 2rem;
+}
+
+.welcomeBanner {
+  background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 2rem;
+  border-radius: 16px;
+}
+
+.welcomeBanner h2 {
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.healthy {
+  background: rgba(0, 200, 83, 0.1);
+  color: #00e676;
+  font-size: 0.8rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 99px;
+  border: 1px solid rgba(0, 200, 83, 0.2);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.welcomeBanner p {
+  color: #a0a0b0;
 }
 
 .statsGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 24px;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
 }
 
 .statCard {
-  background-color: var(--bg-secondary);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-lg);
-  padding: 24px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  position: relative;
-  overflow: hidden;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 2rem;
+  border-radius: 16px;
+  text-align: center;
+  transition: transform 0.2s ease;
 }
 
-.statTitle {
-  font-size: 0.9rem;
-  color: var(--text-secondary);
-  font-weight: 500;
+.statCard:hover {
+  transform: translateY(-5px);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.statCard h3 {
+  font-size: 1rem;
+  color: #a0a0b0;
+  margin-bottom: 1rem;
 }
 
 .statValue {
-  font-size: 2rem;
+  font-size: 3rem;
   font-weight: 700;
-  color: var(--text-primary);
-  font-family: var(--font-outfit);
-}
-
-.statChange {
-  font-size: 0.85rem;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  font-weight: 600;
-}
-
-.positive {
-  color: #34d399; /* Emerald */
-}
-
-.negative {
-  color: #f87171; /* Red */
-}
-
-.mainGrid {
-  display: grid;
-  grid-template-columns: 2fr 1fr;
-  gap: 24px;
-}
-
-.panelTitle {
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: var(--text-primary);
-}
-
-.usersPanel, .reportsPanel, .storagePanel {
-  background-color: var(--bg-secondary);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-lg);
-  padding: 24px;
-}
-
-.panelHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-}
-
-.viewAllBtn {
-  color: var(--accent-primary);
-  font-size: 0.85rem;
-  font-weight: 500;
-}
-
-.usersTable {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.usersTable th {
-  text-align: left;
-  padding: 12px 16px;
-  color: var(--text-muted);
-  font-size: 0.8rem;
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  border-bottom: 1px solid var(--border-color);
-}
-
-.usersTable td {
-  padding: 16px;
-  color: var(--text-secondary);
-  font-size: 0.9rem;
-  border-bottom: 1px solid rgba(255,255,255,0.02);
-}
-
-.usersTable tr:last-child td {
-  border-bottom: none;
-}
-
-.userCell {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  color: var(--text-primary);
-  font-weight: 500;
-}
-
-.cellAvatar {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background-color: #6366f1;
-}
-
-.sideGrid {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-}
-
-.donutChartContainer {
-  display: flex;
-  justify-content: center;
-  padding: 24px 0;
-}
-
-.donutPlaceholder {
-  width: 160px;
-  height: 160px;
-  border-radius: 50%;
-  background: conic-gradient(#fca5a5 0% 37%, #60a5fa 37% 83%, #34d399 83% 100%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.donutInner {
-  width: 120px;
-  height: 120px;
-  border-radius: 50%;
-  background-color: var(--bg-secondary);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-}
-
-.donutValue {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: var(--text-primary);
-}
-
-.donutLabel {
-  font-size: 0.75rem;
-  color: var(--text-muted);
-}
-
-.legendList {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.legendItem {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.legendColor {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-}
-
-.legendName {
-  flex-grow: 1;
-  color: var(--text-secondary);
-  font-size: 0.85rem;
-}
-
-.legendValue {
-  color: var(--text-primary);
-  font-size: 0.85rem;
-  font-weight: 600;
-}
-
-.storageHeader {
-  margin-bottom: 16px;
-}
-
-.storageValue {
-  font-size: 0.85rem;
-  color: var(--text-secondary);
-  margin-top: 8px;
-}
-
-.storageBarContainer {
-  width: 100%;
-  height: 8px;
-  background-color: rgba(255, 255, 255, 0.1);
-  border-radius: 4px;
-  overflow: hidden;
-}
-
-.storageBar {
-  height: 100%;
-  background-color: var(--accent-primary);
-  border-radius: 4px;
-}
-
-@media (max-width: 1024px) {
-  .mainGrid {
-    grid-template-columns: 1fr;
-  }
+  color: #fff;
+  background: linear-gradient(135deg, #fff 0%, #a0a0b0 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }

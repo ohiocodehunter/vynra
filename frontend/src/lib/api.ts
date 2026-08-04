@@ -12,12 +12,32 @@ api.interceptors.request.use(
   (config) => {
     // In a real app, you'd get this from a state manager or cookie
     const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
-    if (token && config.headers) {
+    
+    // Only set the token if Authorization is not already explicitly set
+    if (token && config.headers && !config.headers.Authorization) {
       config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
   },
   (error) => Promise.reject(error)
+);
+
+// Add a response interceptor to handle global errors like 403 for Admin
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    // If the request was to an admin endpoint and we got a 401 or 403
+    if (
+      typeof window !== 'undefined' &&
+      error.response &&
+      (error.response.status === 401 || error.response.status === 403) &&
+      error.config?.url?.includes('/admin')
+    ) {
+      localStorage.removeItem('adminToken');
+      window.location.href = '/admin/login';
+    }
+    return Promise.reject(error);
+  }
 );
 
 export interface User {
@@ -206,6 +226,48 @@ export const notificationService = {
   markAllAsRead: async (): Promise<{ success: boolean }> => {
     const response = await api.put('/notifications/read-all');
     return response.data;
+  }
+};
+
+export const adminService = {
+  login: async (credentials: any) => {
+    const res = await api.post('/admin/login', credentials);
+    return res.data;
+  },
+  getStats: async () => {
+    const adminToken = localStorage.getItem('adminToken');
+    const res = await api.get('/admin/stats', { headers: { Authorization: `Bearer ${adminToken}` } });
+    return res.data;
+  },
+  getUsers: async () => {
+    const adminToken = localStorage.getItem('adminToken');
+    const res = await api.get('/admin/users', { headers: { Authorization: `Bearer ${adminToken}` } });
+    return res.data;
+  },
+  updateUser: async (id: string, data: any) => {
+    const adminToken = localStorage.getItem('adminToken');
+    const res = await api.patch(`/admin/users/${id}`, data, { headers: { Authorization: `Bearer ${adminToken}` } });
+    return res.data;
+  },
+  deleteUser: async (id: string) => {
+    const adminToken = localStorage.getItem('adminToken');
+    const res = await api.delete(`/admin/users/${id}`, { headers: { Authorization: `Bearer ${adminToken}` } });
+    return res.data;
+  },
+  getVideos: async () => {
+    const adminToken = localStorage.getItem('adminToken');
+    const res = await api.get('/admin/videos', { headers: { Authorization: `Bearer ${adminToken}` } });
+    return res.data;
+  },
+  updateVideo: async (id: string, data: any) => {
+    const adminToken = localStorage.getItem('adminToken');
+    const res = await api.patch(`/admin/videos/${id}`, data, { headers: { Authorization: `Bearer ${adminToken}` } });
+    return res.data;
+  },
+  deleteVideo: async (id: string) => {
+    const adminToken = localStorage.getItem('adminToken');
+    const res = await api.delete(`/admin/videos/${id}`, { headers: { Authorization: `Bearer ${adminToken}` } });
+    return res.data;
   }
 };
 

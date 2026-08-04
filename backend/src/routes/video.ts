@@ -5,7 +5,7 @@ import fs from 'fs';
 import { v4 as uuidv4 } from 'uuid';
 import Video from '../models/Video';
 import User from '../models/User';
-import { authMiddleware, optionalAuthMiddleware, AuthRequest } from '../middlewares/authMiddleware';
+import { authMiddleware, optionalAuthMiddleware, activeUserMiddleware, AuthRequest } from '../middlewares/authMiddleware';
 import { compressVideo, generateThumbnail, getVideoDuration } from '../services/ffmpeg';
 import { uploadFileToR2 } from '../services/r2';
 
@@ -29,7 +29,7 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 // Upload a new video
-router.post('/upload', authMiddleware, upload.single('video'), async (req: AuthRequest, res: Response) => {
+router.post('/upload', [authMiddleware, activeUserMiddleware], upload.single('video'), async (req: AuthRequest, res: Response) => {
   try {
     if (!req.file) {
       return res.status(400).json({ error: 'No video file provided' });
@@ -256,7 +256,7 @@ router.get('/subscriptions', authMiddleware, async (req: AuthRequest, res: Respo
 });
 
 // Get a single video by ID
-router.get('/:id', async (req: Request, res: Response) => {
+router.get('/:id', optionalAuthMiddleware, async (req: AuthRequest, res: Response) => {
   try {
     const video = await Video.findById(req.params.id).populate('creator', 'username channelName avatarUrl subscribersCount');
     if (!video) {
@@ -358,36 +358,37 @@ router.post('/:id/dislike', authMiddleware, async (req: AuthRequest, res: Respon
   }
 });
 
-// Update a video (Title, Description, Tags, Visibility)
-router.put('/:id', authMiddleware, async (req: AuthRequest, res: Response) => {
+// Update video details (owner only)
+router.put('/:id', [authMiddleware, activeUserMiddleware], async (req: AuthRequest, res: Response) => {
   try {
-    if (!req.user) return res.status(401).json({ error: 'Unauthorized' });
-
+    const { title, description, visibility, category, tags } = req.body;
+    
     const video = await Video.findById(req.params.id);
-    if (!video) return res.status(404).json({ error: 'Video not found' });
-
-    // Check if the user is the creator
-    if (video.creator.toString() !== req.user.id) {
-      return res.status(403).json({ error: 'Not authorized to edit this video' });
+    if (!video) {
+      return res.status(404).json({ error: 'Video not found' });
     }
-
-    const { title, description, tags, visibility } = req.body;
-
-    if (title !== undefined) video.title = title;
+    
+    if (video.creator.toString() !== req.user?.id) {
+      return res.status(403).json({ error: 'Not authorized to update this video' });
+    }
+    
+    if (title) video.title = title;
     if (description !== undefined) video.description = description;
-    if (tags !== undefined) video.tags = Array.isArray(tags) ? tags : JSON.parse(tags);
-    if (visibility !== undefined) video.visibility = visibility;
-
+    if (visibility) video.visibility = visibility;
+    if (category) video.category = category;
+    if (tags) video.tags = tags;
+    
     await video.save();
+    
     res.json(video);
   } catch (error) {
     console.error('Error updating video:', error);
-    res.status(500).json({ error: 'Server error updating video' });
+    res.status(500).json({ error: 'Server error' });
   }
 });
 
-// Delete a video
-router.delete('/:id', authMiddleware, async (req: AuthRequest, res: Response) => {
+// Delete video (owner only)
+router.delete('/:id', [authMiddleware, activeUserMiddleware], async (req: AuthRequest, res: Response) => {
   try {
     if (!req.user) return res.status(401).json({ error: 'Unauthorized' });
 

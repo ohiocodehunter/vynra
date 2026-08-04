@@ -13,6 +13,7 @@ import playlistRoutes from './routes/playlists';
 import commentRoutes from './routes/comments';
 import studioRoutes from './routes/studio';
 import notificationRoutes from './routes/notifications';
+import adminRoutes from './routes/admin';
 
 dotenv.config();
 
@@ -40,12 +41,12 @@ app.use('/uploads', express.static(path.join(__dirname, '../../uploads')));
 
 // Routes
 app.use('/api/auth', authRoutes);
-app.use('/api/videos', videoRoutes);
 app.use('/api/users', userRoutes);
-app.use('/api/playlists', playlistRoutes);
+app.use('/api/videos', videoRoutes);
 app.use('/api/comments', commentRoutes);
+app.use('/api/playlists', playlistRoutes);
 app.use('/api/studio', studioRoutes);
-app.use('/api/notifications', notificationRoutes);
+app.use('/api/admin', adminRoutes);
 
 app.get('/health', (req, res) => {
   res.status(200).json({ status: 'ok', message: 'Vynra Backend is running smoothly.' });
@@ -74,3 +75,4 @@ mongoose.connect(MONGO_URI)
   .catch((err) => {
     console.error('MongoDB connection error:', err);
   });
+app.use('/api/notifications', notificationRoutes);

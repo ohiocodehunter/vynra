@@ -15,6 +15,7 @@ export interface IVideo extends Document {
   duration: number; // in seconds
   status: 'processing' | 'published' | 'private' | 'failed';
   visibility: 'public' | 'private' | 'unlisted';
+  category?: string;
   tags: string[];
   createdAt: Date;
   updatedAt: Date;

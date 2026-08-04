@@ -26,6 +26,26 @@ export default function StudioLayout({
     }
   }, [isLoading, isAuthenticated, router]);
 
+  if (user?.accountStatus === 'suspended') {
+    return (
+      <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', backgroundColor: '#0a0a0a', color: '#fff', padding: '2rem', textAlign: 'center' }}>
+        <h1 style={{ color: '#ffaa00', marginBottom: '1rem' }}>Account Suspended</h1>
+        <p style={{ maxWidth: 500, lineHeight: 1.5 }}>Your account has been temporarily suspended due to a violation of our terms of service. You cannot access the Creator Studio, but you may still watch videos.</p>
+        <Link href="/" style={{ marginTop: '2rem', padding: '0.75rem 1.5rem', background: '#333', color: '#fff', borderRadius: 8, textDecoration: 'none' }}>Return to Homepage</Link>
+      </div>
+    );
+  }
+
+  if (user?.accountStatus === 'banned') {
+    return (
+      <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', backgroundColor: '#0a0a0a', color: '#fff', padding: '2rem', textAlign: 'center' }}>
+        <h1 style={{ color: '#ff3333', marginBottom: '1rem' }}>Account Banned</h1>
+        <p style={{ maxWidth: 500, lineHeight: 1.5 }}>Your account has been permanently banned for severe violations of our terms of service. You can no longer access the Creator Studio.</p>
+        <Link href="/" style={{ marginTop: '2rem', padding: '0.75rem 1.5rem', background: '#333', color: '#fff', borderRadius: 8, textDecoration: 'none' }}>Return to Homepage</Link>
+      </div>
+    );
+  }
+
   if (isLoading || !isAuthenticated) {
     return null; // or a loading spinner
   }
