@@ -69,8 +69,8 @@ const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/vynra';
 mongoose.connect(MONGO_URI)
   .then(() => {
     console.log('MongoDB connected successfully');
-    server.listen(PORT, () => {
-      console.log(`Server running on port ${PORT}`);
+    server.listen(Number(PORT), '0.0.0.0', () => {
+      console.log(`Server running on port ${PORT} (IPv4)`);
     });
   })
   .catch((err) => {

@@ -12,7 +12,8 @@ export const compressVideo = (inputPath: string, outputPath: string): Promise<st
         '-pix_fmt yuv420p',// Pixel format for broad mobile compatibility
         '-profile:v main', // Main profile for better mobile support
         '-c:a aac',        // Audio codec
-        '-b:a 128k'        // Audio bitrate
+        '-b:a 128k',       // Audio bitrate
+        '-movflags +faststart' // Move moov atom to start for fast playback and seeking
       ])
       .on('end', () => {
         resolve(outputPath);
@@ -51,14 +52,34 @@ export const generateThumbnail = (inputPath: string, outputFolder: string, filen
   });
 };
 
-export const getVideoDuration = (inputPath: string): Promise<number> => {
+export const getVideoMetadata = (inputPath: string): Promise<{ duration: number, width: number, height: number }> => {
   return new Promise((resolve, reject) => {
     ffmpeg.ffprobe(inputPath, (err, metadata) => {
       if (err) {
         reject(err);
       } else {
         const duration = metadata.format.duration || 0;
-        resolve(duration);
+        let width = 0;
+        let height = 0;
+        
+        const videoStream = metadata.streams.find(s => s.codec_type === 'video');
+        if (videoStream) {
+          width = videoStream.width || 0;
+          height = videoStream.height || 0;
+          
+          // Handle rotation metadata (if video is rotated 90 or 270 degrees, swap width and height)
+          const rotation = videoStream.rotation || 
+                           (videoStream.tags && (videoStream.tags as any).rotate) || 
+                           0;
+          
+          if (Math.abs(Number(rotation)) === 90 || Math.abs(Number(rotation)) === 270) {
+            const temp = width;
+            width = height;
+            height = temp;
+          }
+        }
+        
+        resolve({ duration, width, height });
       }
     });
   });

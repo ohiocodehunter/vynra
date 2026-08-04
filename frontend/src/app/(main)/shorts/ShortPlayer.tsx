@@ -96,12 +96,12 @@ export default function ShortPlayer({ short }: ShortPlayerProps) {
           className={styles.videoPlayer}
           loop
           playsInline
-          preload="metadata"
+          preload="none"
           poster={short.thumbnailUrl}
           onPlay={(e) => {
             const token = localStorage.getItem('token');
             if (token) {
-              fetch(`${(typeof window !== 'undefined' ? '/api' : (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api'))}/users/history/${short._id}`, {
+              fetch(`${(typeof window !== 'undefined' ? '/api' : (process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5001/api'))}/users/history/${short._id}`, {
                 method: 'POST',
                 headers: { 'Authorization': `Bearer ${token}` }
               }).catch(console.error);

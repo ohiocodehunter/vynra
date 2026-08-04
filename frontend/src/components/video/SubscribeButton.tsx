@@ -72,7 +72,7 @@ export default function SubscribeButton({
   }
 
   // If the user is viewing their own channel, don't show the subscribe button
-  if (currentUser.id === channelId) {
+  if (currentUser._id === channelId || currentUser.id === channelId) {
     return null;
   }
 

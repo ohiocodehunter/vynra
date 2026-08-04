@@ -9,7 +9,7 @@ import styles from "./VideoCard.module.css";
 
 interface VideoCardProps {
   video: Video;
-  layout?: "vertical" | "horizontal";
+  layout?: "vertical" | "horizontal" | "shorts";
 }
 
 function formatDuration(seconds: number) {
@@ -90,7 +90,7 @@ export default function VideoCard({
       onClick={handleClick}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
-      className={`${styles.videoCard} ${layout === "horizontal" ? styles.horizontal : ""}`}
+      className={`${styles.videoCard} ${layout === "horizontal" ? styles.horizontal : ""} ${layout === "shorts" ? styles.shorts : ""}`}
     >
       <div className={styles.thumbnailContainer}>
         <div

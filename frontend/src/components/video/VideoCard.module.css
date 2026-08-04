@@ -291,3 +291,13 @@
     font-size: 0.8rem;
   }
 }
+
+.shorts.videoCard .thumbnailContainer {
+  aspect-ratio: 9 / 16;
+}
+
+.shorts.videoCard .videoTitle {
+  font-size: 0.95rem;
+  line-height: 1.3;
+}
+

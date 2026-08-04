@@ -1,4 +1,4 @@
-import { Router, Request, Response } from 'express';
+import { Router, Request, Response, NextFunction } from 'express';
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
@@ -6,7 +6,7 @@ import { v4 as uuidv4 } from 'uuid';
 import Video from '../models/Video';
 import User from '../models/User';
 import { authMiddleware, optionalAuthMiddleware, activeUserMiddleware, AuthRequest } from '../middlewares/authMiddleware';
-import { compressVideo, generateThumbnail, getVideoDuration } from '../services/ffmpeg';
+import { compressVideo, generateThumbnail, getVideoMetadata } from '../services/ffmpeg';
 import { uploadFileToR2 } from '../services/r2';
 
 const router = Router();
@@ -27,9 +27,21 @@ const storage = multer.diskStorage({
 });
 
 const upload = multer({ storage });
+const uploadSingle = upload.single('video');
 
 // Upload a new video
-router.post('/upload', [authMiddleware, activeUserMiddleware], upload.single('video'), async (req: AuthRequest, res: Response) => {
+router.post('/upload', [authMiddleware, activeUserMiddleware], (req: AuthRequest, res: Response, next: NextFunction) => {
+  uploadSingle(req, res, (err) => {
+    if (err) {
+      if (err.message === 'Request aborted') {
+        console.warn('Upload aborted by client');
+        return res.status(400).json({ error: 'Upload aborted by client' });
+      }
+      return res.status(500).json({ error: 'Upload error', details: err.message });
+    }
+    next();
+  });
+}, async (req: AuthRequest, res: Response) => {
   try {
     if (!req.file) {
       return res.status(400).json({ error: 'No video file provided' });
@@ -71,9 +83,16 @@ router.post('/upload', [authMiddleware, activeUserMiddleware], upload.single('vi
     // --- Background Processing ---
     (async () => {
       try {
-        // 1. Get Duration
-        const duration = await getVideoDuration(inputPath);
-        video.duration = duration;
+        // 1. Get Duration and Metadata
+        const metadata = await getVideoMetadata(inputPath);
+        video.duration = metadata.duration;
+
+        // Auto-tag as 'shorts' if vertical video (width < height) and under 60 seconds
+        if (metadata.width > 0 && metadata.height > 0 && metadata.width < metadata.height) {
+          if (!video.tags.includes('shorts')) {
+            video.tags.push('shorts');
+          }
+        }
 
         // 2. Compress Video
         await compressVideo(inputPath, compressedVideoPath);
@@ -214,7 +233,7 @@ router.get('/', optionalAuthMiddleware, async (req: AuthRequest, res: Response) 
     res.json(allVideos);
   } catch (error) {
     console.error('Error fetching videos:', error);
-    res.status(500).json({ error: 'Server error fetching videos' });
+    res.status(500).json({ error: 'Server error fetching videos', details: error.message });
   }
 });
 
@@ -292,33 +311,49 @@ router.get('/:id', optionalAuthMiddleware, async (req: AuthRequest, res: Respons
 router.post('/:id/like', authMiddleware, async (req: AuthRequest, res: Response) => {
   try {
     if (!req.user) return res.status(401).json({ error: 'Unauthorized' });
-    
-    const video = await Video.findById(req.params.id);
-    if (!video) return res.status(404).json({ error: 'Video not found' });
-
     const userId = req.user.id;
-    const hasLiked = video.likedBy.some(id => id.toString() === userId);
-    const hasDisliked = video.dislikedBy.some(id => id.toString() === userId);
 
-    if (hasLiked) {
-      // Remove like
-      video.likedBy = video.likedBy.filter(id => id.toString() !== userId);
-      video.likes = Math.max(0, video.likes - 1);
-    } else {
-      // Add like
-      video.likedBy.push(userId as any);
-      video.likes += 1;
+    // Try to remove like first (if it was already liked)
+    let video = await Video.findOneAndUpdate(
+      { _id: req.params.id, likedBy: userId },
+      { $pull: { likedBy: userId }, $inc: { likes: -1 } },
+      { new: true }
+    );
+
+    if (!video) {
+      // It wasn't liked, so add like
+      video = await Video.findOneAndUpdate(
+        { _id: req.params.id, likedBy: { $ne: userId } },
+        { $push: { likedBy: userId }, $inc: { likes: 1 } },
+        { new: true }
+      );
       
-      // Remove dislike if exists
-      if (hasDisliked) {
-        video.dislikedBy = video.dislikedBy.filter(id => id.toString() !== userId);
-        video.dislikes = Math.max(0, video.dislikes - 1);
+      if (video) {
+        // Also check and remove from dislikedBy if present
+        const updatedDislike = await Video.findOneAndUpdate(
+          { _id: req.params.id, dislikedBy: userId },
+          { $pull: { dislikedBy: userId }, $inc: { dislikes: -1 } },
+          { new: true }
+        );
+        if (updatedDislike) video = updatedDislike;
       }
     }
 
-    await video.save();
+    if (!video) return res.status(404).json({ error: 'Video not found' });
+
+    // Emit real-time update
+    const io = req.app.get('io');
+    if (io) {
+      io.emit('videoInteractionUpdated', { 
+        videoId: video._id, 
+        likes: video.likes, 
+        dislikes: video.dislikes 
+      });
+    }
+
     res.json(video);
   } catch (error) {
+    console.error('Like error:', error);
     res.status(500).json({ error: 'Server error liking video' });
   }
 });
@@ -327,33 +362,49 @@ router.post('/:id/like', authMiddleware, async (req: AuthRequest, res: Response)
 router.post('/:id/dislike', authMiddleware, async (req: AuthRequest, res: Response) => {
   try {
     if (!req.user) return res.status(401).json({ error: 'Unauthorized' });
-    
-    const video = await Video.findById(req.params.id);
-    if (!video) return res.status(404).json({ error: 'Video not found' });
-
     const userId = req.user.id;
-    const hasLiked = video.likedBy.some(id => id.toString() === userId);
-    const hasDisliked = video.dislikedBy.some(id => id.toString() === userId);
 
-    if (hasDisliked) {
-      // Remove dislike
-      video.dislikedBy = video.dislikedBy.filter(id => id.toString() !== userId);
-      video.dislikes = Math.max(0, video.dislikes - 1);
-    } else {
-      // Add dislike
-      video.dislikedBy.push(userId as any);
-      video.dislikes += 1;
+    // Try to remove dislike first
+    let video = await Video.findOneAndUpdate(
+      { _id: req.params.id, dislikedBy: userId },
+      { $pull: { dislikedBy: userId }, $inc: { dislikes: -1 } },
+      { new: true }
+    );
+
+    if (!video) {
+      // It wasn't disliked, so add dislike
+      video = await Video.findOneAndUpdate(
+        { _id: req.params.id, dislikedBy: { $ne: userId } },
+        { $push: { dislikedBy: userId }, $inc: { dislikes: 1 } },
+        { new: true }
+      );
       
-      // Remove like if exists
-      if (hasLiked) {
-        video.likedBy = video.likedBy.filter(id => id.toString() !== userId);
-        video.likes = Math.max(0, video.likes - 1);
+      if (video) {
+        // Remove from likedBy if present
+        const updatedLike = await Video.findOneAndUpdate(
+          { _id: req.params.id, likedBy: userId },
+          { $pull: { likedBy: userId }, $inc: { likes: -1 } },
+          { new: true }
+        );
+        if (updatedLike) video = updatedLike;
       }
     }
 
-    await video.save();
+    if (!video) return res.status(404).json({ error: 'Video not found' });
+
+    // Emit real-time update
+    const io = req.app.get('io');
+    if (io) {
+      io.emit('videoInteractionUpdated', { 
+        videoId: video._id, 
+        likes: video.likes, 
+        dislikes: video.dislikes 
+      });
+    }
+
     res.json(video);
   } catch (error) {
+    console.error('Dislike error:', error);
     res.status(500).json({ error: 'Server error disliking video' });
   }
 });

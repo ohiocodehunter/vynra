@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, StyleSheet, FlatList, Dimensions, Text, ActivityIndicator, Image, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, FlatList, Dimensions, Text, ActivityIndicator, Image, TouchableOpacity, TouchableWithoutFeedback, Share, Modal, TextInput, KeyboardAvoidingView, Platform } from 'react-native';
+import { useAuth } from '../context/AuthContext';
+import { io } from 'socket.io-client';
 import { useVideoPlayer, VideoView } from 'expo-video';
 import apiClient from '../api/client';
 import { Video } from '../types';
@@ -11,9 +13,180 @@ const SHORTS_HEIGHT = WINDOW_HEIGHT - 50;
 
 import { ThumbsUp, MessageSquare, Share2, MoreVertical } from 'lucide-react-native';
 
+function CommentsModal({ videoId, visible, onClose }: { videoId: string, visible: boolean, onClose: () => void }) {
+  const [comments, setComments] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [text, setText] = useState('');
+  const { user } = useAuth();
+
+  useEffect(() => {
+    if (visible) {
+      fetchComments();
+    }
+  }, [visible]);
+
+  const fetchComments = async () => {
+    try {
+      const res = await apiClient.get(`/comments/${videoId}`);
+      setComments(res.data);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const postComment = async () => {
+    if (!text.trim()) return;
+    try {
+      const res = await apiClient.post(`/comments/${videoId}`, { text });
+      setComments([res.data, ...comments]);
+      setText('');
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  return (
+    <Modal visible={visible} animationType="slide" transparent>
+      <View style={styles.modalOverlay}>
+        <KeyboardAvoidingView 
+          style={styles.modalContent} 
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        >
+          <View style={styles.modalHeader}>
+            <Text style={styles.modalTitle}>Comments</Text>
+            <TouchableOpacity onPress={onClose}><Text style={styles.closeText}>Close</Text></TouchableOpacity>
+          </View>
+          {loading ? <ActivityIndicator style={{marginTop: 20}} color="#fff" /> : (
+            <FlatList
+              data={comments}
+              keyExtractor={item => item._id}
+              renderItem={({item}) => (
+                <View style={styles.commentItem}>
+                  <Text style={styles.commentAuthor}>@{item.author?.username}</Text>
+                  <Text style={styles.commentText}>{item.text}</Text>
+                </View>
+              )}
+              ListEmptyComponent={<Text style={{color: '#888', padding: 16}}>No comments yet.</Text>}
+            />
+          )}
+          {user ? (
+            <View style={styles.commentInputRow}>
+              <TextInput
+                style={styles.commentInput}
+                placeholder="Add a comment..."
+                placeholderTextColor="#888"
+                value={text}
+                onChangeText={setText}
+              />
+              <TouchableOpacity onPress={postComment} style={styles.postBtn}>
+                <Text style={styles.postBtnText}>Post</Text>
+              </TouchableOpacity>
+            </View>
+          ) : (
+            <Text style={{color: '#888', padding: 16, textAlign: 'center'}}>Log in to comment</Text>
+          )}
+        </KeyboardAvoidingView>
+      </View>
+    </Modal>
+  );
+}
+
+function SaveToPlaylistModal({ videoId, visible, onClose }: { videoId: string, visible: boolean, onClose: () => void }) {
+  const [playlists, setPlaylists] = useState<any[]>([]);
+  const { user } = useAuth();
+
+  useEffect(() => {
+    if (visible && user) {
+      fetchPlaylists();
+    }
+  }, [visible, user]);
+
+  const fetchPlaylists = async () => {
+    try {
+      const res = await apiClient.get('/playlists');
+      setPlaylists(res.data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const toggleSave = async (playlist: any) => {
+    try {
+      const isSaved = playlist.videos.some((v: any) => v._id === videoId || v === videoId);
+      if (isSaved) {
+        await apiClient.post(`/playlists/${playlist._id}/remove`, { videoId });
+      } else {
+        await apiClient.post(`/playlists/${playlist._id}/add`, { videoId });
+      }
+      fetchPlaylists();
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  return (
+    <Modal visible={visible} animationType="slide" transparent>
+      <View style={styles.modalOverlay}>
+        <View style={styles.modalContent}>
+          <View style={styles.modalHeader}>
+            <Text style={styles.modalTitle}>Save to Playlist</Text>
+            <TouchableOpacity onPress={onClose}><Text style={styles.closeText}>Close</Text></TouchableOpacity>
+          </View>
+          {!user ? <Text style={{color: '#888', padding: 16, textAlign: 'center'}}>Log in to save</Text> : (
+            <FlatList
+              data={playlists}
+              keyExtractor={item => item._id}
+              renderItem={({item}) => {
+                const isSaved = item.videos.some((v: any) => v._id === videoId || v === videoId);
+                return (
+                  <TouchableOpacity style={styles.playlistItem} onPress={() => toggleSave(item)}>
+                    <Text style={styles.playlistName}>{item.name}</Text>
+                    <Text style={styles.playlistStatus}>{isSaved ? 'Saved' : 'Save'}</Text>
+                  </TouchableOpacity>
+                );
+              }}
+              ListEmptyComponent={<Text style={{color: '#888', padding: 16}}>No playlists found.</Text>}
+            />
+          )}
+        </View>
+      </View>
+    </Modal>
+  );
+}
+
 function ShortVideoItem({ item, isActive, height }: { item: Video, isActive: boolean, height: number }) {
+  const { user } = useAuth();
   const [likes, setLikes] = useState(item.likes || 0);
   const [userAction, setUserAction] = useState<'like' | 'dislike' | null>(null);
+  const [showComments, setShowComments] = useState(false);
+  const [showPlaylist, setShowPlaylist] = useState(false);
+  const [isLiking, setIsLiking] = useState(false);
+
+  useEffect(() => {
+    const videoItem = item as any;
+    if (user && videoItem.likedBy && videoItem.likedBy.includes(user._id)) {
+      setUserAction('like');
+    }
+  }, [user, item]);
+
+  useEffect(() => {
+    const socketUrl = apiClient.defaults.baseURL?.replace('/api', '') || 'http://10.252.145.66:5001';
+    const socket = io(socketUrl);
+    
+    socket.on('videoInteractionUpdated', (data: any) => {
+      if (data.videoId === item._id) {
+        setLikes(data.likes);
+        // We don't change userAction here because we don't know the remote user's ID
+        // The local user's own action is already updated via handleLike's response
+      }
+    });
+
+    return () => {
+      socket.disconnect();
+    };
+  }, [item._id]);
 
   const player = useVideoPlayer(item.url, player => {
     player.loop = true;
@@ -34,28 +207,66 @@ function ShortVideoItem({ item, isActive, height }: { item: Video, isActive: boo
   }, [isActive, player]);
 
   const handleLike = async () => {
+    if (!user || isLiking) return;
+    setIsLiking(true);
+    
+    const prevAction = userAction;
+    const prevLikes = likes;
+    
+    // Optimistic Update
+    const newAction = prevAction === 'like' ? null : 'like';
+    setUserAction(newAction);
+    setLikes(prev => newAction === 'like' ? prev + 1 : prev - 1);
+    
     try {
-      await apiClient.post(`/videos/${item._id}/like`);
-      const action = userAction === 'like' ? null : 'like';
-      setUserAction(action);
-      if (action === 'like') {
-        setLikes(prev => prev + 1);
-      } else if (userAction === 'like') {
-        setLikes(prev => prev - 1);
+      const res = await apiClient.post(`/videos/${item._id}/like`);
+      const updatedVideo = res.data;
+      setLikes(updatedVideo.likes);
+      if (updatedVideo.likedBy.includes(user._id)) {
+        setUserAction('like');
+      } else {
+        setUserAction(null);
       }
     } catch (error) {
       console.error('Failed to like video:', error);
+      // Revert on failure
+      setUserAction(prevAction);
+      setLikes(prevLikes);
+    } finally {
+      setIsLiking(false);
+    }
+  };
+
+  const handleShare = async () => {
+    try {
+      await Share.share({
+        message: `Check out this short: https://vynra.com/watch/${item._id}`,
+      });
+    } catch (error) {
+      console.error('Error sharing:', error);
+    }
+  };
+
+  const togglePlayPause = () => {
+    if (player.playing) {
+      player.pause();
+    } else {
+      player.play();
     }
   };
 
   return (
     <View style={[styles.shortContainer, { height }]}>
-      <VideoView
-        style={styles.video}
-        player={player}
-        nativeControls={false}
-        contentFit="contain"
-      />
+      <TouchableWithoutFeedback onPress={togglePlayPause}>
+        <View style={{ width: '100%', height: '100%' }}>
+          <VideoView
+            style={styles.video}
+            player={player}
+            nativeControls={false}
+            contentFit="contain"
+          />
+        </View>
+      </TouchableWithoutFeedback>
       <View style={styles.overlay}>
         <View style={styles.creatorInfo}>
           <Image 
@@ -80,33 +291,35 @@ function ShortVideoItem({ item, isActive, height }: { item: Video, isActive: boo
           </Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.actionBtn}>
+        <TouchableOpacity style={styles.actionBtn} onPress={() => setShowComments(true)}>
           <View style={styles.iconWrapper}>
             <MessageSquare color="#fff" size={28} />
           </View>
           <Text style={styles.actionText}>Comment</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.actionBtn}>
+        <TouchableOpacity style={styles.actionBtn} onPress={handleShare}>
           <View style={styles.iconWrapper}>
             <Share2 color="#fff" size={28} />
           </View>
           <Text style={styles.actionText}>Share</Text>
         </TouchableOpacity>
         
-        <TouchableOpacity style={styles.actionBtn}>
+        <TouchableOpacity style={styles.actionBtn} onPress={() => setShowPlaylist(true)}>
           <View style={styles.iconWrapper}>
             <MoreVertical color="#fff" size={28} />
           </View>
         </TouchableOpacity>
       </View>
+      <CommentsModal videoId={item._id} visible={showComments} onClose={() => setShowComments(false)} />
+      <SaveToPlaylistModal videoId={item._id} visible={showPlaylist} onClose={() => setShowPlaylist(false)} />
     </View>
   );
 }
 
 import { useIsFocused } from '@react-navigation/native';
 
-export default function ShortsScreen() {
+export default function ShortsScreen({ route }: any) {
   const [videos, setVideos] = useState<Video[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -114,14 +327,28 @@ export default function ShortsScreen() {
   const [containerHeight, setContainerHeight] = useState(SHORTS_HEIGHT);
   const isFocused = useIsFocused();
 
+  const initialVideoId = route?.params?.initialVideoId;
+
   useEffect(() => {
     fetchVideos();
-  }, []);
+  }, [initialVideoId]);
 
   const fetchVideos = async () => {
     try {
+      setLoading(true);
       const res = await apiClient.get('/videos?tag=shorts');
-      setVideos(res.data);
+      let fetchedVideos = res.data;
+
+      if (initialVideoId) {
+        const targetIndex = fetchedVideos.findIndex((v: any) => v._id === initialVideoId);
+        if (targetIndex > -1) {
+          const targetVideo = fetchedVideos.splice(targetIndex, 1)[0];
+          fetchedVideos.unshift(targetVideo);
+        }
+      }
+
+      setVideos(fetchedVideos);
+      setActiveIndex(0); // Reset to top
     } catch (error) {
       console.error('Failed to fetch shorts:', error);
     } finally {
@@ -176,6 +403,10 @@ export default function ShortsScreen() {
         viewabilityConfig={viewabilityConfig.current}
         refreshing={refreshing}
         onRefresh={onRefresh}
+        initialNumToRender={2}
+        maxToRenderPerBatch={2}
+        windowSize={3}
+        removeClippedSubviews={true}
         ListEmptyComponent={() => (
           <View style={[styles.loaderContainer, { height: containerHeight }]}>
             <Text style={{ color: '#888', fontSize: 16 }}>No shorts available</Text>
@@ -209,7 +440,7 @@ const styles = StyleSheet.create({
   },
   overlay: {
     position: 'absolute',
-    bottom: 80, // Uplifted from bottom
+    bottom: 16, // Uplifted from bottom
     left: 16,
     right: 80, // Leave room for right side buttons
   },
@@ -249,7 +480,7 @@ const styles = StyleSheet.create({
   },
   actionsContainer: {
     position: 'absolute',
-    bottom: 80, // Uplifted
+    bottom: 16, // Uplifted
     right: 12,
     alignItems: 'center',
   },
@@ -273,5 +504,84 @@ const styles = StyleSheet.create({
     textShadowColor: 'rgba(0,0,0,0.5)',
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 2,
+  },
+  modalOverlay: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    backgroundColor: 'rgba(0,0,0,0.5)'
+  },
+  modalContent: {
+    backgroundColor: '#1a1a1a',
+    height: '60%',
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
+    paddingBottom: 20
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#333'
+  },
+  modalTitle: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: 'bold'
+  },
+  closeText: {
+    color: '#aaa',
+    fontSize: 16
+  },
+  commentItem: {
+    padding: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#333'
+  },
+  commentAuthor: {
+    color: '#aaa',
+    fontSize: 13,
+    marginBottom: 4
+  },
+  commentText: {
+    color: '#fff',
+    fontSize: 15
+  },
+  commentInputRow: {
+    flexDirection: 'row',
+    padding: 12,
+    borderTopWidth: 1,
+    borderTopColor: '#333'
+  },
+  commentInput: {
+    flex: 1,
+    color: '#fff',
+    backgroundColor: '#333',
+    borderRadius: 20,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    marginRight: 10
+  },
+  postBtn: {
+    justifyContent: 'center',
+    paddingHorizontal: 12
+  },
+  postBtnText: {
+    color: '#3ea6ff',
+    fontWeight: 'bold'
+  },
+  playlistItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#333'
+  },
+  playlistName: {
+    color: '#fff',
+    fontSize: 16
+  },
+  playlistStatus: {
+    color: '#3ea6ff'
   }
 });

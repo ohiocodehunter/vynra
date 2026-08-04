@@ -5,6 +5,10 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { ChevronLeft, ThumbsUp, ThumbsDown, Share2, MessageSquare, PlusCircle } from 'lucide-react-native';
 import { formatDistanceToNow } from 'date-fns';
+import { socket } from '../api/socket';
+import client from '../api/client';
+import { useAuth } from '../context/AuthContext';
+import CommentsSheet from '../components/CommentsSheet';
 
 export default function VideoPlayerScreen() {
   const route = useRoute<any>();
@@ -15,6 +19,59 @@ export default function VideoPlayerScreen() {
     player.loop = false;
     player.play();
   });
+
+  const { user } = useAuth();
+  const [creator, setCreator] = React.useState(video.creator);
+  const [isSubscribed, setIsSubscribed] = React.useState(false);
+  const [subscribing, setSubscribing] = React.useState(false);
+  const [showComments, setShowComments] = React.useState(false);
+
+  React.useEffect(() => {
+    const checkSub = async () => {
+      if (!user || !creator?._id) return;
+      try {
+        const res = await client.get(`/users/check-subscription/${creator._id}`);
+        setIsSubscribed(res.data.isSubscribed);
+      } catch (error) {
+        console.error('Error checking subscription', error);
+      }
+    };
+    checkSub();
+  }, [user, creator?._id]);
+
+  React.useEffect(() => {
+    const handleUserUpdate = (data: any) => {
+      if (creator && (creator._id === data.userId || creator.id === data.userId)) {
+        setCreator((prev: any) => ({
+          ...prev,
+          subscribersCount: data.subscribersCount,
+          isVerified: data.isVerified
+        }));
+      }
+    };
+    socket.on('user_updated', handleUserUpdate);
+    return () => {
+      socket.off('user_updated', handleUserUpdate);
+    };
+  }, [creator]);
+
+  const handleSubscribe = async () => {
+    if (!user) {
+      navigation.navigate('Login' as never);
+      return;
+    }
+    if (!creator?._id) return;
+    
+    setSubscribing(true);
+    try {
+      const res = await client.post('/users/subscribe', { channelId: creator._id });
+      setIsSubscribed(res.data.subscribed);
+    } catch (error) {
+      console.error('Error subscribing', error);
+    } finally {
+      setSubscribing(false);
+    }
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -45,12 +102,20 @@ export default function VideoPlayerScreen() {
             style={styles.avatar} 
           />
           <View style={styles.creatorInfo}>
-            <Text style={styles.creatorName}>{video.creator?.username || 'Unknown'}</Text>
-            <Text style={styles.subscribers}>1.2K subscribers</Text>
+            <Text style={styles.creatorName}>{creator?.username || 'Unknown'}</Text>
+            <Text style={styles.subscribers}>{creator?.subscribersCount || 0} subscribers</Text>
           </View>
-          <TouchableOpacity style={styles.subscribeBtn}>
-            <Text style={styles.subscribeBtnText}>Subscribe</Text>
-          </TouchableOpacity>
+          {user?._id !== creator?._id && (
+            <TouchableOpacity 
+              style={[styles.subscribeBtn, isSubscribed && styles.subscribedBtn]}
+              onPress={handleSubscribe}
+              disabled={subscribing}
+            >
+              <Text style={[styles.subscribeBtnText, isSubscribed && styles.subscribedText]}>
+                {isSubscribed ? 'Subscribed' : 'Subscribe'}
+              </Text>
+            </TouchableOpacity>
+          )}
         </View>
 
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.actionsRow}>
@@ -72,7 +137,7 @@ export default function VideoPlayerScreen() {
           </TouchableOpacity>
         </ScrollView>
 
-        <TouchableOpacity style={styles.commentsPreview}>
+        <TouchableOpacity style={styles.commentsPreview} onPress={() => setShowComments(true)}>
           <View style={styles.commentsHeader}>
             <Text style={styles.commentsTitle}>Comments</Text>
             <Text style={styles.commentsCount}>{video.comments?.length || 0}</Text>
@@ -88,6 +153,12 @@ export default function VideoPlayerScreen() {
           </View>
         ) : null}
       </ScrollView>
+
+      <CommentsSheet 
+        isVisible={showComments}
+        onClose={() => setShowComments(false)}
+        videoId={video._id}
+      />
     </SafeAreaView>
   );
 }
@@ -107,7 +178,9 @@ const styles = StyleSheet.create({
   creatorName: { color: '#fff', fontSize: 16, fontWeight: 'bold' },
   subscribers: { color: '#888', fontSize: 12 },
   subscribeBtn: { backgroundColor: '#fff', paddingHorizontal: 16, paddingVertical: 8, borderRadius: 20 },
+  subscribedBtn: { backgroundColor: '#222' },
   subscribeBtnText: { color: '#000', fontWeight: 'bold' },
+  subscribedText: { color: '#fff' },
   actionsRow: { flexDirection: 'row', marginBottom: 24, gap: 12 },
   actionBtn: { alignItems: 'center', backgroundColor: '#222', paddingVertical: 8, paddingHorizontal: 16, borderRadius: 20, flexDirection: 'row', gap: 8 },
   actionText: { color: '#fff', fontSize: 14, fontWeight: '500' },

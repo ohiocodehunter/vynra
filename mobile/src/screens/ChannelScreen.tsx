@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { ChevronLeft } from 'lucide-react-native';
 import client from '../api/client';
+import { socket } from '../api/socket';
 import { useAuth } from '../context/AuthContext';
 
 export default function ChannelScreen() {
@@ -18,6 +19,9 @@ export default function ChannelScreen() {
   const [activeTab, setActiveTab] = useState<'videos' | 'shorts'>('videos');
 
   const isOwner = currentUser?.username === username;
+
+  const [isSubscribed, setIsSubscribed] = useState(false);
+  const [subscribing, setSubscribing] = useState(false);
 
   useEffect(() => {
     const fetchChannel = async () => {
@@ -34,6 +38,53 @@ export default function ChannelScreen() {
     
     fetchChannel();
   }, [username]);
+
+  useEffect(() => {
+    const checkSub = async () => {
+      if (!currentUser || !channel?._id) return;
+      try {
+        const res = await client.get(`/users/check-subscription/${channel._id}`);
+        setIsSubscribed(res.data.isSubscribed);
+      } catch (error) {
+        console.error('Error checking subscription', error);
+      }
+    };
+    checkSub();
+  }, [currentUser, channel?._id]);
+
+  useEffect(() => {
+    const handleUserUpdate = (data: any) => {
+      if (channel && (channel._id === data.userId || channel.id === data.userId)) {
+        setChannel((prev: any) => ({
+          ...prev,
+          subscribersCount: data.subscribersCount,
+          isVerified: data.isVerified
+        }));
+      }
+    };
+    socket.on('user_updated', handleUserUpdate);
+    return () => {
+      socket.off('user_updated', handleUserUpdate);
+    };
+  }, [channel]);
+
+  const handleSubscribe = async () => {
+    if (!currentUser) {
+      navigation.navigate('Login' as never);
+      return;
+    }
+    if (!channel?._id) return;
+    
+    setSubscribing(true);
+    try {
+      const res = await client.post('/users/subscribe', { channelId: channel._id });
+      setIsSubscribed(res.data.subscribed);
+    } catch (error) {
+      console.error('Error subscribing', error);
+    } finally {
+      setSubscribing(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -94,8 +145,14 @@ export default function ChannelScreen() {
               <Text style={styles.bio} numberOfLines={2}>{channel.bio || 'No description available.'}</Text>
               
               {!isOwner && (
-                <TouchableOpacity style={styles.subscribeBtn}>
-                  <Text style={styles.subscribeBtnText}>Subscribe</Text>
+                <TouchableOpacity 
+                  style={[styles.subscribeBtn, isSubscribed && styles.subscribedBtn]}
+                  onPress={handleSubscribe}
+                  disabled={subscribing}
+                >
+                  <Text style={[styles.subscribeBtnText, isSubscribed && styles.subscribedText]}>
+                    {isSubscribed ? 'Subscribed' : 'Subscribe'}
+                  </Text>
                 </TouchableOpacity>
               )}
             </View>
@@ -196,10 +253,16 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     marginBottom: 16,
   },
+  subscribedBtn: {
+    backgroundColor: '#222',
+  },
   subscribeBtnText: {
     color: '#0f0f0f',
     fontWeight: 'bold',
     fontSize: 16,
+  },
+  subscribedText: {
+    color: '#fff',
   },
   tabsContainer: {
     flexDirection: 'row',

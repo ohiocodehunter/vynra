@@ -26,6 +26,7 @@ export default function ClientVideoPlayer({ url, poster, nextVideoId, videoId }:
   const [isPlaying, setIsPlaying] = useState(true);
 
   useEffect(() => {
+    setVideoSrc(url);
     // Check if video is cached offline
     if (typeof caches !== 'undefined') {
       caches.open('vynra-offline-videos').then(cache => {
@@ -80,7 +81,7 @@ export default function ClientVideoPlayer({ url, poster, nextVideoId, videoId }:
         historyRecorded = true;
         const token = localStorage.getItem('token');
         if (token) {
-          fetch(`${(typeof window !== 'undefined' ? '/api' : (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api'))}/users/history/${videoId}`, {
+          fetch(`${(typeof window !== 'undefined' ? '/api' : (process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5001/api'))}/users/history/${videoId}`, {
             method: 'POST',
             headers: { 'Authorization': `Bearer ${token}` }
           }).catch(console.error);

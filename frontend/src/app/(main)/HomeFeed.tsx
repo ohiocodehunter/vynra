@@ -36,7 +36,7 @@ export default function HomeFeed() {
         const token = localStorage.getItem('token');
         if (token) {
           try {
-            const res = await fetch(`${(typeof window !== 'undefined' ? '/api' : (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api'))}/users/history`, {
+            const res = await fetch(`${(typeof window !== 'undefined' ? '/api' : (process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5001/api'))}/users/history`, {
               headers: { 'Authorization': `Bearer ${token}` }
             });
             if (res.ok) {
@@ -73,6 +73,9 @@ export default function HomeFeed() {
     return result.length > 0 ? result : videos.slice(0, 3);
   }, [videos, activeCategory, historyVideos]);
 
+  const regularVideos = filteredVideos.filter(v => !v.tags?.includes('shorts'));
+  const shortVideos = filteredVideos.filter(v => v.tags?.includes('shorts'));
+
   return (
     <div className={styles.container}>
       {/* Category Pills */}
@@ -90,32 +93,55 @@ export default function HomeFeed() {
         </div>
       </div>
 
-      {/* Main Content Area */}
       {loading ? (
-        <div className={styles.grid}>
-          {Array.from({ length: 12 }).map((_, i) => (
-            <VideoSkeleton key={i} />
-          ))}
+        <div className={styles.feedLayout}>
+          {/* Hero Skeleton */}
+          <div className={styles.heroSection}>
+            <div className={`${styles.shimmer} ${styles.sectionHeading}`} style={{ height: '24px', width: '120px', borderRadius: '4px', marginBottom: '1.25rem', background: '#222' }}></div>
+            <div className={styles.heroWrapper}>
+              <VideoSkeleton layout="vertical" />
+            </div>
+          </div>
+          {/* Row Skeleton */}
+          <div className={styles.rowSection}>
+            <div className={`${styles.shimmer} ${styles.sectionHeading}`} style={{ height: '24px', width: '150px', borderRadius: '4px', marginBottom: '1.25rem', background: '#222' }}></div>
+            <div className={styles.rowScroll}>
+              {Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className={styles.rowItem}>
+                  <VideoSkeleton />
+                </div>
+              ))}
+            </div>
+          </div>
+          {/* Grid Skeleton */}
+          <div className={styles.gridSection}>
+            <div className={`${styles.shimmer} ${styles.sectionHeading}`} style={{ height: '24px', width: '100px', borderRadius: '4px', marginBottom: '1.25rem', background: '#222' }}></div>
+            <div className={styles.grid}>
+              {Array.from({ length: 8 }).map((_, i) => (
+                <VideoSkeleton key={i} />
+              ))}
+            </div>
+          </div>
         </div>
       ) : filteredVideos.length > 0 ? (
         <div className={styles.feedLayout}>
           
           {/* 1. Hero Section (Featured Video) */}
-          {filteredVideos[0] && (
+          {regularVideos[0] && (
             <div className={styles.heroSection}>
               <h2 className={styles.sectionHeading}>Featured</h2>
               <div className={styles.heroWrapper}>
-                <VideoCard video={filteredVideos[0]} layout="vertical" />
+                <VideoCard video={regularVideos[0]} layout="vertical" />
               </div>
             </div>
           )}
 
           {/* 2. Trending Row */}
-          {filteredVideos.length > 1 && (
+          {regularVideos.length > 1 && (
             <div className={styles.rowSection}>
               <h2 className={styles.sectionHeading}>Trending</h2>
               <div className={styles.rowScroll}>
-                {filteredVideos.slice(1, 5).map((video) => (
+                {regularVideos.slice(1, 5).map((video) => (
                   <div key={video._id} className={styles.rowItem}>
                     <VideoCard video={video} />
                   </div>
@@ -124,12 +150,24 @@ export default function HomeFeed() {
             </div>
           )}
 
-          {/* 3. Recommended Row */}
-          {filteredVideos.length > 5 && (
+          {/* 3. Shorts Section */}
+          {shortVideos.length > 0 && (
+            <div className={styles.gridSection}>
+              <h2 className={styles.sectionHeading}>Shorts</h2>
+              <div className={styles.shortsGrid}>
+                {shortVideos.map((video) => (
+                  <VideoCard key={video._id} video={video} layout="shorts" />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* 4. Recommended Row */}
+          {regularVideos.length > 5 && (
             <div className={styles.rowSection}>
               <h2 className={styles.sectionHeading}>Recommended for You</h2>
               <div className={styles.rowScroll}>
-                {filteredVideos.slice(5, 9).map((video) => (
+                {regularVideos.slice(5, 9).map((video) => (
                   <div key={video._id} className={styles.rowItem}>
                     <VideoCard video={video} />
                   </div>
@@ -138,12 +176,12 @@ export default function HomeFeed() {
             </div>
           )}
 
-          {/* 4. Latest Grid */}
-          {filteredVideos.length > 9 && (
+          {/* 5. Latest Grid */}
+          {regularVideos.length > 9 && (
             <div className={styles.gridSection}>
               <h2 className={styles.sectionHeading}>Latest</h2>
               <div className={styles.grid}>
-                {filteredVideos.slice(9).map((video) => (
+                {regularVideos.slice(9).map((video) => (
                   <VideoCard key={video._id} video={video} />
                 ))}
               </div>
