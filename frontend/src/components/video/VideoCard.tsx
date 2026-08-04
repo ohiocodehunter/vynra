@@ -18,13 +18,47 @@ function formatDuration(seconds: number) {
   return `${m}:${s < 10 ? "0" : ""}${s}`;
 }
 
+import { socket } from '@/lib/socket';
+
 export default function VideoCard({
   video,
   layout = "vertical",
 }: VideoCardProps) {
   const [isNavigating, setIsNavigating] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
+  const [creator, setCreator] = useState(video.creator);
   const router = useRouter();
+
+  React.useEffect(() => {
+    // Keep local state in sync with prop changes
+    setCreator(video.creator);
+  }, [video.creator]);
+
+  React.useEffect(() => {
+    // Listen for real-time user verification changes
+    const handleUserUpdate = (data: any) => {
+      if (creator && (creator._id === data.userId || creator.id === data.userId)) {
+        setCreator(prev => prev ? {
+          ...prev,
+          isVerified: data.isVerified,
+          username: data.username,
+          channelName: data.channelName
+        } : prev);
+      }
+    };
+    
+    // @ts-ignore
+    import('@/lib/socket').then(({ socket }) => {
+      socket.on('user_updated', handleUserUpdate);
+    });
+
+    return () => {
+      // @ts-ignore
+      import('@/lib/socket').then(({ socket }) => {
+        socket.off('user_updated', handleUserUpdate);
+      });
+    };
+  }, [creator]);
 
   const handleClick = (e: React.MouseEvent) => {
     e.preventDefault(); // Prevent standard link behavior
@@ -86,10 +120,10 @@ export default function VideoCard({
       <div className={styles.videoInfo}>
         {layout === "vertical" && (
           <div className={styles.creatorAvatar}>
-            {video.creator?.avatarUrl ? (
-              <img src={video.creator.avatarUrl} alt={video.creator.username} className={styles.avatarImage} />
+            {creator?.avatarUrl ? (
+              <img src={creator.avatarUrl} alt={creator.username} className={styles.avatarImage} />
             ) : (
-              video.creator?.username?.charAt(0) || "U"
+              creator?.username?.charAt(0) || "U"
             )}
           </div>
         )}
@@ -97,10 +131,11 @@ export default function VideoCard({
           <h3 className={styles.videoTitle}>{video.title}</h3>
           <div className={styles.creatorRow}>
             <p className={styles.videoMetaChannel}>
-              {video.creator?.username || "Upload by Dev"}
+              {creator?.username || "Upload by Dev"}
             </p>
-            {/* Mock Verified Icon for premium feel */}
-            <BadgeCheck size={14} className={styles.verifiedIcon} />
+            {creator?.isVerified && (
+              <BadgeCheck size={14} className={styles.verifiedIcon} />
+            )}
           </div>
           <p className={styles.videoMetaViews}>
             {video.views >= 1000

@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import styles from './page.module.css';
-import { Video as VideoIcon } from 'lucide-react';
+import { Video as VideoIcon, BadgeCheck } from 'lucide-react';
 import VideoCard from '@/components/video/VideoCard';
 import Link from 'next/link';
 import { User, Video, userService } from '@/lib/api';
@@ -159,7 +159,10 @@ export default function ChannelPage() {
           </div>
           
           <div className={styles.channelDetails}>
-            <h1 className={styles.channelName}>{user.channelName || user.username}</h1>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'center' }}>
+              <h1 className={styles.channelName} style={{ marginBottom: 0 }}>{user.channelName || user.username}</h1>
+              {user.isVerified && <BadgeCheck size={24} className={styles.verifiedIcon} />}
+            </div>
             <div className={styles.channelMeta}>
               <span>{subscriberCount} subscribers</span>
               <span>•</span>
