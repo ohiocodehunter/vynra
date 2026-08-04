@@ -225,9 +225,9 @@ export default function ChannelPage() {
       
       <div className={styles.contentArea}>
         {activeTab === 'videos' && (
-          videos.length > 0 ? (
+          videos.filter(v => !v.tags?.includes('shorts')).length > 0 ? (
             <div className={styles.grid}>
-              {videos.map(video => (
+              {videos.filter(v => !v.tags?.includes('shorts')).map(video => (
                 <VideoCard key={video._id} video={video} />
               ))}
             </div>
@@ -247,9 +247,17 @@ export default function ChannelPage() {
         )}
         
         {activeTab === 'shorts' && (
-          <div className={styles.emptyState}>
-            <h2 className={styles.emptyTitle}>No shorts yet</h2>
-          </div>
+          videos.filter(v => v.tags?.includes('shorts')).length > 0 ? (
+            <div className={styles.grid}>
+              {videos.filter(v => v.tags?.includes('shorts')).map(video => (
+                <VideoCard key={video._id} video={video} />
+              ))}
+            </div>
+          ) : (
+            <div className={styles.emptyState}>
+              <h2 className={styles.emptyTitle}>No shorts yet</h2>
+            </div>
+          )
         )}
 
         {activeTab === 'playlists' && (
