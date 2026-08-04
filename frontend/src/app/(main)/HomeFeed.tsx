@@ -113,6 +113,15 @@ export default function HomeFeed() {
               ))}
             </div>
           </div>
+          {/* Shorts Skeleton */}
+          <div className={styles.gridSection}>
+            <div className={`${styles.shimmer} ${styles.sectionHeading}`} style={{ height: '24px', width: '80px', borderRadius: '4px', marginBottom: '1.25rem', background: '#222' }}></div>
+            <div className={styles.shortsGrid}>
+              {Array.from({ length: 4 }).map((_, i) => (
+                <VideoSkeleton key={i} layout="shorts" />
+              ))}
+            </div>
+          </div>
           {/* Grid Skeleton */}
           <div className={styles.gridSection}>
             <div className={`${styles.shimmer} ${styles.sectionHeading}`} style={{ height: '24px', width: '100px', borderRadius: '4px', marginBottom: '1.25rem', background: '#222' }}></div>

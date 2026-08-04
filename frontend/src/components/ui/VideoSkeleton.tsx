@@ -3,7 +3,7 @@ import styles from './Skeleton.module.css';
 import cardStyles from '../video/VideoCard.module.css';
 
 interface VideoSkeletonProps {
-  layout?: "vertical" | "horizontal";
+  layout?: "vertical" | "horizontal" | "shorts";
 }
 
 export default function VideoSkeleton({ layout = "vertical" }: VideoSkeletonProps) {
@@ -16,6 +16,27 @@ export default function VideoSkeleton({ layout = "vertical" }: VideoSkeletonProp
           <div className={`${styles.shimmer}`} style={{ height: '12px', width: '60%', background: '#222', borderRadius: '4px', marginBottom: '4px' }}></div>
           <div className={`${styles.shimmer}`} style={{ height: '12px', width: '40%', background: '#222', borderRadius: '4px' }}></div>
         </div>
+      </div>
+    );
+  }
+
+  if (layout === "shorts") {
+    return (
+      <div className={cardStyles.videoCard} style={{ gap: '10px' }}>
+        {/* Shorts thumbnail: portrait 9:16 */}
+        <div
+          className={styles.shimmer}
+          style={{
+            width: '100%',
+            aspectRatio: '9 / 16',
+            borderRadius: '12px',
+            background: '#222',
+          }}
+        />
+        {/* Title line */}
+        <div className={styles.shimmer} style={{ height: '14px', width: '80%', background: '#222', borderRadius: '4px' }} />
+        {/* Meta line */}
+        <div className={styles.shimmer} style={{ height: '12px', width: '50%', background: '#222', borderRadius: '4px' }} />
       </div>
     );
   }
