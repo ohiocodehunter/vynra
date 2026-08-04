@@ -7,7 +7,7 @@ export async function saveVideoOffline(video: Video, onProgress?: (percent: numb
     const cache = await caches.open(CACHE_NAME);
     
     // Check if already downloaded
-    const existing = await cache.match(video.videoUrl);
+    const existing = await cache.match(video.url);
     if (existing) {
       console.log('Video already saved offline');
       if (onProgress) onProgress(100);
@@ -18,7 +18,7 @@ export async function saveVideoOffline(video: Video, onProgress?: (percent: numb
     }
 
     // Fetch the video with progress tracking
-    const response = await fetch(video.videoUrl);
+    const response = await fetch(video.url);
     if (!response.ok) throw new Error('Failed to fetch video');
 
     const contentLength = response.headers.get('content-length');
@@ -28,11 +28,11 @@ export async function saveVideoOffline(video: Video, onProgress?: (percent: numb
     
     if (total === 0 || !response.body) {
       // Fallback if no content-length or body stream
-      await cache.put(video.videoUrl, response);
+      await cache.put(video.url, response);
       if (onProgress) onProgress(100);
     } else {
       const reader = response.body.getReader();
-      const chunks: Uint8Array[] = [];
+      const chunks: any[] = [];
 
       while (true) {
         const { done, value } = await reader.read();
@@ -51,34 +51,36 @@ export async function saveVideoOffline(video: Video, onProgress?: (percent: numb
           'Content-Length': blob.size.toString(),
         }
       });
-      await cache.put(video.videoUrl, newResponse);
+      await cache.put(video.url, newResponse);
     }
 
     await saveVideoMetadata(video);
     return true;
   } catch (error) {
-    console.error('Error saving video offline:', error);
+    console.error('Failed to download video:', error);
     return false;
   }
 }
 
+// Save basic metadata to local storage for listing offline videos later
 async function saveVideoMetadata(video: Video) {
-  // Use localStorage or IndexedDB. Using localStorage for simplicity if it fits,
-  // but metadata array can get big. For robust PWA, IndexedDB is better.
-  // We will just use localStorage for the video array metadata for now.
-  const stored = localStorage.getItem('vynra_offline_metadata');
-  let offlineVideos: Video[] = stored ? JSON.parse(stored) : [];
-  
-  if (!offlineVideos.find(v => v._id === video._id)) {
-    offlineVideos.push(video);
-    localStorage.setItem('vynra_offline_metadata', JSON.stringify(offlineVideos));
+  try {
+    const stored = localStorage.getItem('vynra_offline_metadata');
+    let offlineVideos: Video[] = stored ? JSON.parse(stored) : [];
+    
+    if (!offlineVideos.find(v => v._id === video._id)) {
+      offlineVideos.push(video);
+      localStorage.setItem('vynra_offline_metadata', JSON.stringify(offlineVideos));
+    }
+  } catch (error) {
+    console.error('Failed to save metadata', error);
   }
 }
 
-export async function removeOfflineVideo(video: Video) {
+export async function removeOfflineVideo(video: Video): Promise<boolean> {
   try {
     const cache = await caches.open(CACHE_NAME);
-    await cache.delete(video.videoUrl);
+    await cache.delete(video.url);
     
     const stored = localStorage.getItem('vynra_offline_metadata');
     if (stored) {

@@ -22,8 +22,10 @@ export default function VideoActions({ initialVideo }: VideoActionsProps) {
   const [downloadProgress, setDownloadProgress] = useState(0);
 
   React.useEffect(() => {
-    isVideoOffline(video.videoUrl).then(setIsDownloaded);
-  }, [video.videoUrl]);
+    if (video.url) {
+      isVideoOffline(video.url).then(setIsDownloaded);
+    }
+  }, [video.url]);
 
   const handleDownloadToggle = async () => {
     if (isDownloaded) {
