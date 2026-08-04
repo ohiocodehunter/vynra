@@ -11,6 +11,7 @@ import VideoActions from '@/components/video/VideoActions';
 import CommentsSection from '@/components/video/CommentsSection';
 import SubscribeButton from '@/components/video/SubscribeButton';
 import UpNextSidebar from '@/components/video/UpNextSidebar';
+import WatchChannelInfo from '@/components/video/WatchChannelInfo';
 
 function formatDuration(seconds: number) {
   const m = Math.floor(seconds / 60);
@@ -57,13 +58,7 @@ export default async function WatchPage({ searchParams }: { searchParams: Promis
           
           <div className={styles.videoActionsRow}>
             <div className={styles.channelInfo}>
-              <Link href={`/channel/${video.creator?.username || 'ohiocodehunter'}`} style={{ display: 'flex', alignItems: 'center', gap: '12px', textDecoration: 'none', color: 'inherit' }}>
-                <div className={styles.channelAvatar} style={{ backgroundImage: `url(${video.creator?.avatarUrl || ''})`, backgroundSize: 'cover' }}></div>
-                <div className={styles.channelText}>
-                  <div className={styles.channelName}>{video.creator?.username || 'Upload by Dev'}</div>
-                  <div className={styles.subCount}>{video.creator?.subscribersCount || 0} subscribers</div>
-                </div>
-              </Link>
+              {video.creator && <WatchChannelInfo initialCreator={video.creator} />}
               <SubscribeButton channelId={video.creator?._id || ''} />
             </div>
             
