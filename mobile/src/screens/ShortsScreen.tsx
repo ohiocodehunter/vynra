@@ -11,7 +11,7 @@ const SHORTS_HEIGHT = WINDOW_HEIGHT - 50;
 
 import { ThumbsUp, MessageSquare, Share2, MoreVertical } from 'lucide-react-native';
 
-function ShortVideoItem({ item, isActive }: { item: Video, isActive: boolean }) {
+function ShortVideoItem({ item, isActive, height }: { item: Video, isActive: boolean, height: number }) {
   const [likes, setLikes] = useState(item.likes || 0);
   const [userAction, setUserAction] = useState<'like' | 'dislike' | null>(null);
 
@@ -49,7 +49,7 @@ function ShortVideoItem({ item, isActive }: { item: Video, isActive: boolean }) 
   };
 
   return (
-    <View style={[styles.shortContainer, { height: SHORTS_HEIGHT }]}>
+    <View style={[styles.shortContainer, { height }]}>
       <VideoView
         style={styles.video}
         player={player}
@@ -104,11 +104,15 @@ function ShortVideoItem({ item, isActive }: { item: Video, isActive: boolean }) 
   );
 }
 
+import { useIsFocused } from '@react-navigation/native';
+
 export default function ShortsScreen() {
   const [videos, setVideos] = useState<Video[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
+  const [containerHeight, setContainerHeight] = useState(SHORTS_HEIGHT);
+  const isFocused = useIsFocused();
 
   useEffect(() => {
     fetchVideos();
@@ -150,12 +154,19 @@ export default function ShortsScreen() {
   }
 
   return (
-    <View style={styles.container}>
+    <View 
+      style={styles.container}
+      onLayout={(e) => setContainerHeight(e.nativeEvent.layout.height)}
+    >
       <FlatList
         data={videos}
         keyExtractor={(item) => item._id}
         renderItem={({ item, index }) => (
-          <ShortVideoItem item={item} isActive={index === activeIndex} />
+          <ShortVideoItem 
+            item={item} 
+            isActive={isFocused && index === activeIndex} 
+            height={containerHeight} 
+          />
         )}
         pagingEnabled
         showsVerticalScrollIndicator={false}
@@ -166,7 +177,7 @@ export default function ShortsScreen() {
         refreshing={refreshing}
         onRefresh={onRefresh}
         ListEmptyComponent={() => (
-          <View style={[styles.loaderContainer, { height: SHORTS_HEIGHT }]}>
+          <View style={[styles.loaderContainer, { height: containerHeight }]}>
             <Text style={{ color: '#888', fontSize: 16 }}>No shorts available</Text>
           </View>
         )}
