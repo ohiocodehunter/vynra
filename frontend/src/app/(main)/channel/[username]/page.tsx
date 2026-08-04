@@ -15,6 +15,8 @@ interface ChannelData {
   videos: Video[];
 }
 
+import { socket } from '@/lib/socket';
+
 export default function ChannelPage() {
   const params = useParams();
   const username = params.username as string;
@@ -26,6 +28,39 @@ export default function ChannelPage() {
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [subscriberCount, setSubscriberCount] = useState(0);
   const [isSubscribing, setIsSubscribing] = useState(false);
+
+  useEffect(() => {
+    // Listen for real-time user updates (e.g. admin verify/unverify)
+    const handleUserUpdate = (data: any) => {
+      if (channelData && channelData.user._id === data.userId) {
+        setChannelData(prev => prev ? {
+          ...prev,
+          user: {
+            ...prev.user,
+            isVerified: data.isVerified,
+            channelName: data.channelName,
+            username: data.username
+          }
+        } : null);
+      }
+    };
+    
+    // Listen for real-time user deletion
+    const handleUserDelete = (data: any) => {
+      if (channelData && channelData.user._id === data.userId) {
+        alert('This channel has been permanently deleted by the admin.');
+        window.location.href = '/';
+      }
+    };
+
+    socket.on('user_updated', handleUserUpdate);
+    socket.on('user_deleted', handleUserDelete);
+    
+    return () => {
+      socket.off('user_updated', handleUserUpdate);
+      socket.off('user_deleted', handleUserDelete);
+    };
+  }, [channelData]);
 
   useEffect(() => {
     const fetchChannel = async () => {

@@ -131,6 +131,18 @@ router.patch('/users/:id', adminMiddleware, async (req: Request, res: Response) 
 
     await user.save();
     
+    // Emit real-time update if socket.io is available
+    const io = req.app.get('io');
+    if (io) {
+      io.emit('user_updated', { 
+        userId: user._id.toString(), 
+        isVerified: user.isVerified,
+        channelName: user.channelName,
+        username: user.username,
+        accountStatus: user.accountStatus
+      });
+    }
+    
     // Convert to plain object to attach the cleartext PIN
     const userResponse = user.toObject();
     if (newAdminPin) {
@@ -151,12 +163,54 @@ router.delete('/users/:id', adminMiddleware, async (req: Request, res: Response)
     
     // Cascading delete: permanently delete all videos belonging to this user
     const Video = require('../models/Video').default;
+    const { deleteFileFromR2 } = require('../services/r2');
+    
+    const userVideos = await Video.find({ creator: req.params.id });
+    
+    // Delete files from R2
+    for (const video of userVideos) {
+      try {
+        if (video.url && video.url.includes('r2.dev')) {
+          const videoFileName = video.url.split('/').pop();
+          if (videoFileName) await deleteFileFromR2(`videos/${videoFileName}`);
+        }
+        if (video.thumbnailUrl && video.thumbnailUrl.includes('r2.dev')) {
+          const thumbFileName = video.thumbnailUrl.split('/').pop();
+          if (thumbFileName) await deleteFileFromR2(`thumbnails/${thumbFileName}`);
+        }
+      } catch (err) {
+        console.error('Error deleting files from R2 during cascade delete:', err);
+      }
+    }
+    
     await Video.deleteMany({ creator: req.params.id });
+
+    // Delete user avatars/banners if they exist on R2
+    try {
+      if (user.avatarUrl && user.avatarUrl.includes('r2.dev')) {
+        const avatarFileName = user.avatarUrl.split('/').pop();
+        if (avatarFileName) await deleteFileFromR2(`avatars/${avatarFileName}`);
+      }
+      if (user.bannerUrl && user.bannerUrl.includes('r2.dev')) {
+        const bannerFileName = user.bannerUrl.split('/').pop();
+        if (bannerFileName) await deleteFileFromR2(`banners/${bannerFileName}`);
+      }
+    } catch (err) {
+      console.error('Error deleting user profile images from R2:', err);
+    }
 
     // Finally delete the user
     await User.findByIdAndDelete(req.params.id);
-    res.json({ success: true, message: 'User and all their videos were permanently deleted' });
+    
+    // Emit real-time socket event for user deletion
+    const io = req.app.get('io');
+    if (io) {
+      io.emit('user_deleted', { userId: req.params.id });
+    }
+    
+    res.json({ success: true, message: 'User and all their videos/files were permanently deleted' });
   } catch (error) {
+    console.error('Error in user hard delete:', error);
     res.status(500).json({ error: 'Error deleting user' });
   }
 });

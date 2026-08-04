@@ -63,6 +63,43 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(null);
   };
 
+  useEffect(() => {
+    const handleUserUpdate = (data: any) => {
+      if (user && user._id === data.userId) {
+        const updatedUser = {
+          ...user,
+          isVerified: data.isVerified,
+          channelName: data.channelName,
+          username: data.username
+        };
+        setUser(updatedUser);
+        localStorage.setItem('user', JSON.stringify(updatedUser));
+      }
+    };
+    
+    const handleUserDelete = (data: any) => {
+      if (user && user._id === data.userId) {
+        alert('Your account has been deleted by an administrator.');
+        logout();
+        window.location.href = '/';
+      }
+    };
+    
+    // @ts-ignore
+    import('@/lib/socket').then(({ socket }) => {
+      socket.on('user_updated', handleUserUpdate);
+      socket.on('user_deleted', handleUserDelete);
+    });
+
+    return () => {
+      // @ts-ignore
+      import('@/lib/socket').then(({ socket }) => {
+        socket.off('user_updated', handleUserUpdate);
+        socket.off('user_deleted', handleUserDelete);
+      });
+    };
+  }, [user]);
+
   const checkUsername = async (username: string) => {
     try {
       const res = await fetch(`${(typeof window !== 'undefined' ? '/api' : (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api'))}/auth/check-username?username=${username}`);
