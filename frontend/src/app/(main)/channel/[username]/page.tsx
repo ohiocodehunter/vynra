@@ -159,8 +159,8 @@ export default function ChannelPage() {
           </div>
           
           <div className={styles.channelDetails}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'center' }}>
-              <h1 className={styles.channelName} style={{ marginBottom: 0 }}>{user.channelName || user.username}</h1>
+            <div className={styles.channelNameWrapper}>
+              <h1 className={styles.channelName}>{user.channelName || user.username}</h1>
               {user.isVerified && <BadgeCheck size={24} className={styles.verifiedIcon} />}
             </div>
             <div className={styles.channelMeta}>

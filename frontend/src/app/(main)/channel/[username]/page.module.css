@@ -86,10 +86,27 @@
   gap: 8px;
 }
 
+.channelNameWrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 100%;
+}
+
+@media (max-width: 768px) {
+  .channelNameWrapper {
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+}
+
 .channelName {
   font-size: 2rem;
   font-weight: 700;
   margin: 0;
+  word-break: break-word; /* Allows long unbroken words to wrap */
+  overflow-wrap: break-word;
+  max-width: 100%;
 }
 
 .channelMeta {
