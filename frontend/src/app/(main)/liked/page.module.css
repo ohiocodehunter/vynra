@@ -27,8 +27,8 @@
 
 .grid {
   display: grid !important;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)) !important;
-  gap: 24px 16px !important;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)) !important;
+  gap: 32px 16px !important;
   width: 100% !important;
   padding-bottom: 40px;
 }
