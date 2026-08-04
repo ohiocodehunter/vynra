@@ -59,6 +59,7 @@ export interface User {
   subscriptions?: string[];
   role?: 'user' | 'admin';
   isVerified?: boolean;
+  accountStatus?: 'active' | 'suspended';
   createdAt?: string;
 }
 
