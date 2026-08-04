@@ -269,6 +269,11 @@ export const adminService = {
     const adminToken = localStorage.getItem('adminToken');
     const res = await api.delete(`/admin/videos/${id}`, { headers: { Authorization: `Bearer ${adminToken}` } });
     return res.data;
+  },
+  getSystemStats: async () => {
+    const adminToken = localStorage.getItem('adminToken');
+    const res = await api.get('/admin/system-stats', { headers: { Authorization: `Bearer ${adminToken}` } });
+    return res.data;
   }
 };
 

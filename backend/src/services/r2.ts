@@ -59,3 +59,34 @@ export const deleteFileFromR2 = async (fileName: string): Promise<boolean> => {
     return false;
   }
 };
+
+import { ListObjectsV2Command } from '@aws-sdk/client-s3';
+
+export const getR2StorageStats = async () => {
+  const bucketName = process.env.R2_BUCKET_NAME || 'vynra-bucket';
+  let totalBytes = 0;
+  let totalFiles = 0;
+  let continuationToken: string | undefined = undefined;
+  
+  try {
+    do {
+      const listCmd = new ListObjectsV2Command({
+        Bucket: bucketName,
+        ContinuationToken: continuationToken,
+      });
+      const response = await getS3Client().send(listCmd);
+      if (response.Contents) {
+        response.Contents.forEach(obj => {
+          totalBytes += obj.Size || 0;
+          totalFiles += 1;
+        });
+      }
+      continuationToken = response.NextContinuationToken;
+    } while (continuationToken);
+    
+    return { totalBytes, totalFiles };
+  } catch (error) {
+    console.error('Error getting R2 stats:', error);
+    return { totalBytes: 0, totalFiles: 0 };
+  }
+};

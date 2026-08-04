@@ -261,4 +261,38 @@ router.delete('/videos/:id', adminMiddleware, async (req: Request, res: Response
   }
 });
 
+// === SYSTEM STATS ===
+
+router.get('/system-stats', adminMiddleware, async (req: Request, res: Response) => {
+  try {
+    const mongoose = require('mongoose');
+    const { getR2StorageStats } = require('../services/r2');
+
+    // MongoDB Stats
+    const dbStats = await mongoose.connection.db.stats();
+    
+    // R2 Stats
+    const r2Stats = await getR2StorageStats();
+    
+    res.json({
+      mongodb: {
+        dbName: dbStats.db,
+        collections: dbStats.collections,
+        objects: dbStats.objects,
+        dataSize: dbStats.dataSize,
+        storageSize: dbStats.storageSize,
+        indexes: dbStats.indexes,
+        indexSize: dbStats.indexSize,
+      },
+      cloudflareR2: {
+        totalFiles: r2Stats.totalFiles,
+        storageSize: r2Stats.totalBytes,
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching system stats:', error);
+    res.status(500).json({ error: 'Failed to fetch system stats' });
+  }
+});
+
 export default router;

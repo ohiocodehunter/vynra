@@ -70,7 +70,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <Link href="/admin/videos" style={{ padding: '0.75rem 1rem', borderRadius: '8px', background: pathname === '/admin/videos' ? 'rgba(255,51,51,0.1)' : 'transparent', color: pathname === '/admin/videos' ? '#ff3333' : '#a0a0b0', textDecoration: 'none', fontWeight: 500 }}>
           Videos Manager
         </Link>
-
+        <Link href="/admin/storage" style={{ padding: '0.75rem 1rem', borderRadius: '8px', background: pathname === '/admin/storage' ? 'rgba(255,51,51,0.1)' : 'transparent', color: pathname === '/admin/storage' ? '#ff3333' : '#a0a0b0', textDecoration: 'none', fontWeight: 500 }}>
+          Storage & System
+        </Link>
         <button 
           onClick={() => { localStorage.removeItem('adminToken'); router.push('/admin/login'); }}
           style={{ marginTop: 'auto', padding: '0.75rem 1rem', borderRadius: '8px', background: 'transparent', border: '1px solid rgba(255,51,51,0.3)', color: '#ff4d4d', cursor: 'pointer' }}
