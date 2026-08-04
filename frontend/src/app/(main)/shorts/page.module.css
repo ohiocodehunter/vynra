@@ -50,18 +50,21 @@
   height: 100%;
   width: 100%;
   max-width: 450px; /* Constrain on desktop, fill on mobile */
+  aspect-ratio: 9/16;
+  max-height: calc(100vh - 120px);
   background: black;
   border-radius: 16px;
   overflow: hidden;
   box-shadow: 0 10px 30px rgba(0,0,0,0.5);
   display: flex;
   flex-direction: column;
+  margin: 0 auto;
 }
 
 .videoPlayer {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain; /* Aspect control */
   border-radius: 16px;
 }
 
@@ -76,6 +79,7 @@
   justify-content: space-between;
   background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 25%, rgba(0,0,0,0.4) 100%);
   padding: 1.5rem;
+  padding-bottom: 3.5rem; /* Uplift bottom metadata */
   pointer-events: none; /* Let clicks pass to video */
   z-index: 10;
   box-sizing: border-box;
@@ -184,8 +188,8 @@
 
 .actions {
   position: absolute;
-  right: 8px;
-  bottom: 2.5rem;
+  right: 12px;
+  bottom: 4.5rem; /* Uplift actions */
   display: flex;
   flex-direction: column;
   align-items: center;
