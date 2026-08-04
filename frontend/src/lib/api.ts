@@ -58,6 +58,7 @@ export interface User {
   subscribersCount?: number;
   subscriptions?: string[];
   role?: 'user' | 'admin';
+  isVerified?: boolean;
   createdAt?: string;
 }
 
