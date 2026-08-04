@@ -70,13 +70,13 @@ export const getR2StorageStats = async () => {
   
   try {
     do {
-      const listCmd = new ListObjectsV2Command({
+      const listCmd: any = new ListObjectsV2Command({
         Bucket: bucketName,
         ContinuationToken: continuationToken,
       });
-      const response = await getS3Client().send(listCmd);
+      const response: any = await getS3Client().send(listCmd);
       if (response.Contents) {
-        response.Contents.forEach(obj => {
+        response.Contents.forEach((obj: any) => {
           totalBytes += obj.Size || 0;
           totalFiles += 1;
         });

@@ -67,18 +67,18 @@ const cleanBucket = async () => {
     console.log('Scanning R2 bucket for orphaned files...');
 
     do {
-      const listCmd = new ListObjectsV2Command({
+      const listCmd: any = new ListObjectsV2Command({
         Bucket: R2_BUCKET,
         ContinuationToken: continuationToken,
       });
 
-      const response = await s3Client.send(listCmd);
+      const response: any = await s3Client.send(listCmd);
       const objects = response.Contents || [];
       totalScanned += objects.length;
 
       const keysToDelete: string[] = [];
 
-      objects.forEach(obj => {
+      objects.forEach((obj: any) => {
         if (obj.Key && !validKeys.has(obj.Key)) {
           keysToDelete.push(obj.Key);
         }
