@@ -15,12 +15,31 @@ interface ClientVideoPlayerProps {
   videoId?: string;
 }
 
+import { isVideoOffline } from "@/lib/offlineDownload";
+
 export default function ClientVideoPlayer({ url, poster, nextVideoId, videoId }: ClientVideoPlayerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
+  const [videoSrc, setVideoSrc] = useState<string>(url);
   const [isPlaying, setIsPlaying] = useState(true);
+
+  useEffect(() => {
+    // Check if video is cached offline
+    if (typeof caches !== 'undefined') {
+      caches.open('vynra-offline-videos').then(cache => {
+        cache.match(url).then(res => {
+          if (res) {
+            res.blob().then(blob => {
+              const objectUrl = URL.createObjectURL(blob);
+              setVideoSrc(objectUrl);
+            });
+          }
+        });
+      });
+    }
+  }, [url]);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [volume, setVolume] = useState(1);
@@ -181,7 +200,7 @@ export default function ClientVideoPlayer({ url, poster, nextVideoId, videoId }:
     >
       <video
         ref={videoRef}
-        src={url}
+        src={videoSrc}
         poster={poster}
         autoPlay
         playsInline

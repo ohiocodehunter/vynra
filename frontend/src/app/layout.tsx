@@ -15,6 +15,7 @@ const outfit = Outfit({
 export const metadata: Metadata = {
   title: "Vynra | Premium Video Platform by Karan OCH",
   description: "Vynra is a next-generation, premium video sharing experience created by Karan OCH (ohiocodehunter). Watch, share, and discover the best videos in stunning quality.",
+  manifest: "/manifest.json",
   keywords: ["vynra", "ohiocodehunter", "Karan OCH", "video platform", "premium video sharing", "Karan", "video streaming"],
   authors: [{ name: "Karan OCH", url: "https://vynra.ohiocodehunter.com" }],
   creator: "Karan OCH (ohiocodehunter)",

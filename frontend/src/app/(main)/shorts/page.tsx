@@ -4,6 +4,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { videoService, Video } from '@/lib/api';
 import styles from './page.module.css';
 import ShortPlayer from './ShortPlayer';
+import ShortSkeleton from '@/components/ui/ShortSkeleton';
 
 export default function ShortsPage() {
   const [shorts, setShorts] = useState<Video[]>([]);
@@ -47,7 +48,13 @@ export default function ShortsPage() {
   }, [shorts]);
 
   if (loading) {
-    return <div className={styles.loading}>Loading Shorts...</div>;
+    return (
+      <div className={styles.shortsContainer} style={{ padding: '20px' }}>
+        <div style={{ height: 'calc(100vh - 100px)', width: '100%', maxWidth: '400px', margin: '0 auto' }}>
+          <ShortSkeleton />
+        </div>
+      </div>
+    );
   }
 
   if (shorts.length === 0) {

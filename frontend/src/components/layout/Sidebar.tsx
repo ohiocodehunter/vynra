@@ -12,6 +12,7 @@ import {
   ThumbsUp,
   ListVideo,
   ChevronDown,
+  DownloadCloud,
 } from "lucide-react";
 import styles from "./Sidebar.module.css";
 import Link from "next/link";
@@ -98,6 +99,10 @@ export default function Sidebar() {
         <Link href="/playlists" className={`${styles.navItem} ${pathname === '/playlists' ? styles.active : ''}`}>
           <ListVideo size={20} />
           <span>Playlists</span>
+        </Link>
+        <Link href="/downloads" className={`${styles.navItem} ${pathname === '/downloads' ? styles.active : ''}`}>
+          <DownloadCloud size={20} />
+          <span>Downloads</span>
         </Link>
       </nav>
 

@@ -5,6 +5,7 @@ import VideoCard from '@/components/video/VideoCard';
 import { Video, videoService } from '@/lib/api';
 import styles from '@/components/video/InfiniteVideoGrid.module.css';
 import { Loader2 } from 'lucide-react';
+import VideoSkeleton from '@/components/ui/VideoSkeleton';
 
 const CATEGORIES = ['All', 'Music', 'Gaming', 'Live', 'Mixes', 'Podcasts', 'News', 'Watched'];
 
@@ -91,8 +92,10 @@ export default function HomeFeed() {
 
       {/* Main Content Area */}
       {loading ? (
-        <div className={styles.loaderContainer}>
-          <Loader2 className={styles.spinner} size={32} />
+        <div className={styles.grid}>
+          {Array.from({ length: 12 }).map((_, i) => (
+            <VideoSkeleton key={i} />
+          ))}
         </div>
       ) : filteredVideos.length > 0 ? (
         <div className={styles.feedLayout}>

@@ -6,6 +6,7 @@ import { videoService, Video } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
 import styles from '@/app/(main)/watch/page.module.css';
 import SaveToPlaylistModal from './SaveToPlaylistModal';
+import { saveVideoOffline, removeOfflineVideo, isVideoOffline } from '@/lib/offlineDownload';
 
 interface VideoActionsProps {
   initialVideo: Video;
@@ -16,6 +17,29 @@ export default function VideoActions({ initialVideo }: VideoActionsProps) {
   const { user } = useAuth();
   const [isLikeLoading, setIsLikeLoading] = useState(false);
   const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
+  
+  const [isDownloaded, setIsDownloaded] = useState(false);
+  const [downloadProgress, setDownloadProgress] = useState(0);
+
+  React.useEffect(() => {
+    isVideoOffline(video.videoUrl).then(setIsDownloaded);
+  }, [video.videoUrl]);
+
+  const handleDownloadToggle = async () => {
+    if (isDownloaded) {
+      const removed = await removeOfflineVideo(video);
+      if (removed) setIsDownloaded(false);
+    } else {
+      setDownloadProgress(1); // start showing percentage
+      const saved = await saveVideoOffline(video, (percent) => {
+        setDownloadProgress(percent);
+      });
+      if (saved) {
+        setIsDownloaded(true);
+      }
+      setTimeout(() => setDownloadProgress(0), 1000);
+    }
+  };
 
   const hasLiked = user && video.likedBy?.includes(user._id || user.id || '');
   const hasDisliked = user && video.dislikedBy?.includes(user._id || user.id || '');
@@ -79,8 +103,17 @@ export default function VideoActions({ initialVideo }: VideoActionsProps) {
         <button className={styles.actionBtn} onClick={handleShare}>
           <Share2 size={18} /> Share
         </button>
-        <button className={styles.actionBtn}>
-          <Download size={18} /> Download
+        <button 
+          className={`${styles.actionBtn} ${isDownloaded ? styles.activeAction : ''}`} 
+          onClick={handleDownloadToggle}
+          disabled={downloadProgress > 0 && downloadProgress < 100}
+        >
+          {downloadProgress > 0 && downloadProgress < 100 ? (
+            <span style={{ fontSize: '12px' }}>{downloadProgress}%</span>
+          ) : (
+            <Download size={18} fill={isDownloaded ? 'currentColor' : 'none'} /> 
+          )}
+          {isDownloaded ? 'Downloaded' : 'Download'}
         </button>
         <button className={styles.actionBtn} onClick={() => {
           if (!user) return alert('Please login to save to playlist');

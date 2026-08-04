@@ -5,6 +5,7 @@ import styles from '@/app/(main)/watch/page.module.css';
 import { Video } from '@/lib/api';
 import VideoCard from './VideoCard';
 import AutoplayToggle from './AutoplayToggle';
+import VideoSkeleton from '@/components/ui/VideoSkeleton';
 
 interface UpNextSidebarProps {
   currentVideo: Video;
@@ -116,7 +117,11 @@ export default function UpNextSidebar({ currentVideo, allVideos }: UpNextSidebar
       </div>
 
       <div className={styles.upNextList}>
-        {upNextVideos.length > 0 ? (
+        {!isMounted ? (
+          Array.from({ length: 8 }).map((_, i) => (
+            <VideoSkeleton key={i} layout="horizontal" />
+          ))
+        ) : upNextVideos.length > 0 ? (
           upNextVideos.map(upNext => (
             <div key={upNext._id} style={{ animation: 'slideIn 0.3s ease-out' }}>
               <VideoCard video={upNext} layout="horizontal" />
