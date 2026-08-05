@@ -1,12 +1,9 @@
-import axios from 'axios';
-import { Platform } from 'react-native';
-
-const baseURL = 'http://10.252.145.66:5001/api';
+import axios from "axios";
 
 const apiClient = axios.create({
-  baseURL,
+  baseURL: process.env.EXPO_PUBLIC_API_URL,
   headers: {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
   },
 });
 
