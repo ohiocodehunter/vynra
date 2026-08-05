@@ -230,6 +230,8 @@ router.get('/', optionalAuthMiddleware, async (req: AuthRequest, res: Response) 
        allVideos = allVideos.sort(() => Math.random() - 0.5);
     }
 
+    // Set a short-lived cache so repeated page loads are instant
+    res.setHeader('Cache-Control', 'public, max-age=60, stale-while-revalidate=300');
     res.json(allVideos);
   } catch (error) {
     console.error('Error fetching videos:', error);

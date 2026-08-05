@@ -10,6 +10,7 @@ import styles from "./VideoCard.module.css";
 interface VideoCardProps {
   video: Video;
   layout?: "vertical" | "horizontal" | "shorts";
+  isPriority?: boolean;
 }
 
 function formatDuration(seconds: number) {
@@ -23,6 +24,7 @@ import { socket } from '@/lib/socket';
 export default function VideoCard({
   video,
   layout = "vertical",
+  isPriority = false,
 }: VideoCardProps) {
   const [isNavigating, setIsNavigating] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
@@ -93,10 +95,20 @@ export default function VideoCard({
       className={`${styles.videoCard} ${layout === "horizontal" ? styles.horizontal : ""} ${layout === "shorts" ? styles.shorts : ""}`}
     >
       <div className={styles.thumbnailContainer}>
-        <div
-          className={styles.thumbnail}
-          style={{ backgroundImage: `url(${video.thumbnailUrl})` }}
-        />
+        {video.thumbnailUrl ? (
+          <img
+            src={video.thumbnailUrl}
+            alt={video.title}
+            className={styles.thumbnail}
+            loading={isPriority ? 'eager' : 'lazy'}
+            decoding={isPriority ? 'sync' : 'async'}
+            // @ts-ignore – fetchPriority is a valid HTML attribute in React 18+
+            fetchPriority={isPriority ? 'high' : 'auto'}
+            style={{ width: '100%', height: '100%', objectFit: 'cover', position: 'absolute', top: 0, left: 0 }}
+          />
+        ) : (
+          <div className={styles.thumbnail} style={{ backgroundColor: '#1a1a1a' }} />
+        )}
         {isNew && <div className={styles.newBadge}>New</div>}
         {isHovered && (
           <video
@@ -121,7 +133,13 @@ export default function VideoCard({
         {layout === "vertical" && (
           <div className={styles.creatorAvatar}>
             {creator?.avatarUrl ? (
-              <img src={creator.avatarUrl} alt={creator.username} className={styles.avatarImage} />
+              <img
+                src={creator.avatarUrl}
+                alt={creator.username}
+                className={styles.avatarImage}
+                loading="lazy"
+                decoding="async"
+              />
             ) : (
               creator?.username?.charAt(0) || "U"
             )}

@@ -140,7 +140,7 @@ export default function HomeFeed() {
             <div className={styles.heroSection}>
               <h2 className={styles.sectionHeading}>Featured</h2>
               <div className={styles.heroWrapper}>
-                <VideoCard video={regularVideos[0]} layout="vertical" />
+                <VideoCard video={regularVideos[0]} layout="vertical" isPriority />
               </div>
             </div>
           )}
@@ -150,9 +150,9 @@ export default function HomeFeed() {
             <div className={styles.rowSection}>
               <h2 className={styles.sectionHeading}>Trending</h2>
               <div className={styles.rowScroll}>
-                {regularVideos.slice(1, 5).map((video) => (
+                {regularVideos.slice(1, 5).map((video, i) => (
                   <div key={video._id} className={styles.rowItem}>
-                    <VideoCard video={video} />
+                    <VideoCard video={video} isPriority={i < 4} />
                   </div>
                 ))}
               </div>

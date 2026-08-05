@@ -1,18 +1,19 @@
 import React from 'react';
-import { View, StyleSheet, Text, ScrollView, TouchableOpacity, Image } from 'react-native';
+import { View, StyleSheet, Text, ScrollView, TouchableOpacity, Image, Share } from 'react-native';
 import { useVideoPlayer, VideoView } from 'expo-video';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRoute, useNavigation } from '@react-navigation/native';
-import { ChevronLeft, ThumbsUp, ThumbsDown, Share2, MessageSquare, PlusCircle } from 'lucide-react-native';
+import { ChevronLeft, ThumbsUp, ThumbsDown, Share2, Bookmark, MessageSquare } from 'lucide-react-native';
 import { formatDistanceToNow } from 'date-fns';
 import { socket } from '../api/socket';
 import client from '../api/client';
 import { useAuth } from '../context/AuthContext';
 import CommentsSheet from '../components/CommentsSheet';
+import SaveSheet from '../components/SaveSheet';
 
 export default function VideoPlayerScreen() {
   const route = useRoute<any>();
-  const navigation = useNavigation();
+  const navigation = useNavigation<any>();
   const { video } = route.params;
 
   const player = useVideoPlayer(video.url, player => {
@@ -25,6 +26,26 @@ export default function VideoPlayerScreen() {
   const [isSubscribed, setIsSubscribed] = React.useState(false);
   const [subscribing, setSubscribing] = React.useState(false);
   const [showComments, setShowComments] = React.useState(false);
+  const [showSave, setShowSave] = React.useState(false);
+
+  // Action states
+  const [likes, setLikes] = React.useState<number>(video.likes || 0);
+  const [userAction, setUserAction] = React.useState<'like' | 'dislike' | null>(null);
+
+  React.useEffect(() => {
+    const checkInteraction = async () => {
+      if (!user) return;
+      try {
+        const res = await client.get(`/videos/${video._id}`);
+        const v = res.data;
+        const uid = user._id;
+        if (v.likedBy?.includes(uid)) setUserAction('like');
+        else if (v.dislikedBy?.includes(uid)) setUserAction('dislike');
+        if (typeof v.likes === 'number') setLikes(v.likes);
+      } catch {/* silent */}
+    };
+    checkInteraction();
+  }, [video._id, user]);
 
   React.useEffect(() => {
     const checkSub = async () => {
@@ -32,9 +53,7 @@ export default function VideoPlayerScreen() {
       try {
         const res = await client.get(`/users/check-subscription/${creator._id}`);
         setIsSubscribed(res.data.isSubscribed);
-      } catch (error) {
-        console.error('Error checking subscription', error);
-      }
+      } catch (error) { console.error('Error checking subscription', error); }
     };
     checkSub();
   }, [user, creator?._id]);
@@ -42,35 +61,54 @@ export default function VideoPlayerScreen() {
   React.useEffect(() => {
     const handleUserUpdate = (data: any) => {
       if (creator && (creator._id === data.userId || creator.id === data.userId)) {
-        setCreator((prev: any) => ({
-          ...prev,
-          subscribersCount: data.subscribersCount,
-          isVerified: data.isVerified
-        }));
+        setCreator((prev: any) => ({ ...prev, subscribersCount: data.subscribersCount, isVerified: data.isVerified }));
       }
     };
     socket.on('user_updated', handleUserUpdate);
-    return () => {
-      socket.off('user_updated', handleUserUpdate);
-    };
+    return () => { socket.off('user_updated', handleUserUpdate); };
   }, [creator]);
 
   const handleSubscribe = async () => {
-    if (!user) {
-      navigation.navigate('Login' as never);
-      return;
-    }
+    if (!user) { navigation.navigate('Login' as never); return; }
     if (!creator?._id) return;
-    
     setSubscribing(true);
     try {
       const res = await client.post('/users/subscribe', { channelId: creator._id });
       setIsSubscribed(res.data.subscribed);
-    } catch (error) {
-      console.error('Error subscribing', error);
-    } finally {
-      setSubscribing(false);
-    }
+    } catch (error) { console.error('Error subscribing', error); }
+    finally { setSubscribing(false); }
+  };
+
+  const handleLike = async () => {
+    if (!user) { navigation.navigate('Login' as never); return; }
+    try {
+      await client.post(`/videos/${video._id}/like`);
+      if (userAction === 'like') { setUserAction(null); setLikes(prev => Math.max(0, prev - 1)); }
+      else { setUserAction('like'); setLikes(prev => prev + 1); }
+    } catch (error) { console.error('Like error', error); }
+  };
+
+  const handleDislike = async () => {
+    if (!user) { navigation.navigate('Login' as never); return; }
+    try {
+      await client.post(`/videos/${video._id}/dislike`);
+      if (userAction === 'dislike') { setUserAction(null); }
+      else { if (userAction === 'like') setLikes(prev => Math.max(0, prev - 1)); setUserAction('dislike'); }
+    } catch (error) { console.error('Dislike error', error); }
+  };
+
+  const handleShare = async () => {
+    try {
+      await Share.share({
+        message: `Watch "${video.title}" on Vynra!\nhttps://vynra.app/watch?v=${video._id}`,
+      });
+    } catch (error) { console.error('Share error', error); }
+  };
+
+  const formatLikes = (n: number) => {
+    if (n >= 1000000) return `${(n / 1000000).toFixed(1)}M`;
+    if (n >= 1000) return `${(n / 1000).toFixed(1)}K`;
+    return `${n}`;
   };
 
   return (
@@ -82,12 +120,7 @@ export default function VideoPlayerScreen() {
       </View>
       
       <View style={styles.videoContainer}>
-        <VideoView
-          style={styles.video}
-          player={player}
-          nativeControls={true}
-          contentFit="contain"
-        />
+        <VideoView style={styles.video} player={player} nativeControls={true} contentFit="contain" />
       </View>
 
       <ScrollView style={styles.detailsContainer} showsVerticalScrollIndicator={false}>
@@ -97,10 +130,7 @@ export default function VideoPlayerScreen() {
         </Text>
 
         <View style={styles.creatorRow}>
-          <Image 
-            source={{ uri: video.creator?.avatarUrl || 'https://via.placeholder.com/40' }} 
-            style={styles.avatar} 
-          />
+          <Image source={{ uri: video.creator?.avatarUrl || 'https://via.placeholder.com/40' }} style={styles.avatar} />
           <View style={styles.creatorInfo}>
             <Text style={styles.creatorName}>{creator?.username || 'Unknown'}</Text>
             <Text style={styles.subscribers}>{creator?.subscribersCount || 0} subscribers</Text>
@@ -118,22 +148,31 @@ export default function VideoPlayerScreen() {
           )}
         </View>
 
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.actionsRow}>
-          <TouchableOpacity style={styles.actionBtn}>
-            <ThumbsUp color="#fff" size={20} />
-            <Text style={styles.actionText}>{video.likes || 0}</Text>
+        {/* Action buttons */}
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.actionsRow} contentContainerStyle={{ gap: 10, paddingRight: 16 }}>
+          <TouchableOpacity style={[styles.actionBtn, userAction === 'like' && styles.actionBtnActive]} onPress={handleLike}>
+            <ThumbsUp color={userAction === 'like' ? '#0f0f0f' : '#fff'} size={18} fill={userAction === 'like' ? '#0f0f0f' : 'none'} />
+            <Text style={[styles.actionText, userAction === 'like' && styles.actionTextActive]}>{formatLikes(likes)}</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.actionBtn}>
-            <ThumbsDown color="#fff" size={20} />
-            <Text style={styles.actionText}>Dislike</Text>
+
+          <TouchableOpacity style={[styles.actionBtn, userAction === 'dislike' && styles.actionBtnActive]} onPress={handleDislike}>
+            <ThumbsDown color={userAction === 'dislike' ? '#0f0f0f' : '#fff'} size={18} fill={userAction === 'dislike' ? '#0f0f0f' : 'none'} />
+            <Text style={[styles.actionText, userAction === 'dislike' && styles.actionTextActive]}>Dislike</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.actionBtn}>
-            <Share2 color="#fff" size={20} />
+
+          <TouchableOpacity style={styles.actionBtn} onPress={handleShare}>
+            <Share2 color="#fff" size={18} />
             <Text style={styles.actionText}>Share</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.actionBtn}>
-            <PlusCircle color="#fff" size={20} />
+
+          <TouchableOpacity style={styles.actionBtn} onPress={() => setShowSave(true)}>
+            <Bookmark color="#fff" size={18} />
             <Text style={styles.actionText}>Save</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.actionBtn} onPress={() => setShowComments(true)}>
+            <MessageSquare color="#fff" size={18} />
+            <Text style={styles.actionText}>Comments</Text>
           </TouchableOpacity>
         </ScrollView>
 
@@ -142,9 +181,7 @@ export default function VideoPlayerScreen() {
             <Text style={styles.commentsTitle}>Comments</Text>
             <Text style={styles.commentsCount}>{video.comments?.length || 0}</Text>
           </View>
-          <Text style={styles.commentPreviewText}>
-            {video.comments?.[0]?.text || "Add a comment..."}
-          </Text>
+          <Text style={styles.commentPreviewText}>{video.comments?.[0]?.text || 'Add a comment...'}</Text>
         </TouchableOpacity>
 
         {video.description ? (
@@ -154,11 +191,8 @@ export default function VideoPlayerScreen() {
         ) : null}
       </ScrollView>
 
-      <CommentsSheet 
-        isVisible={showComments}
-        onClose={() => setShowComments(false)}
-        videoId={video._id}
-      />
+      <CommentsSheet isVisible={showComments} onClose={() => setShowComments(false)} videoId={video._id} />
+      <SaveSheet isVisible={showSave} onClose={() => setShowSave(false)} videoId={video._id} />
     </SafeAreaView>
   );
 }
@@ -181,14 +215,16 @@ const styles = StyleSheet.create({
   subscribedBtn: { backgroundColor: '#222' },
   subscribeBtnText: { color: '#000', fontWeight: 'bold' },
   subscribedText: { color: '#fff' },
-  actionsRow: { flexDirection: 'row', marginBottom: 24, gap: 12 },
-  actionBtn: { alignItems: 'center', backgroundColor: '#222', paddingVertical: 8, paddingHorizontal: 16, borderRadius: 20, flexDirection: 'row', gap: 8 },
+  actionsRow: { flexDirection: 'row', marginBottom: 24 },
+  actionBtn: { alignItems: 'center', backgroundColor: '#222', paddingVertical: 9, paddingHorizontal: 16, borderRadius: 20, flexDirection: 'row', gap: 7 },
+  actionBtnActive: { backgroundColor: '#fff' },
   actionText: { color: '#fff', fontSize: 14, fontWeight: '500' },
+  actionTextActive: { color: '#0f0f0f' },
   commentsPreview: { backgroundColor: '#1a1a1a', padding: 12, borderRadius: 12, marginBottom: 16 },
   commentsHeader: { flexDirection: 'row', alignItems: 'center', marginBottom: 4 },
   commentsTitle: { color: '#fff', fontWeight: 'bold', marginRight: 8 },
   commentsCount: { color: '#aaa', fontSize: 12 },
   commentPreviewText: { color: '#fff', fontSize: 14 },
   descriptionBox: { backgroundColor: '#1a1a1a', padding: 12, borderRadius: 12, marginBottom: 40 },
-  descriptionText: { color: '#fff', fontSize: 14, lineHeight: 20 }
+  descriptionText: { color: '#fff', fontSize: 14, lineHeight: 20 },
 });

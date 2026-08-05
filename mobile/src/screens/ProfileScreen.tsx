@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '../context/AuthContext';
-import { LogOut, ChevronRight, Video, Globe, Moon, Settings, History, Clock, ThumbsUp } from 'lucide-react-native';
+import { LogOut, ChevronRight, Video, Globe, Moon, Settings, History, Clock, ThumbsUp, ListVideo } from 'lucide-react-native';
 import { useNavigation } from '@react-navigation/native';
 
 export default function ProfileScreen() {
@@ -56,6 +56,11 @@ export default function ProfileScreen() {
           <TouchableOpacity style={styles.menuItem} onPress={() => navigateToVideoList('Liked Videos', '/videos/liked')}>
             <ThumbsUp color="#fff" size={24} style={styles.menuIcon} />
             <Text style={styles.menuText}>Liked Videos</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.menuItem} onPress={() => navigation.navigate('Playlists')}>
+            <ListVideo color="#fff" size={24} style={styles.menuIcon} />
+            <Text style={styles.menuText}>Playlists</Text>
           </TouchableOpacity>
         </View>
 
