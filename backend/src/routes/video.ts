@@ -235,7 +235,7 @@ router.get('/', optionalAuthMiddleware, async (req: AuthRequest, res: Response) 
     res.json(allVideos);
   } catch (error) {
     console.error('Error fetching videos:', error);
-    res.status(500).json({ error: 'Server error fetching videos', details: error.message });
+    res.status(500).json({ error: 'Server error fetching videos', details: error instanceof Error ? error.message : 'Unknown error' });
   }
 });
 

@@ -1,48 +1,55 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import {
   View, Text, StyleSheet, FlatList, TouchableOpacity,
-  ActivityIndicator, Image
+  ActivityIndicator, Image, RefreshControl
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useNavigation, useRoute } from '@react-navigation/native';
-import { ChevronLeft, ListVideo } from 'lucide-react-native';
+import { useNavigation, useRoute, useFocusEffect } from '@react-navigation/native';
+import { ChevronLeft, ListVideo, Play } from 'lucide-react-native';
 import client from '../api/client';
 import { formatDistanceToNow } from 'date-fns';
+
+const isShort = (video: any) =>
+  video?.tags?.includes('shorts') ||
+  video?.aspectRatio === '9:16' ||
+  (video?.height && video?.width && video.height > video.width);
 
 export default function PlaylistsScreen() {
   const navigation = useNavigation<any>();
   const route = useRoute<any>();
   const playlistId = route.params?.playlistId;
   const playlistName = route.params?.playlistName;
+  const playlistObj = route.params?.playlist;
 
   const [playlists, setPlaylists] = useState<any[]>([]);
   const [videos, setVideos] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
 
-  useEffect(() => {
-    if (playlistId) {
-      fetchPlaylistVideos();
-    } else {
-      fetchPlaylists();
-    }
-  }, [playlistId]);
+  // Refresh whenever screen comes into focus (e.g. after saving a new video)
+  useFocusEffect(
+    useCallback(() => {
+      if (playlistId) fetchPlaylistVideos();
+      else fetchPlaylists();
+    }, [playlistId])
+  );
 
-  const fetchPlaylists = async () => {
+  const fetchPlaylists = async (isRefresh = false) => {
     try {
-      setLoading(true);
+      if (!isRefresh) setLoading(true);
       const res = await client.get('/playlists');
       setPlaylists(res.data);
     } catch (error) {
       console.error('Error fetching playlists', error);
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   };
 
-  const fetchPlaylistVideos = async () => {
+  const fetchPlaylistVideos = async (isRefresh = false) => {
     try {
-      setLoading(true);
-      // Fetch all playlists and find the matching one
+      if (!isRefresh) setLoading(true);
       const res = await client.get('/playlists');
       const playlist = res.data.find((p: any) => p._id === playlistId);
       setVideos(playlist?.videos || []);
@@ -50,13 +57,17 @@ export default function PlaylistsScreen() {
       console.error('Error fetching playlist videos', error);
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   };
 
-  // Delete not supported by backend yet
+  const onRefresh = () => {
+    setRefreshing(true);
+    if (playlistId) fetchPlaylistVideos(true);
+    else fetchPlaylists(true);
+  };
 
-
-  // ── Playlist list view ──────────────────────────────────────────
+  // ── Playlist list view ─────────────────────────────────────────
   if (!playlistId) {
     return (
       <SafeAreaView style={styles.container}>
@@ -68,47 +79,76 @@ export default function PlaylistsScreen() {
         </View>
 
         {loading ? (
-          <ActivityIndicator style={styles.loader} color="#fff" />
+          <ActivityIndicator style={{ marginTop: 40 }} color="#fff" />
         ) : (
           <FlatList
             data={playlists}
             keyExtractor={(item) => item._id}
             contentContainerStyle={styles.listContent}
-            renderItem={({ item }) => (
-              <TouchableOpacity
-                style={styles.playlistCard}
-                onPress={() => navigation.navigate('Playlists', { playlistId: item._id, playlistName: item.name })}
-              >
-                {/* Thumbnail stack */}
-                <View style={styles.thumbStack}>
-                  {item.thumbnailUrl ? (
-                    <Image source={{ uri: item.thumbnailUrl }} style={styles.thumbImg} />
-                  ) : (
-                    <View style={[styles.thumbImg, styles.thumbPlaceholder]}>
-                      <ListVideo color="#555" size={28} />
-                    </View>
-                  )}
-                  <View style={styles.thumbOverlay}>
-                    <Text style={styles.thumbCount}>{item.videos?.length || 0}</Text>
-                  </View>
-                </View>
+            refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#fff" />}
+            renderItem={({ item }) => {
+              // Pick first video thumbnail as playlist cover
+              const firstThumb = item.videos?.[0]?.thumbnailUrl;
+              const shortCount = item.videos?.filter(isShort).length || 0;
+              const videoCount = (item.videos?.length || 0) - shortCount;
 
-                <View style={styles.playlistInfo}>
-                  <Text style={styles.playlistName} numberOfLines={1}>{item.name}</Text>
-                  <Text style={styles.playlistMeta}>{item.videos?.length || 0} videos</Text>
-                  {item.createdAt && (
-                    <Text style={styles.playlistDate}>
-                      {formatDistanceToNow(new Date(item.createdAt), { addSuffix: true })}
-                    </Text>
-                  )}
-                </View>
-              </TouchableOpacity>
-            )}
+              return (
+                <TouchableOpacity
+                  style={styles.playlistCard}
+                  onPress={() =>
+                    navigation.navigate('Playlists', {
+                      playlistId: item._id,
+                      playlistName: item.name,
+                      playlist: item,
+                    })
+                  }
+                  activeOpacity={0.75}
+                >
+                  {/* Stacked thumbnail */}
+                  <View style={styles.thumbWrap}>
+                    <View style={styles.thumbBack} />
+                    <View style={styles.thumbMid} />
+                    {firstThumb ? (
+                      <Image source={{ uri: firstThumb }} style={styles.thumbFront} />
+                    ) : (
+                      <View style={[styles.thumbFront, styles.thumbPlaceholder]}>
+                        <ListVideo color="#555" size={24} />
+                      </View>
+                    )}
+                    <View style={styles.thumbCountBadge}>
+                      <Play color="#fff" size={8} fill="#fff" />
+                      <Text style={styles.thumbCountText}>{item.videos?.length || 0}</Text>
+                    </View>
+                  </View>
+
+                  <View style={styles.playlistInfo}>
+                    <Text style={styles.playlistName} numberOfLines={1}>{item.name}</Text>
+                    <View style={styles.playlistMeta}>
+                      {videoCount > 0 && (
+                        <Text style={styles.metaChip}>🎬 {videoCount} video{videoCount !== 1 ? 's' : ''}</Text>
+                      )}
+                      {shortCount > 0 && (
+                        <Text style={styles.metaChipShort}>⚡ {shortCount} short{shortCount !== 1 ? 's' : ''}</Text>
+                      )}
+                    </View>
+                    {item.createdAt && (
+                      <Text style={styles.playlistDate}>
+                        {formatDistanceToNow(new Date(item.createdAt), { addSuffix: true })}
+                      </Text>
+                    )}
+                  </View>
+
+                  <ChevronLeft color="#555" size={20} style={{ transform: [{ rotate: '180deg' }] }} />
+                </TouchableOpacity>
+              );
+            }}
             ListEmptyComponent={
               <View style={styles.empty}>
-                <ListVideo color="#444" size={48} />
+                <ListVideo color="#333" size={56} />
                 <Text style={styles.emptyTitle}>No playlists yet</Text>
-                <Text style={styles.emptySubtext}>Save a video to create your first playlist</Text>
+                <Text style={styles.emptySubtext}>
+                  Tap Save on any video or short to create your first playlist
+                </Text>
               </View>
             }
           />
@@ -117,45 +157,98 @@ export default function PlaylistsScreen() {
     );
   }
 
-  // ── Single playlist video list view ────────────────────────────
+  // ── Playlist detail view ────────────────────────────────────────
+  const buildPlaylistObj = () => ({
+    _id: playlistId,
+    name: playlistName,
+    videos,
+  });
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
           <ChevronLeft color="#fff" size={26} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle} numberOfLines={1}>{playlistName}</Text>
+        <View style={{ flex: 1 }}>
+          <Text style={styles.headerTitle} numberOfLines={1}>{playlistName}</Text>
+          {!loading && (
+            <Text style={styles.headerSub}>{videos.length} video{videos.length !== 1 ? 's' : ''}</Text>
+          )}
+        </View>
+        {/* Play all button */}
+        {videos.length > 0 && (
+          <TouchableOpacity
+            style={styles.playAllBtn}
+            onPress={() =>
+              navigation.navigate('PlaylistPlayer', {
+                playlist: buildPlaylistObj(),
+                startIndex: 0,
+              })
+            }
+          >
+            <Play color="#fff" size={14} fill="#fff" />
+            <Text style={styles.playAllText}>Play All</Text>
+          </TouchableOpacity>
+        )}
       </View>
 
       {loading ? (
-        <ActivityIndicator style={styles.loader} color="#fff" />
+        <ActivityIndicator style={{ marginTop: 40 }} color="#fff" />
       ) : (
         <FlatList
           data={videos}
           keyExtractor={(item) => item._id}
           contentContainerStyle={styles.listContent}
-          renderItem={({ item }) => (
-            <TouchableOpacity
-              style={styles.videoRow}
-              onPress={() => navigation.navigate('VideoPlayer', { video: item })}
-            >
-              <Image
-                source={{ uri: item.thumbnailUrl || 'https://via.placeholder.com/160x90' }}
-                style={styles.videoThumb}
-              />
-              <View style={styles.videoInfo}>
-                <Text style={styles.videoTitle} numberOfLines={2}>{item.title}</Text>
-                <Text style={styles.videoMeta}>{item.creator?.username}</Text>
-                <Text style={styles.videoMeta}>
-                  {item.views?.toLocaleString()} views •{' '}
-                  {item.createdAt ? formatDistanceToNow(new Date(item.createdAt), { addSuffix: true }) : ''}
-                </Text>
-              </View>
-            </TouchableOpacity>
-          )}
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#fff" />}
+          renderItem={({ item, index }) => {
+            const short = isShort(item);
+            return (
+              <TouchableOpacity
+                style={styles.videoRow}
+                onPress={() =>
+                  navigation.navigate('PlaylistPlayer', {
+                    playlist: buildPlaylistObj(),
+                    startIndex: index,
+                  })
+                }
+                activeOpacity={0.75}
+              >
+                {/* Thumbnail — portrait for shorts, landscape for videos */}
+                <View style={short ? styles.shortThumbWrap : styles.videoThumbWrap}>
+                  <Image
+                    source={{ uri: item.thumbnailUrl || 'https://via.placeholder.com/160x90' }}
+                    style={short ? styles.shortThumb : styles.videoThumb}
+                    resizeMode="cover"
+                  />
+                  {short && (
+                    <View style={styles.shortBadge}>
+                      <Text style={styles.shortBadgeText}>Short</Text>
+                    </View>
+                  )}
+                  <View style={styles.indexBadge}>
+                    <Text style={styles.indexBadgeText}>{index + 1}</Text>
+                  </View>
+                </View>
+
+                <View style={styles.videoInfo}>
+                  <Text style={styles.videoTitle} numberOfLines={2}>{item.title}</Text>
+                  <Text style={styles.videoMeta}>{item.creator?.username}</Text>
+                  <Text style={styles.videoMeta}>
+                    {item.views?.toLocaleString()} views
+                    {item.createdAt
+                      ? ` • ${formatDistanceToNow(new Date(item.createdAt), { addSuffix: true })}`
+                      : ''}
+                  </Text>
+                </View>
+              </TouchableOpacity>
+            );
+          }}
           ListEmptyComponent={
             <View style={styles.empty}>
-              <Text style={styles.emptyTitle}>This playlist is empty</Text>
+              <ListVideo color="#333" size={48} />
+              <Text style={styles.emptyTitle}>Playlist is empty</Text>
+              <Text style={styles.emptySubtext}>Save videos or shorts to this playlist</Text>
             </View>
           }
         />
@@ -167,42 +260,77 @@ export default function PlaylistsScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#0f0f0f' },
   header: {
-    flexDirection: 'row', alignItems: 'center', padding: 16,
-    borderBottomWidth: 1, borderBottomColor: '#222', gap: 12,
+    flexDirection: 'row', alignItems: 'center',
+    paddingHorizontal: 16, paddingVertical: 12,
+    borderBottomWidth: 1, borderBottomColor: '#1a1a1a', gap: 12,
   },
   backBtn: { padding: 4 },
-  headerTitle: { color: '#fff', fontSize: 20, fontWeight: 'bold', flex: 1 },
-  loader: { flex: 1, justifyContent: 'center' },
+  headerTitle: { color: '#fff', fontSize: 18, fontWeight: 'bold' },
+  headerSub: { color: '#888', fontSize: 12, marginTop: 1 },
+  playAllBtn: {
+    flexDirection: 'row', alignItems: 'center', gap: 6,
+    backgroundColor: '#3ea6ff', paddingHorizontal: 14, paddingVertical: 8, borderRadius: 20,
+  },
+  playAllText: { color: '#fff', fontWeight: 'bold', fontSize: 13 },
   listContent: { padding: 16, gap: 12 },
-  // Playlist card
+
+  // Playlist cards
   playlistCard: {
     flexDirection: 'row', alignItems: 'center', gap: 14,
-    backgroundColor: '#1a1a1a', borderRadius: 12, padding: 12,
+    backgroundColor: '#1a1a1a', borderRadius: 14, padding: 12,
   },
-  thumbStack: { width: 100, height: 60, borderRadius: 8, overflow: 'hidden', position: 'relative' },
-  thumbImg: { width: '100%', height: '100%' },
+  thumbWrap: { width: 90, height: 60, position: 'relative' },
+  thumbBack: {
+    position: 'absolute', bottom: 0, left: 4, right: -4,
+    height: 50, backgroundColor: '#2a2a2a', borderRadius: 6,
+  },
+  thumbMid: {
+    position: 'absolute', bottom: 3, left: 2, right: -2,
+    height: 50, backgroundColor: '#252525', borderRadius: 6,
+  },
+  thumbFront: {
+    position: 'absolute', bottom: 6, left: 0, right: 0,
+    height: 50, borderRadius: 6, overflow: 'hidden',
+  },
   thumbPlaceholder: { backgroundColor: '#2a2a2a', alignItems: 'center', justifyContent: 'center' },
-  thumbOverlay: {
-    position: 'absolute', bottom: 0, right: 0, left: 0,
-    backgroundColor: 'rgba(0,0,0,0.6)', alignItems: 'center', paddingVertical: 2,
+  thumbCountBadge: {
+    position: 'absolute', top: 2, right: -2,
+    flexDirection: 'row', alignItems: 'center', gap: 2,
+    backgroundColor: 'rgba(0,0,0,0.7)', paddingHorizontal: 5, paddingVertical: 2, borderRadius: 6,
   },
-  thumbCount: { color: '#fff', fontSize: 11, fontWeight: 'bold' },
-  playlistInfo: { flex: 1 },
-  playlistName: { color: '#fff', fontSize: 15, fontWeight: '600', marginBottom: 2 },
-  playlistMeta: { color: '#888', fontSize: 13 },
-  playlistDate: { color: '#666', fontSize: 12, marginTop: 2 },
-  deleteBtn: { padding: 8 },
-  // Video row
+  thumbCountText: { color: '#fff', fontSize: 10, fontWeight: 'bold' },
+  playlistInfo: { flex: 1, gap: 4 },
+  playlistName: { color: '#fff', fontSize: 15, fontWeight: '700' },
+  playlistMeta: { flexDirection: 'row', gap: 6, flexWrap: 'wrap' },
+  metaChip: { color: '#aaa', fontSize: 12 },
+  metaChipShort: { color: '#ff9800', fontSize: 12 },
+  playlistDate: { color: '#666', fontSize: 11 },
+
+  // Video rows
   videoRow: {
-    flexDirection: 'row', gap: 12, backgroundColor: '#1a1a1a',
-    borderRadius: 12, overflow: 'hidden',
+    flexDirection: 'row', gap: 12, alignItems: 'flex-start',
+    backgroundColor: '#1a1a1a', borderRadius: 12, overflow: 'hidden', padding: 8,
   },
-  videoThumb: { width: 140, height: 80 },
-  videoInfo: { flex: 1, padding: 10, justifyContent: 'center' },
-  videoTitle: { color: '#fff', fontSize: 14, fontWeight: '600', marginBottom: 4 },
-  videoMeta: { color: '#888', fontSize: 12 },
+  videoThumbWrap: { width: 130, height: 76, borderRadius: 8, overflow: 'hidden', position: 'relative' },
+  videoThumb: { width: '100%', height: '100%' },
+  shortThumbWrap: { width: 52, height: 76, borderRadius: 8, overflow: 'hidden', position: 'relative' },
+  shortThumb: { width: '100%', height: '100%' },
+  shortBadge: {
+    position: 'absolute', top: 3, left: 3,
+    backgroundColor: '#ff4444', paddingHorizontal: 5, paddingVertical: 1, borderRadius: 4,
+  },
+  shortBadgeText: { color: '#fff', fontSize: 9, fontWeight: 'bold' },
+  indexBadge: {
+    position: 'absolute', bottom: 3, right: 3,
+    backgroundColor: 'rgba(0,0,0,0.7)', paddingHorizontal: 5, paddingVertical: 1, borderRadius: 4,
+  },
+  indexBadgeText: { color: '#fff', fontSize: 9, fontWeight: 'bold' },
+  videoInfo: { flex: 1, justifyContent: 'center', paddingVertical: 4, gap: 3 },
+  videoTitle: { color: '#fff', fontSize: 13, fontWeight: '600' },
+  videoMeta: { color: '#888', fontSize: 11 },
+
   // Empty state
-  empty: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingTop: 80, gap: 10 },
+  empty: { alignItems: 'center', paddingTop: 80, gap: 12 },
   emptyTitle: { color: '#fff', fontSize: 18, fontWeight: 'bold' },
   emptySubtext: { color: '#888', fontSize: 14, textAlign: 'center', paddingHorizontal: 32 },
 });

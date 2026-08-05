@@ -12,6 +12,7 @@ const { height: WINDOW_HEIGHT, width: WINDOW_WIDTH } = Dimensions.get('window');
 const SHORTS_HEIGHT = WINDOW_HEIGHT - 50;
 
 import { ThumbsUp, MessageSquare, Share2, MoreVertical } from 'lucide-react-native';
+import SaveSheet from '../components/SaveSheet';
 
 function CommentsModal({ videoId, visible, onClose }: { videoId: string, visible: boolean, onClose: () => void }) {
   const [comments, setComments] = useState<any[]>([]);
@@ -93,68 +94,6 @@ function CommentsModal({ videoId, visible, onClose }: { videoId: string, visible
   );
 }
 
-function SaveToPlaylistModal({ videoId, visible, onClose }: { videoId: string, visible: boolean, onClose: () => void }) {
-  const [playlists, setPlaylists] = useState<any[]>([]);
-  const { user } = useAuth();
-
-  useEffect(() => {
-    if (visible && user) {
-      fetchPlaylists();
-    }
-  }, [visible, user]);
-
-  const fetchPlaylists = async () => {
-    try {
-      const res = await apiClient.get('/playlists');
-      setPlaylists(res.data);
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  const toggleSave = async (playlist: any) => {
-    try {
-      const isSaved = playlist.videos.some((v: any) => v._id === videoId || v === videoId);
-      if (isSaved) {
-        await apiClient.post(`/playlists/${playlist._id}/remove`, { videoId });
-      } else {
-        await apiClient.post(`/playlists/${playlist._id}/add`, { videoId });
-      }
-      fetchPlaylists();
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  return (
-    <Modal visible={visible} animationType="slide" transparent>
-      <View style={styles.modalOverlay}>
-        <View style={styles.modalContent}>
-          <View style={styles.modalHeader}>
-            <Text style={styles.modalTitle}>Save to Playlist</Text>
-            <TouchableOpacity onPress={onClose}><Text style={styles.closeText}>Close</Text></TouchableOpacity>
-          </View>
-          {!user ? <Text style={{color: '#888', padding: 16, textAlign: 'center'}}>Log in to save</Text> : (
-            <FlatList
-              data={playlists}
-              keyExtractor={item => item._id}
-              renderItem={({item}) => {
-                const isSaved = item.videos.some((v: any) => v._id === videoId || v === videoId);
-                return (
-                  <TouchableOpacity style={styles.playlistItem} onPress={() => toggleSave(item)}>
-                    <Text style={styles.playlistName}>{item.name}</Text>
-                    <Text style={styles.playlistStatus}>{isSaved ? 'Saved' : 'Save'}</Text>
-                  </TouchableOpacity>
-                );
-              }}
-              ListEmptyComponent={<Text style={{color: '#888', padding: 16}}>No playlists found.</Text>}
-            />
-          )}
-        </View>
-      </View>
-    </Modal>
-  );
-}
 
 function ShortVideoItem({ item, isActive, height }: { item: Video, isActive: boolean, height: number }) {
   const { user } = useAuth();
@@ -162,7 +101,7 @@ function ShortVideoItem({ item, isActive, height }: { item: Video, isActive: boo
   const [userAction, setUserAction] = useState<'like' | 'dislike' | null>(null);
   const [showComments, setShowComments] = useState(false);
   const [showPlaylist, setShowPlaylist] = useState(false);
-  const [isLiking, setIsLiking] = useState(false);
+  const isLiking = React.useRef(false);
 
   useEffect(() => {
     const videoItem = item as any;
@@ -207,22 +146,23 @@ function ShortVideoItem({ item, isActive, height }: { item: Video, isActive: boo
   }, [isActive, player]);
 
   const handleLike = async () => {
-    if (!user || isLiking) return;
-    setIsLiking(true);
-    
+    if (!user || isLiking.current) return;
+    isLiking.current = true; // synchronous — blocks immediately
+
     const prevAction = userAction;
     const prevLikes = likes;
-    
-    // Optimistic Update
+
+    // Optimistic update
     const newAction = prevAction === 'like' ? null : 'like';
     setUserAction(newAction);
-    setLikes(prev => newAction === 'like' ? prev + 1 : prev - 1);
-    
+    setLikes(prev => newAction === 'like' ? prev + 1 : Math.max(0, prev - 1));
+
     try {
       const res = await apiClient.post(`/videos/${item._id}/like`);
       const updatedVideo = res.data;
-      setLikes(updatedVideo.likes);
-      if (updatedVideo.likedBy.includes(user._id)) {
+      // Sync authoritative count from server
+      if (typeof updatedVideo.likes === 'number') setLikes(updatedVideo.likes);
+      if (updatedVideo.likedBy?.includes(user._id)) {
         setUserAction('like');
       } else {
         setUserAction(null);
@@ -233,7 +173,7 @@ function ShortVideoItem({ item, isActive, height }: { item: Video, isActive: boo
       setUserAction(prevAction);
       setLikes(prevLikes);
     } finally {
-      setIsLiking(false);
+      isLiking.current = false;
     }
   };
 
@@ -312,7 +252,7 @@ function ShortVideoItem({ item, isActive, height }: { item: Video, isActive: boo
         </TouchableOpacity>
       </View>
       <CommentsModal videoId={item._id} visible={showComments} onClose={() => setShowComments(false)} />
-      <SaveToPlaylistModal videoId={item._id} visible={showPlaylist} onClose={() => setShowPlaylist(false)} />
+      <SaveSheet isVisible={showPlaylist} onClose={() => setShowPlaylist(false)} videoId={item._id} />
     </View>
   );
 }

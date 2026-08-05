@@ -50,20 +50,33 @@ export default function ShortPlayer({ short }: ShortPlayerProps) {
     }
   };
 
+  const isLiking = React.useRef(false);
+
   const handleLike = async (e: React.MouseEvent) => {
     e.stopPropagation();
+    if (isLiking.current) return; // block rapid clicks
+    isLiking.current = true;
+
+    // Snapshot current state for rollback
+    const prevAction = userAction;
+    const prevLikes = likes;
+
+    // Optimistic update immediately
+    const newAction = userAction === 'like' ? null : 'like';
+    setUserAction(newAction);
+    setLikes(prev => newAction === 'like' ? prev + 1 : Math.max(0, prev - 1));
+
     try {
-      await videoService.likeVideo(short._id);
-      
-      const action = userAction === 'like' ? null : 'like';
-      setUserAction(action);
-      if (action === 'like') {
-        setLikes(prev => prev + 1);
-      } else if (userAction === 'like') {
-        setLikes(prev => prev - 1);
-      }
+      const res = await videoService.likeVideo(short._id) as any;
+      // Sync authoritative count from server
+      if (typeof res.likes === 'number') setLikes(res.likes);
     } catch (error) {
+      // Revert on failure
+      setUserAction(prevAction);
+      setLikes(prevLikes);
       console.error('Failed to like video:', error);
+    } finally {
+      isLiking.current = false;
     }
   };
 

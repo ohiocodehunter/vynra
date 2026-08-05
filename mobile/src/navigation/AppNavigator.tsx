@@ -22,6 +22,7 @@ import SubscriptionsScreen from '../screens/SubscriptionsScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 import ChannelScreen from '../screens/ChannelScreen';
 import PlaylistsScreen from '../screens/PlaylistsScreen';
+import PlaylistPlayerScreen from '../screens/PlaylistPlayerScreen';
 import VideoListScreen from '../screens/VideoListScreen';
 
 const Stack = createNativeStackNavigator();
@@ -109,6 +110,7 @@ export default function AppNavigator() {
             <Stack.Screen name="Channel" component={ChannelScreen} />
             <Stack.Screen name="VideoList" component={VideoListScreen} />
             <Stack.Screen name="Playlists" component={PlaylistsScreen} />
+            <Stack.Screen name="PlaylistPlayer" component={PlaylistPlayerScreen} />
             <Stack.Screen name="Explore" component={ExploreScreen} />
           </>
         )}
