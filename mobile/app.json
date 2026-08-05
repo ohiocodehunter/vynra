@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "mobile",
+    "name": "vynra",
     "slug": "mobile",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -9,7 +9,7 @@
     "backgroundColor": "#0f0f0f",
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.ohiocodehunterorg.mobile"
+      "bundleIdentifier": "com.ohiocodehunterorg.vynra"
     },
     "android": {
       "adaptiveIcon": {
@@ -19,7 +19,7 @@
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
-      "package": "com.ohiocodehunterorg.mobile"
+      "package": "com.ohiocodehunterorg.vynra"
     },
     "web": {
       "favicon": "./assets/favicon.png"
