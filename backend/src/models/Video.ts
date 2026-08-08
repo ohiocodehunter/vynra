@@ -17,6 +17,11 @@ export interface IVideo extends Document {
   visibility: 'public' | 'private' | 'unlisted';
   category?: string;
   tags: string[];
+  aiSuggestions?: {
+    title: string;
+    description: string;
+    tags: string[];
+  };
   createdAt: Date;
   updatedAt: Date;
 }
@@ -39,7 +44,12 @@ const VideoSchema: Schema = new Schema({
   duration: { type: Number, default: 0 },
   status: { type: String, enum: ['processing', 'published', 'private', 'failed'], default: 'processing' },
   visibility: { type: String, enum: ['public', 'private', 'unlisted'], default: 'public' },
-  tags: [{ type: String }]
+  tags: [{ type: String }],
+  aiSuggestions: {
+    title: { type: String },
+    description: { type: String },
+    tags: [{ type: String }]
+  }
 }, { timestamps: true });
 
 export default mongoose.model<IVideo>('Video', VideoSchema);

@@ -4,9 +4,15 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import styles from './page.module.css';
-import { Upload as UploadIcon, FileVideo, X, Loader2 } from 'lucide-react';
+import { Upload as UploadIcon, FileVideo, X, Loader2, Sparkles, Check, RefreshCw } from 'lucide-react';
 import Link from 'next/link';
 import { getApiUrl } from '@/lib/api';
+
+interface AISuggestions {
+  title: string;
+  description: string;
+  tags: string[];
+}
 
 export default function StudioUpload() {
   const { isAuthenticated, user, isLoading } = useAuth();
@@ -17,12 +23,18 @@ export default function StudioUpload() {
   
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
+  const [tags, setTags] = useState<string[]>([]);
   
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [uploadSuccess, setUploadSuccess] = useState(false);
   const [processingStatus, setProcessingStatus] = useState('');
   const [videoId, setVideoId] = useState('');
+
+  // AI suggestions state
+  const [aiSuggestions, setAiSuggestions] = useState<AISuggestions | null>(null);
+  const [aiApplied, setAiApplied] = useState(false);
+  const [aiLoading, setAiLoading] = useState(false);
   
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -32,10 +44,11 @@ export default function StudioUpload() {
     }
   }, [isAuthenticated, isLoading, router]);
 
-  // Polling for processing status
+  // Polling for processing status + AI suggestions
   useEffect(() => {
     let intervalId: NodeJS.Timeout;
     if (uploadSuccess && processingStatus === 'processing' && videoId) {
+      setAiLoading(true);
       intervalId = setInterval(async () => {
         try {
           const response = await fetch(`${getApiUrl()}/videos/${videoId}?polling=true`);
@@ -44,8 +57,14 @@ export default function StudioUpload() {
             if (data.status === 'published') {
               setProcessingStatus('published');
               clearInterval(intervalId);
-            } else if (data.status === 'error' || data.status === 'private') {
+              setAiLoading(false);
+              // Load AI suggestions if available
+              if (data.aiSuggestions) {
+                setAiSuggestions(data.aiSuggestions);
+              }
+            } else if (data.status === 'failed' || data.status === 'error' || data.status === 'private') {
               setProcessingStatus('error');
+              setAiLoading(false);
               clearInterval(intervalId);
             }
           }
@@ -114,6 +133,7 @@ export default function StudioUpload() {
     formData.append('video', videoFile);
     formData.append('title', title);
     formData.append('description', description);
+    formData.append('tags', JSON.stringify(tags));
     
     const token = localStorage.getItem('token');
     
@@ -153,19 +173,37 @@ export default function StudioUpload() {
     xhr.send(formData);
   };
 
+  const applyAiSuggestions = () => {
+    if (!aiSuggestions) return;
+    setAiApplied(true);
+  };
+
+  const resetForm = () => {
+    setUploadSuccess(false);
+    setProcessingStatus('');
+    setVideoFile(null);
+    setTitle('');
+    setDescription('');
+    setTags([]);
+    setUploadProgress(0);
+    setAiSuggestions(null);
+    setAiApplied(false);
+    setAiLoading(false);
+  };
+
   if (!user) return null;
 
   if (uploadSuccess) {
     return (
       <div className={styles.uploadContainer}>
         <div className={styles.successMsg}>
-          <h2>{processingStatus === 'published' ? 'Upload & Processing Complete!' : 'Video Uploaded! Processing in background...'}</h2>
+          <h2>{processingStatus === 'published' ? '🎉 Video Published!' : 'Video Uploaded! Processing...'}</h2>
           
           {processingStatus === 'processing' && (
             <div style={{ marginTop: '20px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
               <Loader2 size={32} className={styles.spinner} />
               <p style={{ color: 'var(--text-secondary)' }}>
-                We are compressing your video and generating thumbnails. Please wait...
+                Generating thumbnail and running AI analysis... Please wait
               </p>
             </div>
           )}
@@ -173,30 +211,62 @@ export default function StudioUpload() {
           {processingStatus === 'error' && (
             <div style={{ marginTop: '20px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px', color: '#ef4444' }}>
               <X size={32} />
-              <p>
-                An error occurred during video processing. Please try uploading again.
-              </p>
+              <p>An error occurred during processing. Please try uploading again.</p>
             </div>
           )}
 
           {processingStatus === 'published' && (
-            <p style={{ marginTop: '8px', color: 'var(--text-secondary)' }}>
-              Your video is now live! You can view it on your channel.
-            </p>
+            <>
+              <p style={{ marginTop: '8px', color: 'var(--text-secondary)' }}>
+                Your video is now live!
+              </p>
+
+              {/* AI Suggestions Card */}
+              {aiSuggestions && (
+                <div className={styles.aiCard}>
+                  <div className={styles.aiCardHeader}>
+                    <Sparkles size={20} color="#a855f7" />
+                    <span className={styles.aiCardTitle}>✨ AI Generated Metadata</span>
+                  </div>
+                  <p className={styles.aiCardSubtitle}>
+                    Gemini analyzed your video thumbnail and suggested these:
+                  </p>
+
+                  <div className={styles.aiField}>
+                    <label className={styles.aiLabel}>Suggested Title</label>
+                    <p className={styles.aiValue}>{aiSuggestions.title}</p>
+                  </div>
+
+                  <div className={styles.aiField}>
+                    <label className={styles.aiLabel}>Suggested Description</label>
+                    <p className={styles.aiValue}>{aiSuggestions.description}</p>
+                  </div>
+
+                  <div className={styles.aiField}>
+                    <label className={styles.aiLabel}>Suggested Tags</label>
+                    <div className={styles.aiTags}>
+                      {aiSuggestions.tags.map((tag, i) => (
+                        <span key={i} className={styles.aiTag}>#{tag}</span>
+                      ))}
+                    </div>
+                  </div>
+
+                  {!aiApplied ? (
+                    <p className={styles.aiNote}>
+                      💡 These have been automatically applied to your video. You can edit them anytime in Studio → Content.
+                    </p>
+                  ) : (
+                    <div className={styles.aiAppliedBadge}>
+                      <Check size={16} /> Applied to video
+                    </div>
+                  )}
+                </div>
+              )}
+            </>
           )}
 
-          <div style={{ marginTop: '32px', display: 'flex', gap: '16px', justifyContent: 'center' }}>
-            <button 
-              className={styles.btnPrimary} 
-              onClick={() => {
-                setUploadSuccess(false);
-                setProcessingStatus('');
-                setVideoFile(null);
-                setTitle('');
-                setDescription('');
-                setUploadProgress(0);
-              }}
-            >
+          <div style={{ marginTop: '32px', display: 'flex', gap: '16px', justifyContent: 'center', flexWrap: 'wrap' }}>
+            <button className={styles.btnPrimary} onClick={resetForm}>
               Upload Another
             </button>
             <Link href={`/channel/${user.channelName || user.username}`} style={{ textDecoration: 'none' }}>
@@ -235,6 +305,9 @@ export default function StudioUpload() {
           </div>
           <h2 className={styles.uploadTitle}>Drag and drop video files to upload</h2>
           <p className={styles.uploadSubtitle}>Your videos will be private until you publish them.</p>
+          <p className={styles.uploadSubtitle} style={{ marginTop: '8px', color: '#a855f7', display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'center' }}>
+            <Sparkles size={14} /> AI will auto-generate title, description & tags
+          </p>
           <button className={styles.btnPrimary}>Select Files</button>
           <input 
             ref={inputRef}
@@ -273,9 +346,14 @@ export default function StudioUpload() {
               className={styles.textarea} 
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Tell viewers about your video"
+              placeholder="Tell viewers about your video (or leave blank — AI will generate one)"
               maxLength={5000}
             />
+          </div>
+
+          <div className={styles.aiHint}>
+            <Sparkles size={14} color="#a855f7" />
+            <span>After upload, Gemini AI will analyze your video and auto-generate title, description & tags</span>
           </div>
           
           <div className={styles.actions}>
@@ -296,7 +374,8 @@ export default function StudioUpload() {
                 disabled={!title.trim()}
                 style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
               >
-                Upload
+                <UploadIcon size={16} />
+                Upload & Let AI Analyze
               </button>
             )}
           </div>

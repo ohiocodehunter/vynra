@@ -8,6 +8,7 @@ import User from '../models/User';
 import { authMiddleware, optionalAuthMiddleware, activeUserMiddleware, AuthRequest } from '../middlewares/authMiddleware';
 import { compressVideo, generateThumbnail, getVideoMetadata } from '../services/ffmpeg';
 import { uploadFileToR2 } from '../services/r2';
+import { generateVideoMetadata } from '../services/gemini';
 
 const router = Router();
 
@@ -104,7 +105,10 @@ router.post('/upload', [authMiddleware, activeUserMiddleware], (req: AuthRequest
         // 2. Generate Thumbnail from original file (skip compression)
         await generateThumbnail(inputPath, thumbnailFolder, thumbnailFilename);
 
-        // 3. Upload to R2 (or serve locally if no R2 credentials)
+        // 3. AI Metadata Generation (runs in parallel with upload, non-blocking)
+        const aiPromise = generateVideoMetadata(thumbnailPath, video.title);
+
+        // 4. Upload to R2 (or serve locally if no R2 credentials)
         let finalVideoUrl = '';
         let finalThumbUrl = '';
 
@@ -130,7 +134,29 @@ router.post('/upload', [authMiddleware, activeUserMiddleware], (req: AuthRequest
         // Remove any stale compressed file that might exist
         try { if (fs.existsSync(compressedVideoPath)) fs.unlinkSync(compressedVideoPath); } catch (_) {}
 
-        // 4. Update Database
+        // 5. Apply AI suggestions (wait for AI result)
+        const aiSuggestions = await aiPromise;
+        if (aiSuggestions) {
+          // Only override title if user left it blank or used filename
+          const userProvidedTitle = (title || '').trim();
+          const isGenericTitle = !userProvidedTitle || userProvidedTitle === 'Untitled Video';
+          if (isGenericTitle) {
+            video.title = aiSuggestions.title;
+          }
+          // Only override description if user left it blank
+          if (!description || description.trim() === '') {
+            video.description = aiSuggestions.description;
+          }
+          // Merge AI tags with any user-provided tags
+          const existingTags = video.tags as string[];
+          const mergedTags = [...new Set([...existingTags, ...aiSuggestions.tags])];
+          video.tags = mergedTags;
+          // Store AI suggestions in DB for frontend to read
+          (video as any).aiSuggestions = aiSuggestions;
+          console.log(`AI metadata generated for video ${video._id}:`, aiSuggestions.title);
+        }
+
+        // 6. Update Database
         video.url = finalVideoUrl;
         video.thumbnailUrl = finalThumbUrl;
         video.status = 'published';
