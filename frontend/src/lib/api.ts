@@ -1,11 +1,14 @@
 import axios from 'axios';
 
 export const getApiUrl = () => {
-  let url = process.env.NEXT_PUBLIC_API_URL || '/api';
+  let url = process.env.NEXT_PUBLIC_API_URL || 'https://vynra-backend.onrender.com/api';
   if (typeof window !== 'undefined') {
     const { hostname, protocol } = window.location;
     const isLocalIP = /^192\.168\.|^10\.|^172\.(1[6-9]|2[0-9]|3[0-1])\./.test(hostname);
-    if (isLocalIP && !url.includes(hostname)) {
+    
+    if (hostname === 'localhost') {
+      url = 'http://localhost:5001/api';
+    } else if (isLocalIP) {
       url = `${protocol}//${hostname}:5001/api`;
     }
   }

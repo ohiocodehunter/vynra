@@ -26,7 +26,7 @@ const storage = multer.diskStorage({
   }
 });
 
-const upload = multer({ storage });
+const upload = multer({ storage, limits: { fileSize: 500 * 1024 * 1024 } }); // 500MB max
 const uploadSingle = upload.single('video');
 
 // Upload a new video
@@ -81,63 +81,66 @@ router.post('/upload', [authMiddleware, activeUserMiddleware], (req: AuthRequest
     });
 
     // --- Background Processing ---
+    // NOTE: We skip heavy ffmpeg compression on production (Render free tier).
+    // Compression causes OOM kills that leave videos stuck in 'processing' forever.
+    // Instead: get metadata -> generate thumbnail -> upload original to R2 directly.
     (async () => {
       try {
-        // 1. Get Duration and Metadata
-        const metadata = await getVideoMetadata(inputPath);
+        // 1. Get Duration and Metadata (with timeout to prevent hanging)
+        const metadataPromise = getVideoMetadata(inputPath);
+        const metadataTimeout = new Promise<never>((_, reject) =>
+          setTimeout(() => reject(new Error('ffprobe timed out after 2 minutes')), 120000)
+        );
+        const metadata = await Promise.race([metadataPromise, metadataTimeout]) as Awaited<typeof metadataPromise>;
         video.duration = metadata.duration;
 
-        // Auto-tag as 'shorts' if vertical video (width < height) and under 60 seconds
+        // Auto-tag as 'shorts' if vertical video (width < height)
         if (metadata.width > 0 && metadata.height > 0 && metadata.width < metadata.height) {
           if (!video.tags.includes('shorts')) {
             video.tags.push('shorts');
           }
         }
 
-        // 2. Compress Video
-        await compressVideo(inputPath, compressedVideoPath);
+        // 2. Generate Thumbnail from original file (skip compression)
+        await generateThumbnail(inputPath, thumbnailFolder, thumbnailFilename);
 
-        // 3. Generate Thumbnail
-        await generateThumbnail(compressedVideoPath, thumbnailFolder, thumbnailFilename);
-
-        // 4. Upload to R2 (or serve locally if no R2 credentials)
+        // 3. Upload to R2 (or serve locally if no R2 credentials)
         let finalVideoUrl = '';
         let finalThumbUrl = '';
 
         if (process.env.R2_ACCESS_KEY_ID && process.env.R2_SECRET_ACCESS_KEY) {
-          const videoUrl = await uploadFileToR2(compressedVideoPath, `videos/${fileId}.mp4`, 'video/mp4');
+          // Upload original video directly (no compression)
+          const ext = path.extname(inputPath) || '.mp4';
+          const videoKey = `videos/${fileId}${ext}`;
+          const videoUrl = await uploadFileToR2(inputPath, videoKey, 'video/mp4');
           const thumbUrl = await uploadFileToR2(thumbnailPath, `thumbnails/${fileId}.png`, 'image/png');
           finalVideoUrl = videoUrl || '';
           finalThumbUrl = thumbUrl || '';
-          
-          // Clean up local processed files if uploaded successfully
-          if (videoUrl && thumbUrl) {
-            fs.unlinkSync(compressedVideoPath);
-            fs.unlinkSync(thumbnailPath);
-          }
         } else {
-          // Serve locally if no R2
-          finalVideoUrl = `${process.env.BACKEND_URL || 'http://localhost:5001'}/uploads/processed_${fileId}.mp4`;
+          // Serve locally if no R2 — copy original to a stable path
+          const stablePath = path.join(uploadDir, `video_${fileId}.mp4`);
+          fs.copyFileSync(inputPath, stablePath);
+          finalVideoUrl = `${process.env.BACKEND_URL || 'http://localhost:5001'}/uploads/video_${fileId}.mp4`;
           finalThumbUrl = `${process.env.BACKEND_URL || 'http://localhost:5001'}/uploads/thumbnails/${thumbnailFilename}`;
         }
 
-        // Clean up original temp file
-        if (fs.existsSync(inputPath)) {
-          fs.unlinkSync(inputPath);
-        }
+        // Clean up original temp file and thumbnail
+        try { if (fs.existsSync(inputPath)) fs.unlinkSync(inputPath); } catch (_) {}
+        try { if (fs.existsSync(thumbnailPath)) fs.unlinkSync(thumbnailPath); } catch (_) {}
+        // Remove any stale compressed file that might exist
+        try { if (fs.existsSync(compressedVideoPath)) fs.unlinkSync(compressedVideoPath); } catch (_) {}
 
-        // 5. Update Database
+        // 4. Update Database
         video.url = finalVideoUrl;
         video.thumbnailUrl = finalThumbUrl;
         video.status = 'published';
         await video.save();
+        console.log(`Video ${video._id} published successfully.`);
         
-        // 6. Notify Subscribers
+        // 5. Notify Subscribers
         if (video.visibility === 'public') {
           const Notification = require('../models/Notification').default;
-          // Find all users who have the creator in their subscriptions array
           const subscribers = await User.find({ subscriptions: video.creator }).select('_id');
-          
           if (subscribers.length > 0) {
             const notifications = subscribers.map(sub => ({
               recipient: sub._id,
@@ -145,16 +148,17 @@ router.post('/upload', [authMiddleware, activeUserMiddleware], (req: AuthRequest
               type: 'NEW_VIDEO',
               video: video._id
             }));
-            
-            // Bulk insert notifications
             await Notification.insertMany(notifications);
           }
         }
         
       } catch (err) {
         console.error('Background processing failed:', err);
-        video.status = 'private'; // or error state
-        await video.save();
+        // Use 'failed' so the user sees a clear error, not 'private'
+        video.status = 'failed';
+        try { await video.save(); } catch (saveErr) { console.error('Could not update failed status:', saveErr); }
+        // Attempt cleanup
+        try { if (fs.existsSync(inputPath)) fs.unlinkSync(inputPath); } catch (_) {}
       }
     })();
 
