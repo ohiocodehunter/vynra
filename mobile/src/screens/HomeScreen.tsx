@@ -71,10 +71,8 @@ export default function HomeScreen() {
       }
     }
 
-    while (shortsPairIndex < shortsPairs.length) {
-      feed.push({ type: 'shorts_row', id: `shorts_row_${shortsPairIndex}`, shorts: shortsPairs[shortsPairIndex] });
-      shortsPairIndex++;
-    }
+    // We stop adding short rows if we run out of regular videos
+    // to prevent consecutive rows of shorts at the end of the feed.
 
     return feed;
   }, [videos]);
