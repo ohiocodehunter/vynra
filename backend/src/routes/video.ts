@@ -224,7 +224,7 @@ router.get('/', optionalAuthMiddleware, async (req: AuthRequest, res: Response) 
 
     // Recommendation Engine Logic
     let allVideos = await Video.find(query)
-      .populate('creator', 'username channelName avatarUrl isVerified')
+      .populate('creator', 'username channelName avatarUrl isVerified subscribersCount')
       .sort(sortOption)
       .limit(100);
 
@@ -284,7 +284,7 @@ router.get('/liked', authMiddleware, async (req: AuthRequest, res: Response) => 
   try {
     const userId = req.user?.id;
     const videos = await Video.find({ likedBy: userId, status: 'published', visibility: 'public' })
-      .populate('creator', 'username channelName avatarUrl isVerified')
+      .populate('creator', 'username channelName avatarUrl isVerified subscribersCount')
       .sort({ createdAt: -1 });
     res.json(videos);
   } catch (error) {
@@ -305,7 +305,7 @@ router.get('/subscriptions', authMiddleware, async (req: AuthRequest, res: Respo
       status: 'published',
       visibility: 'public'
     })
-      .populate('creator', 'username channelName avatarUrl isVerified')
+      .populate('creator', 'username channelName avatarUrl isVerified subscribersCount')
       .sort({ createdAt: -1 })
       .limit(100);
 

@@ -458,7 +458,7 @@ export default function PlaylistPlayerScreen() {
                   <View style={styles.recInfoContainer}>
                     <Text style={[styles.recTitle, isActive && styles.recTitleActive]} numberOfLines={2}>{v.title}</Text>
                     <Text style={styles.recDetails}>
-                      {v.creator?.username}
+                      {v.creator?.username} • {v.creator?.subscribersCount || 0} {t('channel.subscribers', 'subscribers')}
                     </Text>
                   </View>
                 </TouchableOpacity>

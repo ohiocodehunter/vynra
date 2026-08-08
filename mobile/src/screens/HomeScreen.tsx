@@ -114,7 +114,7 @@ export default function HomeScreen() {
           <View style={styles.textContainer}>
             <Text style={[styles.title, { color: colors.text }]} numberOfLines={2}>{video.title}</Text>
             <Text style={[styles.details, { color: colors.textSecondary }]}>
-              {video.creator?.username} • {video.views} {t('common.views')}
+              {video.creator?.username} • {video.creator?.subscribersCount || 0} {t('channel.subscribers', 'subscribers')} • {video.views} {t('common.views')}
             </Text>
           </View>
         </View>

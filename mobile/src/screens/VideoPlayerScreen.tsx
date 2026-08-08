@@ -481,7 +481,7 @@ export default function VideoPlayerScreen() {
               <View style={styles.recInfoContainer}>
                 <Text style={styles.recTitle} numberOfLines={2}>{v.title}</Text>
                 <Text style={styles.recDetails}>
-                  {v.creator?.username}
+                  {v.creator?.username} • {v.creator?.subscribersCount || 0} {t('channel.subscribers', 'subscribers')}
                 </Text>
                 <Text style={styles.recDetails}>
                   {v.views} {t('common.views')} • {formatDistanceToNow(new Date(v.createdAt), { addSuffix: true })}

@@ -63,7 +63,7 @@ export default function SubscriptionsScreen() {
         <View style={styles.textContainer}>
           <Text style={[styles.title, { color: colors.text }]} numberOfLines={2}>{item.title}</Text>
           <Text style={[styles.details, { color: colors.textSecondary }]}>
-            {item.creator?.username} • {item.views || 0} {t('common.views')} • {item.createdAt ? formatDistanceToNow(new Date(item.createdAt), { addSuffix: true }) : t('common.recently', 'Recently')}
+            {item.creator?.username} • {item.creator?.subscribersCount || 0} {t('channel.subscribers', 'subscribers')} • {item.views || 0} {t('common.views')} • {item.createdAt ? formatDistanceToNow(new Date(item.createdAt), { addSuffix: true }) : t('common.recently', 'Recently')}
           </Text>
         </View>
       </View>
