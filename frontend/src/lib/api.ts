@@ -1,10 +1,11 @@
 import axios from 'axios';
 
 export const getApiUrl = () => {
-  let url = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api';
+  let url = process.env.NEXT_PUBLIC_API_URL || '/api';
   if (typeof window !== 'undefined') {
     const { hostname, protocol } = window.location;
-    if (hostname !== 'localhost' && !url.includes(hostname)) {
+    const isLocalIP = /^192\.168\.|^10\.|^172\.(1[6-9]|2[0-9]|3[0-1])\./.test(hostname);
+    if (isLocalIP && !url.includes(hostname)) {
       url = `${protocol}//${hostname}:5001/api`;
     }
   }
