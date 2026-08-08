@@ -159,12 +159,12 @@ export default function HomeFeed() {
             </div>
           )}
 
-          {/* 3. Shorts Section */}
+          {/* 3. Shorts Section (First 5) */}
           {shortVideos.length > 0 && (
             <div className={styles.gridSection}>
               <h2 className={styles.sectionHeading}>Shorts</h2>
               <div className={styles.shortsGrid}>
-                {shortVideos.map((video) => (
+                {shortVideos.slice(0, 5).map((video) => (
                   <VideoCard key={video._id} video={video} layout="shorts" />
                 ))}
               </div>
@@ -185,17 +185,43 @@ export default function HomeFeed() {
             </div>
           )}
 
-          {/* 5. Latest Grid */}
-          {regularVideos.length > 9 && (
-            <div className={styles.gridSection}>
-              <h2 className={styles.sectionHeading}>Latest</h2>
-              <div className={styles.grid}>
-                {regularVideos.slice(9).map((video) => (
-                  <VideoCard key={video._id} video={video} />
-                ))}
-              </div>
-            </div>
-          )}
+          {/* 5. Latest Grid (with Shorts interleaved) */}
+          {regularVideos.length > 9 && (() => {
+            const latestVideos = regularVideos.slice(9);
+            const remainingShorts = shortVideos.slice(5);
+            const chunks = [];
+            
+            for (let i = 0; i < latestVideos.length; i += 10) {
+              const videoChunk = latestVideos.slice(i, i + 10);
+              const shortChunkIndex = Math.floor(i / 10);
+              const shortChunk = remainingShorts.slice(shortChunkIndex * 5, (shortChunkIndex + 1) * 5);
+              
+              chunks.push(
+                <React.Fragment key={`chunk-${i}`}>
+                  <div className={styles.gridSection}>
+                    {i === 0 && <h2 className={styles.sectionHeading}>Latest</h2>}
+                    <div className={styles.grid}>
+                      {videoChunk.map((video) => (
+                        <VideoCard key={video._id} video={video} />
+                      ))}
+                    </div>
+                  </div>
+                  
+                  {shortChunk.length > 0 && (
+                    <div className={styles.gridSection}>
+                      <h2 className={styles.sectionHeading}>More Shorts</h2>
+                      <div className={styles.shortsGrid}>
+                        {shortChunk.map((video) => (
+                          <VideoCard key={video._id} video={video} layout="shorts" />
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </React.Fragment>
+              );
+            }
+            return chunks;
+          })()}
           
         </div>
       ) : null}
