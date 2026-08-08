@@ -160,8 +160,10 @@ export default function PlaylistPlayerScreen() {
     const checkSub = async () => {
       if (!user || !creator?._id) return;
       try {
-        const res = await client.get(`/users/check-subscription/${creator._id}`);
-        setIsSubscribed(res.data.isSubscribed);
+        const res = await client.get('/auth/me');
+        if (res.data?.subscriptions) {
+          setIsSubscribed(res.data.subscriptions.includes(creator._id));
+        }
       } catch (error: any) { console.error('Error checking subscription', error); }
     };
     checkSub();
