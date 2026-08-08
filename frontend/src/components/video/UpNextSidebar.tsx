@@ -23,7 +23,7 @@ export default function UpNextSidebar({ currentVideo, allVideos }: UpNextSidebar
 
   // Compute upNext videos based on the active filter
   const upNextVideos = useMemo(() => {
-    let result = allVideos.filter(v => v._id !== currentVideo._id && !v.isShort);
+    let result = allVideos.filter(v => v._id !== currentVideo._id && !v.tags?.includes('shorts'));
     
     if (activeFilter === 'Related') {
       const currentTags = new Set((currentVideo.tags || []).map(t => t.toLowerCase()));

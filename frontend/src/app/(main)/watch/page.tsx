@@ -40,7 +40,7 @@ export default async function WatchPage({ searchParams }: { searchParams: Promis
   if (!video) return <div className={styles.watchContainer}><h2>Video not found</h2></div>;
 
   // Get related videos, filter out the current one and any shorts, and randomly shuffle them
-  const relatedVideos = allVideos.filter(v => v._id !== video?._id && !v.isShort);
+  const relatedVideos = allVideos.filter(v => v._id !== video?._id && !v.tags?.includes('shorts'));
   const shuffledRelated = relatedVideos.sort(() => 0.5 - Math.random());
   const upNextVideos = shuffledRelated.slice(0, 15);
   const nextVideoId = upNextVideos.length > 0 ? upNextVideos[0]._id : undefined;
