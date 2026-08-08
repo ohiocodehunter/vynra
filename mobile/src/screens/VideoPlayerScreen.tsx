@@ -348,6 +348,24 @@ export default function VideoPlayerScreen() {
           {video.views?.toLocaleString()} {t('common.views')} • {video.createdAt ? formatDistanceToNow(new Date(video.createdAt), { addSuffix: true }) : t('common.recently', 'Recently')}
         </Text>
 
+        {video.description ? (
+          <TouchableOpacity 
+            style={styles.descriptionBox} 
+            activeOpacity={0.8} 
+            onPress={() => setDescExpanded(!descExpanded)}
+          >
+            <Text 
+              style={styles.descriptionText} 
+              numberOfLines={descExpanded ? undefined : 2}
+            >
+              {video.description}
+            </Text>
+            <Text style={{ color: '#fff', fontSize: 14, fontWeight: '600', marginTop: 4 }}>
+              {descExpanded ? t('common.showLess', 'Show less') : t('common.showMore', '...more')}
+            </Text>
+          </TouchableOpacity>
+        ) : null}
+
         <View style={styles.creatorRow}>
           <Image source={{ uri: video.creator?.avatarUrl || 'https://via.placeholder.com/40' }} style={styles.avatar} />
           <View style={styles.creatorInfo}>
@@ -402,24 +420,6 @@ export default function VideoPlayerScreen() {
           </View>
           <Text style={styles.commentPreviewText}>{video.comments?.[0]?.text || t('video.addComment', 'Add a comment...')}</Text>
         </TouchableOpacity>
-
-        {video.description ? (
-          <TouchableOpacity 
-            style={styles.descriptionBox} 
-            activeOpacity={0.8} 
-            onPress={() => setDescExpanded(!descExpanded)}
-          >
-            <Text 
-              style={styles.descriptionText} 
-              numberOfLines={descExpanded ? undefined : 2}
-            >
-              {video.description}
-            </Text>
-            <Text style={{ color: '#fff', fontSize: 14, fontWeight: '600', marginTop: 4 }}>
-              {descExpanded ? t('common.showLess', 'Show less') : t('common.showMore', '...more')}
-            </Text>
-          </TouchableOpacity>
-        ) : null}
 
         {/* Up Next & Recommendations */}
         <View style={styles.recommendationsContainer}>
