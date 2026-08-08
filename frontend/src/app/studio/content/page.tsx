@@ -108,7 +108,7 @@ export default function StudioContent() {
             ) : (
               videos.map(video => (
                 <tr key={video._id}>
-                  <td>
+                  <td data-label="Video">
                     <div className={styles.videoCell}>
                       <div className={styles.thumbnailContainer}>
                         {video.status === 'processing' ? (
@@ -137,7 +137,7 @@ export default function StudioContent() {
                       </div>
                     </div>
                   </td>
-                  <td>
+                  <td data-label="Visibility">
                     <div className={styles.visibilityBadge}>
                       {getVisibilityIcon(video.visibility || 'public')}
                       <span style={{ textTransform: 'capitalize' }}>
@@ -145,12 +145,12 @@ export default function StudioContent() {
                       </span>
                     </div>
                   </td>
-                  <td>
+                  <td data-label="Date">
                     {new Date(video.createdAt).toLocaleDateString()}
                   </td>
-                  <td>{video.views}</td>
-                  <td>{video.likes}</td>
-                  <td>
+                  <td data-label="Views">{video.views}</td>
+                  <td data-label="Likes">{video.likes}</td>
+                  <td data-label="Actions" className={styles.actionsCell}>
                     <div className={styles.actions}>
                       <button className={styles.actionBtn} onClick={() => handleEditClick(video)} title="Edit">
                         <Edit2 size={18} />

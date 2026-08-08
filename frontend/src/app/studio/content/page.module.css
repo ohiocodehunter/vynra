@@ -335,4 +335,78 @@
     max-height: 90vh;
     overflow-y: auto;
   }
+
+  /* Responsive Table Stacking */
+  .tableContainer {
+    border: none;
+    background: transparent;
+  }
+
+  .table, .table tbody, .table tr, .table td {
+    display: block;
+    width: 100%;
+  }
+
+  .table thead {
+    display: none;
+  }
+
+  .table tr {
+    margin-bottom: 1.5rem;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 1rem;
+  }
+
+  .table td {
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    text-align: right;
+  }
+
+  .table td:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+
+  .table td::before {
+    content: attr(data-label);
+    font-weight: 600;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    text-align: left;
+    margin-right: 1rem;
+  }
+
+  /* Video Cell Specifics */
+  .table td[data-label="Video"] {
+    display: block;
+    text-align: left;
+  }
+
+  .table td[data-label="Video"]::before {
+    display: none;
+  }
+
+  .videoCell {
+    flex-direction: row;
+    width: 100%;
+    gap: 1rem;
+  }
+
+  .thumbnailContainer {
+    width: 100px;
+    height: 56px;
+  }
+  
+  .actionsCell {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+  }
 }
