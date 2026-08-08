@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { View, StyleSheet, FlatList, Dimensions, Text, ActivityIndicator, Image, TouchableOpacity, TouchableWithoutFeedback, Share, Modal, TextInput, KeyboardAvoidingView, Platform } from 'react-native';
 import { useAuth } from '../context/AuthContext';
 import { io } from 'socket.io-client';
@@ -260,7 +260,7 @@ function ShortVideoItem({ item, isActive, height }: { item: Video, isActive: boo
   );
 }
 
-import { useIsFocused } from '@react-navigation/native';
+import { useIsFocused, useFocusEffect } from '@react-navigation/native';
 
 export default function ShortsScreen({ route }: any) {
   const { t } = useTranslation();
@@ -273,15 +273,14 @@ export default function ShortsScreen({ route }: any) {
 
   const initialVideoId = route?.params?.initialVideoId;
 
-  useEffect(() => {
-    fetchVideos();
-  }, [initialVideoId]);
-
-  const fetchVideos = async () => {
+  // Use useCallback to memoize fetchVideos so it can be safely used in useFocusEffect
+  const fetchVideos = useCallback(async () => {
     try {
       setLoading(true);
       const res = await apiClient.get('/videos?tag=shorts');
-      let fetchedVideos = res.data;
+      
+      // Randomize shorts
+      let fetchedVideos = res.data.sort(() => 0.5 - Math.random());
 
       if (initialVideoId) {
         const targetIndex = fetchedVideos.findIndex((v: any) => v._id === initialVideoId);
@@ -299,7 +298,16 @@ export default function ShortsScreen({ route }: any) {
       setLoading(false);
       setRefreshing(false);
     }
-  };
+  }, [initialVideoId]);
+
+  // Fetch when screen comes into focus
+  useFocusEffect(
+    useCallback(() => {
+      fetchVideos();
+    }, [fetchVideos])
+  );
+
+
 
   const onRefresh = () => {
     setRefreshing(true);

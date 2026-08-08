@@ -18,7 +18,8 @@ export default function HomeScreen() {
   const fetchVideos = async () => {
     try {
       const res = await apiClient.get('/videos');
-      setVideos(res.data);
+      const shuffledVideos = res.data.sort(() => 0.5 - Math.random());
+      setVideos(shuffledVideos);
     } catch (error) {
       console.error('Error fetching videos:', error);
     } finally {
