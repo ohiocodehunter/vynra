@@ -62,16 +62,82 @@ export default function VideoPlayerScreen() {
   const [currentTime, setCurrentTime] = React.useState(0);
   const [duration, setDuration] = React.useState(0);
 
+  // Recommendations & Autoplay State
+  const [allVideos, setAllVideos] = React.useState<any[]>([]);
+  const [activeFilter, setActiveFilter] = React.useState<'All' | 'Related'>('All');
+  const [autoplayEnabled, setAutoplayEnabled] = React.useState(true);
+  const [autoplayTriggered, setAutoplayTriggered] = React.useState(false);
+
+  React.useEffect(() => {
+    const fetchAllVideos = async () => {
+      try {
+        const res = await client.get('/videos');
+        setAllVideos(res.data);
+      } catch (err) {
+        console.error('Failed to fetch videos for recommendations', err);
+      }
+    };
+    fetchAllVideos();
+  }, []);
+
+  const upNextVideos = React.useMemo(() => {
+    let result = allVideos.filter(v => v._id !== video._id && !v.tags?.includes('shorts'));
+    
+    if (activeFilter === 'Related') {
+      const currentTags = new Set((video.tags || []).map((t: string) => t.toLowerCase()));
+      const stopWords = new Set(['the', 'is', 'in', 'and', 'to', 'of', 'a', 'with', 'for', 'on', 'how', 'what', 'why', 'when', 'my', 'your', 'this', 'that', 'it', 'at']);
+      
+      const extractTokens = (str: string) => {
+        return (str || '').toLowerCase().replace(/[^\w\s]/gi, '').split(/\s+/).filter(w => w.length > 2 && !stopWords.has(w));
+      };
+
+      const currentTitleTokens = new Set(extractTokens(video.title));
+      
+      const scoredVideos = result.map(v => {
+        let score = 0;
+        if (v.creator?._id === video.creator?._id) score += 15;
+        const vTags = v.tags || [];
+        vTags.forEach((tag: string) => { if (currentTags.has(tag.toLowerCase())) score += 5; });
+        const vTitleTokens = extractTokens(v.title);
+        vTitleTokens.forEach(token => { if (currentTitleTokens.has(token)) score += 3; });
+        return { video: v, score };
+      });
+
+      scoredVideos.sort((a, b) => b.score - a.score);
+      return scoredVideos.slice(0, 15).map(sv => sv.video);
+    } 
+
+    return result.sort(() => 0.5 - Math.random()).slice(0, 15);
+  }, [allVideos, video, activeFilter]);
+
+  // Use a ref so the interval can always see the latest upNextVideos without resetting
+  const nextVideoRef = React.useRef(upNextVideos[0]);
+  React.useEffect(() => {
+    nextVideoRef.current = upNextVideos[0];
+  }, [upNextVideos]);
+
   React.useEffect(() => {
     const interval = setInterval(() => {
       if (player) {
         setCurrentTime(player.currentTime);
         setDuration(player.duration);
         setIsPlaying(player.playing);
+
+        // Autoplay Logic
+        if (autoplayEnabled && !autoplayTriggered && player.duration > 0 && player.currentTime >= player.duration - 0.5 && !player.playing) {
+          setAutoplayTriggered(true);
+          const nextVid = nextVideoRef.current;
+          if (nextVid) {
+            // Wait a tiny bit then navigate
+            setTimeout(() => {
+              navigation.replace('VideoPlayer', { video: nextVid });
+            }, 1000);
+          }
+        }
       }
     }, 500);
     return () => clearInterval(interval);
-  }, [player]);
+  }, [player, autoplayEnabled, autoplayTriggered, navigation]);
 
   const showControlsTemporarily = () => {
     setControlsVisible(true);
@@ -354,6 +420,60 @@ export default function VideoPlayerScreen() {
             </Text>
           </TouchableOpacity>
         ) : null}
+
+        {/* Up Next & Recommendations */}
+        <View style={styles.recommendationsContainer}>
+          <View style={styles.recommendationsHeader}>
+            <Text style={styles.upNextTitle}>Up next</Text>
+            <View style={styles.autoplayToggleRow}>
+              <Text style={styles.autoplayText}>Autoplay</Text>
+              <TouchableOpacity 
+                style={[styles.toggleBtn, autoplayEnabled && styles.toggleBtnActive]} 
+                onPress={() => setAutoplayEnabled(!autoplayEnabled)}
+              >
+                <View style={[styles.toggleKnob, autoplayEnabled && styles.toggleKnobActive]} />
+              </TouchableOpacity>
+            </View>
+          </View>
+          
+          <View style={styles.filtersRow}>
+            <TouchableOpacity 
+              style={[styles.filterPill, activeFilter === 'All' && styles.filterPillActive]}
+              onPress={() => setActiveFilter('All')}
+            >
+              <Text style={[styles.filterPillText, activeFilter === 'All' && styles.filterPillTextActive]}>All</Text>
+            </TouchableOpacity>
+            <TouchableOpacity 
+              style={[styles.filterPill, activeFilter === 'Related' && styles.filterPillActive]}
+              onPress={() => setActiveFilter('Related')}
+            >
+              <Text style={[styles.filterPillText, activeFilter === 'Related' && styles.filterPillTextActive]}>Related</Text>
+            </TouchableOpacity>
+          </View>
+
+          {upNextVideos.map(v => (
+            <TouchableOpacity 
+              key={v._id}
+              style={styles.recCard} 
+              onPress={() => navigation.replace('VideoPlayer', { video: v })}
+              activeOpacity={0.8}
+            >
+              <View style={styles.recThumbnailContainer}>
+                <Image source={{ uri: v.thumbnailUrl }} style={styles.recThumbnail} />
+              </View>
+              <View style={styles.recInfoContainer}>
+                <Text style={styles.recTitle} numberOfLines={2}>{v.title}</Text>
+                <Text style={styles.recDetails}>
+                  {v.creator?.username}
+                </Text>
+                <Text style={styles.recDetails}>
+                  {v.views} {t('common.views')} • {formatDistanceToNow(new Date(v.createdAt), { addSuffix: true })}
+                </Text>
+              </View>
+            </TouchableOpacity>
+          ))}
+        </View>
+
       </ScrollView>
       )}
 
@@ -400,6 +520,28 @@ const styles = StyleSheet.create({
   commentsTitle: { color: '#fff', fontWeight: 'bold', marginRight: 8 },
   commentsCount: { color: '#aaa', fontSize: 12 },
   commentPreviewText: { color: '#fff', fontSize: 14 },
-  descriptionBox: { backgroundColor: '#1a1a1a', padding: 12, borderRadius: 12, marginBottom: 40 },
+  descriptionBox: { backgroundColor: '#1a1a1a', padding: 12, borderRadius: 12, marginBottom: 24 },
   descriptionText: { color: '#fff', fontSize: 14, lineHeight: 20 },
+  
+  // Recommendations Styles
+  recommendationsContainer: { marginTop: 8, paddingBottom: 40 },
+  recommendationsHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
+  upNextTitle: { color: '#fff', fontSize: 18, fontWeight: 'bold' },
+  autoplayToggleRow: { flexDirection: 'row', alignItems: 'center' },
+  autoplayText: { color: '#fff', fontSize: 14, marginRight: 8 },
+  toggleBtn: { width: 40, height: 24, borderRadius: 12, backgroundColor: '#333', padding: 2, justifyContent: 'center' },
+  toggleBtnActive: { backgroundColor: '#3ea6ff' },
+  toggleKnob: { width: 20, height: 20, borderRadius: 10, backgroundColor: '#888' },
+  toggleKnobActive: { backgroundColor: '#fff', transform: [{ translateX: 16 }] },
+  filtersRow: { flexDirection: 'row', marginBottom: 16 },
+  filterPill: { backgroundColor: '#222', paddingHorizontal: 16, paddingVertical: 8, borderRadius: 20, marginRight: 8 },
+  filterPillActive: { backgroundColor: '#fff' },
+  filterPillText: { color: '#fff', fontSize: 14, fontWeight: '500' },
+  filterPillTextActive: { color: '#0f0f0f' },
+  recCard: { flexDirection: 'row', marginBottom: 16 },
+  recThumbnailContainer: { width: 160, aspectRatio: 16/9, marginRight: 12, backgroundColor: '#222', borderRadius: 8, overflow: 'hidden' },
+  recThumbnail: { width: '100%', height: '100%' },
+  recInfoContainer: { flex: 1, justifyContent: 'center' },
+  recTitle: { color: '#fff', fontSize: 14, fontWeight: '500', marginBottom: 4, lineHeight: 20 },
+  recDetails: { color: '#aaa', fontSize: 12, marginBottom: 2 },
 });
