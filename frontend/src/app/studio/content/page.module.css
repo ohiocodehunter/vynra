@@ -340,11 +340,13 @@
   .tableContainer {
     border: none;
     background: transparent;
+    overflow-x: hidden;
   }
 
   .table, .table tbody, .table tr, .table td {
     display: block;
     width: 100%;
+    min-width: 0;
   }
 
   .table thead {
@@ -397,11 +399,17 @@
     flex-direction: row;
     width: 100%;
     gap: 1rem;
+    min-width: 0;
   }
 
   .thumbnailContainer {
     width: 100px;
     height: 56px;
+  }
+  
+  .videoInfo {
+    min-width: 0;
+    flex: 1;
   }
   
   .actionsCell {
