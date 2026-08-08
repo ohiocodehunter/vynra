@@ -4,7 +4,13 @@ import fs from 'fs';
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
 
 // Try models in order of preference (cheapest/fastest first)
-const GEMINI_MODELS = ['gemini-2.0-flash-lite', 'gemini-2.0-flash', 'gemini-1.5-flash-latest'];
+const GEMINI_MODELS = [
+  "gemini-3.1-flash-lite",   // ✅ Confirmed working
+  "gemini-2.5-flash-lite",
+  "gemini-2.5-flash",
+  "gemini-2.0-flash-lite",
+  "gemini-2.0-flash",
+];
 
 export interface AISuggestions {
   title: string;
