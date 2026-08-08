@@ -3,9 +3,9 @@ import fs from 'fs';
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
 
-// Try models in order of preference (cheapest/fastest first)
+// Models in order of preference (confirmed working first)
 const GEMINI_MODELS = [
-  "gemini-3.1-flash-lite",   // ✅ Confirmed working
+  "gemini-3.1-flash-lite",
   "gemini-2.5-flash-lite",
   "gemini-2.5-flash",
   "gemini-2.0-flash-lite",
@@ -16,15 +16,58 @@ export interface AISuggestions {
   title: string;
   description: string;
   tags: string[];
+  transcript?: string;
 }
 
 /**
- * Analyze a video thumbnail using Gemini Vision and generate
- * a suggested title, description, and tags.
+ * Step 1: Transcribe audio from video using Gemini.
+ * Sends the audio file inline (base64) and gets a transcript.
+ */
+export const transcribeAudio = async (audioPath: string): Promise<string | null> => {
+  try {
+    if (!process.env.GEMINI_API_KEY || process.env.GEMINI_API_KEY === 'your_gemini_api_key_here') {
+      return null;
+    }
+    if (!fs.existsSync(audioPath)) {
+      console.warn('Audio file not found for transcription:', audioPath);
+      return null;
+    }
+
+    const audioData = fs.readFileSync(audioPath);
+    const base64Audio = audioData.toString('base64');
+
+    for (const modelName of GEMINI_MODELS) {
+      try {
+        const model = genAI.getGenerativeModel({ model: modelName });
+        const result = await model.generateContent([
+          'Please transcribe the speech in this audio. Return ONLY the transcript text, nothing else. If there is no speech or it is unclear, return "NO_SPEECH".',
+          { inlineData: { mimeType: 'audio/aac', data: base64Audio } },
+        ]);
+        const transcript = result.response.text().trim();
+        console.log(`Transcript extracted using ${modelName}: "${transcript.substring(0, 80)}..."`);
+        return transcript === 'NO_SPEECH' ? null : transcript;
+      } catch (modelErr: any) {
+        console.warn(`Transcription failed with ${modelName}:`, modelErr.message?.substring(0, 80));
+      }
+    }
+    return null;
+  } catch (err) {
+    console.error('Transcription error:', err);
+    return null;
+  }
+};
+
+/**
+ * Step 2: Generate title, description, and tags from transcript.
+ * Falls back to thumbnail-based analysis if no transcript is available.
  */
 export const generateVideoMetadata = async (
-  thumbnailPath: string,
-  userTitle?: string
+  options: {
+    transcript?: string | null;
+    thumbnailPath?: string;
+    userTitle?: string;
+    userDescription?: string;
+  }
 ): Promise<AISuggestions | null> => {
   try {
     if (!process.env.GEMINI_API_KEY || process.env.GEMINI_API_KEY === 'your_gemini_api_key_here') {
@@ -32,38 +75,57 @@ export const generateVideoMetadata = async (
       return null;
     }
 
-    if (!fs.existsSync(thumbnailPath)) {
-      console.warn('Thumbnail not found for AI analysis:', thumbnailPath);
+    const { transcript, thumbnailPath, userTitle, userDescription } = options;
+
+    // Build context
+    let contextParts: any[] = [];
+    let contextText = '';
+
+    if (transcript && transcript.length > 10) {
+      // PRIMARY: Use transcript for accurate metadata
+      contextText = `Video transcript:\n"${transcript.substring(0, 3000)}"`;
+    } else if (thumbnailPath && fs.existsSync(thumbnailPath)) {
+      // FALLBACK: Use thumbnail image
+      const imageData = fs.readFileSync(thumbnailPath);
+      contextParts.push({ inlineData: { mimeType: 'image/png', data: imageData.toString('base64') } });
+      contextText = 'Analyze this video thumbnail image to understand what the video is about.';
+    } else if (userTitle) {
+      // LAST RESORT: Use filename/title as hint
+      contextText = `The video is titled: "${userTitle}"`;
+    } else {
+      console.warn('No context available for AI metadata generation');
       return null;
     }
 
-    const userContext = userTitle && userTitle !== 'Untitled Video'
-      ? `The uploader named this video: "${userTitle}". Use this as context.`
-      : '';
+    const userContext: string[] = [];
+    if (userTitle && userTitle !== 'Untitled Video') userContext.push(`Uploader's title: "${userTitle}"`);
+    if (userDescription) userContext.push(`Uploader's description: "${userDescription}"`);
 
-    const prompt = `You are a YouTube/video platform SEO expert. Analyze this video thumbnail image and generate metadata.
+    const prompt = `You are a YouTube SEO expert. Based on the following video content, generate optimized metadata.
 
-${userContext}
+${contextText}
+${userContext.length > 0 ? '\nAdditional context:\n' + userContext.join('\n') : ''}
 
-Respond ONLY with valid JSON in exactly this format (no markdown, no extra text, no code blocks):
-{"title":"engaging video title max 80 chars","description":"compelling 2-3 sentence description max 300 chars","tags":["tag1","tag2","tag3","tag4","tag5"]}`;
+Respond ONLY with this exact JSON format (no markdown, no code fences, no extra text):
+{"title":"engaging title max 80 chars","description":"compelling 2-4 sentence description","tags":["tag1","tag2","tag3","tag4","tag5","tag6","tag7","tag8"]}
 
-    const imageData = fs.readFileSync(thumbnailPath);
-    const base64Image = imageData.toString('base64');
+Rules:
+- Title must be catchy, SEO-optimized, based on actual content
+- Description must be informative and engage viewers  
+- Tags must be relevant search keywords (no # symbols)
+- All in the same language as the transcript`;
+
+    const promptParts: any[] = [prompt, ...contextParts];
 
     let lastError: Error | null = null;
 
-    // Try each model in sequence until one works
     for (const modelName of GEMINI_MODELS) {
       try {
         const model = genAI.getGenerativeModel({ model: modelName });
-        const result = await model.generateContent([
-          prompt,
-          { inlineData: { mimeType: 'image/png', data: base64Image } },
-        ]);
+        const result = await model.generateContent(promptParts);
 
         const raw = result.response.text().trim();
-        // Strip any markdown code fences
+        // Strip any accidental markdown fences
         const jsonText = raw
           .replace(/^```json\s*/i, '')
           .replace(/^```\s*/i, '')
@@ -76,23 +138,26 @@ Respond ONLY with valid JSON in exactly this format (no markdown, no extra text,
           throw new Error('Invalid AI response structure');
         }
 
-        console.log(`AI metadata generated using model: ${modelName}`);
+        console.log(`✅ AI metadata generated using ${modelName}:`, parsed.title);
         return {
           title: String(parsed.title).slice(0, 100),
-          description: String(parsed.description).slice(0, 500),
-          tags: parsed.tags.map(t => String(t).toLowerCase().trim()).filter(Boolean).slice(0, 10),
+          description: String(parsed.description).slice(0, 1000),
+          tags: parsed.tags
+            .map(t => String(t).toLowerCase().trim().replace(/^#+/, ''))
+            .filter(t => t.length > 0)
+            .slice(0, 10),
+          transcript: transcript || undefined,
         };
       } catch (modelErr: any) {
         console.warn(`Model ${modelName} failed:`, modelErr.message?.substring(0, 100));
         lastError = modelErr;
-        // Continue to next model
       }
     }
 
     console.error('All Gemini models failed. Last error:', lastError?.message);
     return null;
   } catch (err) {
-    console.error('Gemini AI metadata generation failed:', err);
+    console.error('AI metadata generation error:', err);
     return null;
   }
 };

@@ -2,6 +2,28 @@ import ffmpeg from 'fluent-ffmpeg';
 import path from 'path';
 import fs from 'fs';
 
+/**
+ * Extract audio track from video as a small AAC file for AI transcription.
+ * Uses stream copy (no re-encoding) so it's extremely fast even on Render.
+ */
+export const extractAudio = (inputPath: string, outputPath: string): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    ffmpeg(inputPath)
+      .outputOptions([
+        '-vn',          // No video
+        '-c:a aac',     // AAC codec (widely compatible)
+        '-b:a 64k',     // Low bitrate - enough for transcription
+        '-t 300',       // Max 5 minutes of audio to keep file small
+      ])
+      .on('end', () => resolve(outputPath))
+      .on('error', (err) => {
+        console.warn('Audio extraction failed (non-fatal):', err.message);
+        reject(err);
+      })
+      .save(outputPath);
+  });
+};
+
 export const compressVideo = (inputPath: string, outputPath: string): Promise<string> => {
   return new Promise((resolve, reject) => {
     ffmpeg(inputPath)

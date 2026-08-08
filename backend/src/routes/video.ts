@@ -6,9 +6,9 @@ import { v4 as uuidv4 } from 'uuid';
 import Video from '../models/Video';
 import User from '../models/User';
 import { authMiddleware, optionalAuthMiddleware, activeUserMiddleware, AuthRequest } from '../middlewares/authMiddleware';
-import { compressVideo, generateThumbnail, getVideoMetadata } from '../services/ffmpeg';
+import { extractAudio, generateThumbnail, getVideoMetadata } from '../services/ffmpeg';
 import { uploadFileToR2 } from '../services/r2';
-import { generateVideoMetadata } from '../services/gemini';
+import { transcribeAudio, generateVideoMetadata } from '../services/gemini';
 
 const router = Router();
 
@@ -82,12 +82,11 @@ router.post('/upload', [authMiddleware, activeUserMiddleware], (req: AuthRequest
     });
 
     // --- Background Processing ---
-    // NOTE: We skip heavy ffmpeg compression on production (Render free tier).
-    // Compression causes OOM kills that leave videos stuck in 'processing' forever.
-    // Instead: get metadata -> generate thumbnail -> upload original to R2 directly.
+    // Pipeline: metadata → thumbnail → extract audio → transcribe → AI metadata → R2 upload → DB update
     (async () => {
+      const audioPath = path.join(uploadDir, `audio_${fileId}.aac`);
       try {
-        // 1. Get Duration and Metadata (with timeout to prevent hanging)
+        // 1. Get Duration and Metadata (with timeout)
         const metadataPromise = getVideoMetadata(inputPath);
         const metadataTimeout = new Promise<never>((_, reject) =>
           setTimeout(() => reject(new Error('ffprobe timed out after 2 minutes')), 120000)
@@ -95,25 +94,42 @@ router.post('/upload', [authMiddleware, activeUserMiddleware], (req: AuthRequest
         const metadata = await Promise.race([metadataPromise, metadataTimeout]) as Awaited<typeof metadataPromise>;
         video.duration = metadata.duration;
 
-        // Auto-tag as 'shorts' if vertical video (width < height)
+        // Auto-tag as 'shorts' if vertical video
         if (metadata.width > 0 && metadata.height > 0 && metadata.width < metadata.height) {
-          if (!video.tags.includes('shorts')) {
-            video.tags.push('shorts');
-          }
+          if (!video.tags.includes('shorts')) video.tags.push('shorts');
         }
 
-        // 2. Generate Thumbnail from original file (skip compression)
+        // 2. Generate Thumbnail
         await generateThumbnail(inputPath, thumbnailFolder, thumbnailFilename);
 
-        // 3. AI Metadata Generation (runs in parallel with upload, non-blocking)
-        const aiPromise = generateVideoMetadata(thumbnailPath, video.title);
+        // 3. Extract audio for transcription (fast - no re-encoding)
+        let transcript: string | null = null;
+        try {
+          await extractAudio(inputPath, audioPath);
+          console.log(`Audio extracted: ${audioPath}`);
+          // 4. Transcribe audio with Gemini
+          transcript = await transcribeAudio(audioPath);
+          if (transcript) console.log(`Transcript length: ${transcript.length} chars`);
+        } catch (audioErr: any) {
+          console.warn('Audio extraction/transcription failed (non-fatal):', audioErr.message);
+        } finally {
+          // Clean up audio file regardless
+          try { if (fs.existsSync(audioPath)) fs.unlinkSync(audioPath); } catch (_) {}
+        }
 
-        // 4. Upload to R2 (or serve locally if no R2 credentials)
+        // 5. Generate AI metadata from transcript (or thumbnail as fallback)
+        const aiSuggestions = await generateVideoMetadata({
+          transcript,
+          thumbnailPath: fs.existsSync(thumbnailPath) ? thumbnailPath : undefined,
+          userTitle: title || video.title,
+          userDescription: description || undefined,
+        });
+
+        // 6. Upload to R2
         let finalVideoUrl = '';
         let finalThumbUrl = '';
 
         if (process.env.R2_ACCESS_KEY_ID && process.env.R2_SECRET_ACCESS_KEY) {
-          // Upload original video directly (no compression)
           const ext = path.extname(inputPath) || '.mp4';
           const videoKey = `videos/${fileId}${ext}`;
           const videoUrl = await uploadFileToR2(inputPath, videoKey, 'video/mp4');
@@ -121,49 +137,43 @@ router.post('/upload', [authMiddleware, activeUserMiddleware], (req: AuthRequest
           finalVideoUrl = videoUrl || '';
           finalThumbUrl = thumbUrl || '';
         } else {
-          // Serve locally if no R2 — copy original to a stable path
           const stablePath = path.join(uploadDir, `video_${fileId}.mp4`);
           fs.copyFileSync(inputPath, stablePath);
           finalVideoUrl = `${process.env.BACKEND_URL || 'http://localhost:5001'}/uploads/video_${fileId}.mp4`;
           finalThumbUrl = `${process.env.BACKEND_URL || 'http://localhost:5001'}/uploads/thumbnails/${thumbnailFilename}`;
         }
 
-        // Clean up original temp file and thumbnail
+        // Cleanup temp files
         try { if (fs.existsSync(inputPath)) fs.unlinkSync(inputPath); } catch (_) {}
         try { if (fs.existsSync(thumbnailPath)) fs.unlinkSync(thumbnailPath); } catch (_) {}
-        // Remove any stale compressed file that might exist
         try { if (fs.existsSync(compressedVideoPath)) fs.unlinkSync(compressedVideoPath); } catch (_) {}
 
-        // 5. Apply AI suggestions (wait for AI result)
-        const aiSuggestions = await aiPromise;
+        // 7. Apply AI metadata to video
         if (aiSuggestions) {
-          // Only override title if user left it blank or used filename
           const userProvidedTitle = (title || '').trim();
           const isGenericTitle = !userProvidedTitle || userProvidedTitle === 'Untitled Video';
-          if (isGenericTitle) {
-            video.title = aiSuggestions.title;
-          }
-          // Only override description if user left it blank
-          if (!description || description.trim() === '') {
-            video.description = aiSuggestions.description;
-          }
-          // Merge AI tags with any user-provided tags
+          if (isGenericTitle) video.title = aiSuggestions.title;
+          if (!description || description.trim() === '') video.description = aiSuggestions.description;
           const existingTags = video.tags as string[];
-          const mergedTags = [...new Set([...existingTags, ...aiSuggestions.tags])];
-          video.tags = mergedTags;
-          // Store AI suggestions in DB for frontend to read
-          (video as any).aiSuggestions = aiSuggestions;
-          console.log(`AI metadata generated for video ${video._id}:`, aiSuggestions.title);
+          video.tags = [...new Set([...existingTags, ...aiSuggestions.tags])];
+          (video as any).aiSuggestions = {
+            title: aiSuggestions.title,
+            description: aiSuggestions.description,
+            tags: aiSuggestions.tags,
+          };
+          console.log(`✅ AI metadata applied - title: "${aiSuggestions.title}"`);
+        } else {
+          console.warn('AI metadata generation returned null - video published without AI metadata');
         }
 
-        // 6. Update Database
+        // 8. Update Database
         video.url = finalVideoUrl;
         video.thumbnailUrl = finalThumbUrl;
         video.status = 'published';
         await video.save();
-        console.log(`Video ${video._id} published successfully.`);
+        console.log(`✅ Video ${video._id} published successfully.`);
         
-        // 5. Notify Subscribers
+        // 9. Notify Subscribers
         if (video.visibility === 'public') {
           const Notification = require('../models/Notification').default;
           const subscribers = await User.find({ subscriptions: video.creator }).select('_id');
@@ -180,11 +190,11 @@ router.post('/upload', [authMiddleware, activeUserMiddleware], (req: AuthRequest
         
       } catch (err) {
         console.error('Background processing failed:', err);
-        // Use 'failed' so the user sees a clear error, not 'private'
         video.status = 'failed';
         try { await video.save(); } catch (saveErr) { console.error('Could not update failed status:', saveErr); }
-        // Attempt cleanup
+        // Cleanup on failure
         try { if (fs.existsSync(inputPath)) fs.unlinkSync(inputPath); } catch (_) {}
+        try { if (fs.existsSync(audioPath)) fs.unlinkSync(audioPath); } catch (_) {}
       }
     })();
 
