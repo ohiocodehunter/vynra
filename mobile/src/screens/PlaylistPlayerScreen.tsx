@@ -54,6 +54,7 @@ export default function PlaylistPlayerScreen() {
   const [showSave, setShowSave] = useState(false);
   const [descExpanded, setDescExpanded] = useState(false);
 
+  const [views, setViews] = useState<number>(video.views || 0);
   const [likes, setLikes] = useState<number>(video.likes || 0);
   const [userAction, setUserAction] = useState<'like' | 'dislike' | null>(null);
 
@@ -138,18 +139,21 @@ export default function PlaylistPlayerScreen() {
   };
 
   useEffect(() => {
-    const checkInteraction = async () => {
-      if (!user || !video._id) return;
+    const fetchLiveStats = async () => {
       try {
         const res = await client.get(`/videos/${video._id}`);
         const v = res.data;
-        const uid = user._id;
-        if (v.likedBy?.includes(uid)) setUserAction('like');
-        else if (v.dislikedBy?.includes(uid)) setUserAction('dislike');
+        if (typeof v.views === 'number') setViews(v.views);
         if (typeof v.likes === 'number') setLikes(v.likes);
+        
+        if (user) {
+          const uid = user._id;
+          if (v.likedBy?.includes(uid)) setUserAction('like');
+          else if (v.dislikedBy?.includes(uid)) setUserAction('dislike');
+        }
       } catch {/* silent */}
     };
-    checkInteraction();
+    if (video._id) fetchLiveStats();
   }, [video._id, user]);
 
   useEffect(() => {
@@ -178,8 +182,19 @@ export default function PlaylistPlayerScreen() {
     if (!creator?._id) return;
     setSubscribing(true);
     try {
-      const res = await client.post('/users/subscribe', { channelId: creator._id });
-      setIsSubscribed(res.data.subscribed);
+      if (isSubscribed) {
+        const res = await client.post(`/users/unsubscribe/${creator._id}`);
+        setIsSubscribed(false);
+        if (res.data.subscribersCount !== undefined) {
+          setCreator((prev: any) => ({ ...prev, subscribersCount: res.data.subscribersCount }));
+        }
+      } else {
+        const res = await client.post(`/users/subscribe/${creator._id}`);
+        setIsSubscribed(true);
+        if (res.data.subscribersCount !== undefined) {
+          setCreator((prev: any) => ({ ...prev, subscribersCount: res.data.subscribersCount }));
+        }
+      }
     } catch (error) { console.error('Error subscribing', error); }
     finally { setSubscribing(false); }
   };
@@ -295,11 +310,11 @@ export default function PlaylistPlayerScreen() {
             <View style={styles.controlsOverlay}>
               <View style={styles.centerControls}>
                 <TouchableOpacity 
-                  style={[styles.playPauseBtn, { opacity: currentIndex > 0 ? 1 : 0.5 }]} 
+                  style={[styles.skipBtn, { opacity: currentIndex > 0 ? 1 : 0.5 }]} 
                   onPress={goPrev}
                   disabled={currentIndex === 0}
                 >
-                  <SkipBack color="#fff" size={32} />
+                  <SkipBack color="#fff" size={24} />
                 </TouchableOpacity>
                 <TouchableOpacity 
                   style={styles.playPauseBtn} 
@@ -308,14 +323,14 @@ export default function PlaylistPlayerScreen() {
                     else { player.play(); showControlsTemporarily(); }
                   }}
                 >
-                  {isPlaying ? <Pause color="#fff" size={48} fill="#fff" /> : <Play color="#fff" size={48} fill="#fff" />}
+                  {isPlaying ? <Pause color="#fff" size={40} fill="#fff" /> : <Play color="#fff" size={40} fill="#fff" />}
                 </TouchableOpacity>
                 <TouchableOpacity 
-                  style={[styles.playPauseBtn, { opacity: currentIndex < videos.length - 1 ? 1 : 0.5 }]} 
+                  style={[styles.skipBtn, { opacity: currentIndex < videos.length - 1 ? 1 : 0.5 }]} 
                   onPress={goNext}
                   disabled={currentIndex >= videos.length - 1}
                 >
-                  <SkipForward color="#fff" size={32} />
+                  <SkipForward color="#fff" size={24} />
                 </TouchableOpacity>
               </View>
 
@@ -337,7 +352,7 @@ export default function PlaylistPlayerScreen() {
         <ScrollView style={styles.detailsContainer} showsVerticalScrollIndicator={false}>
           <Text style={styles.title}>{video.title}</Text>
           <Text style={styles.stats}>
-            {video.views?.toLocaleString()} {t('common.views')} • {video.createdAt ? formatDistanceToNow(new Date(video.createdAt), { addSuffix: true }) : t('common.recently', 'Recently')}
+            {views.toLocaleString()} {t('common.views')} • {video.createdAt ? formatDistanceToNow(new Date(video.createdAt), { addSuffix: true }) : t('common.recently', 'Recently')}
           </Text>
 
           {video.description ? (
@@ -467,8 +482,9 @@ const styles = StyleSheet.create({
   video: { width: '100%', height: '100%' },
   overlayTouch: { position: 'absolute', top: 0, bottom: 0, left: 0, right: 0 },
   controlsOverlay: { position: 'absolute', top: 0, bottom: 0, left: 0, right: 0, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'space-between' },
-  centerControls: { flex: 1, justifyContent: 'center', alignItems: 'center', flexDirection: 'row', gap: 30 },
-  playPauseBtn: { padding: 10 },
+  centerControls: { flex: 1, justifyContent: 'center', alignItems: 'center', flexDirection: 'row', gap: 40 },
+  playPauseBtn: { padding: 16, backgroundColor: 'rgba(0,0,0,0.6)', borderRadius: 50 },
+  skipBtn: { padding: 12, backgroundColor: 'rgba(0,0,0,0.4)', borderRadius: 30 },
   bottomControls: { flexDirection: 'row', alignItems: 'center', padding: 16, paddingBottom: 20 },
   timeText: { color: '#fff', fontSize: 12, marginRight: 12, width: 75 },
   progressBarBg: { flex: 1, height: 4, backgroundColor: 'rgba(255,255,255,0.3)', borderRadius: 2, marginRight: 16 },
