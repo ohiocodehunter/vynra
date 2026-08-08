@@ -16,7 +16,7 @@ export default function StudioScreen() {
   const [isLoading, setIsLoading] = useState(true);
 
   // You can set this in .env (e.g. EXPO_PUBLIC_FRONTEND_URL=https://your-frontend.com)
-  const frontendUrl = process.env.EXPO_PUBLIC_FRONTEND_URL || 'http://192.168.1.something:3000'; 
+  const frontendUrl = process.env.EXPO_PUBLIC_FRONTEND_URL || 'https://vynra.ohiocodehunter.com'; 
   const studioUrl = `${frontendUrl}/studio`;
 
   useEffect(() => {
