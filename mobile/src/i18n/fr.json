@@ -1,0 +1,105 @@
+{
+  "profile": {
+    "account": "Compte",
+    "viewChannel": "Voir la chaîne",
+    "history": "Historique",
+    "watchLater": "À regarder plus tard",
+    "likedVideos": "Vidéos j'aime",
+    "playlists": "Playlists",
+    "vynraStudio": "Vynra Studio",
+    "language": "Langue",
+    "appearance": "Apparence",
+    "settings": "Paramètres",
+    "logout": "Déconnexion",
+    "comingSoon": "Bientôt disponible",
+    "comingSoonDesc": "Les paramètres de {{action}} seront bientôt disponibles !"
+  },
+  "common": {
+    "views": "vues",
+    "subscribers": "abonnés",
+    "videos": "vidéos",
+    "cancel": "Annuler",
+    "save": "Enregistrer",
+    "recently": "Récemment",
+    "unknown": "Inconnu",
+    "share": "Partager"
+  },
+  "home": {
+    "shorts": "Shorts",
+    "noShorts": "Aucun Short disponible",
+    "noVideos": "Aucune vidéo trouvée"
+  },
+  "channel": {
+    "home": "Accueil",
+    "videos": "Vidéos",
+    "playlists": "Playlists",
+    "community": "Communauté",
+    "subscribe": "S'abonner",
+    "subscribed": "Abonné"
+  },
+  "explore": {
+    "trending": "Tendances",
+    "music": "Musique",
+    "gaming": "Jeux vidéo",
+    "news": "Actualités",
+    "movies": "Films",
+    "fashion": "Mode",
+    "learning": "Savoirs",
+    "live": "En direct",
+    "sports": "Sports"
+  },
+  "auth": {
+    "welcomeBack": "Bon retour",
+    "loginToContinue": "Connectez-vous pour continuer",
+    "createAccount": "Créer un compte",
+    "joinUs": "Rejoignez Vynra aujourd'hui",
+    "username": "Nom d'utilisateur",
+    "email": "Adresse e-mail",
+    "password": "Mot de passe",
+    "confirmPassword": "Confirmer le mot de passe",
+    "login": "Se connecter",
+    "register": "S'inscrire",
+    "noAccount": "Vous n'avez pas de compte ?",
+    "haveAccount": "Vous avez déjà un compte ?"
+  },
+  "video": {
+    "subscribe": "S'abonner",
+    "subscribed": "Abonné",
+    "comments": "Commentaires",
+    "upNext": "À suivre",
+    "addComment": "Ajouter un commentaire...",
+    "dislike": "Je n'aime pas",
+    "post": "Publier",
+    "noComments": "Aucun commentaire pour le moment."
+  },
+  "subscriptions": {
+    "subscriptions": "Abonnements",
+    "latest": "Les dernières de vos chaînes",
+    "noSubscriptions": "Vous n'avez pas encore d'abonnement"
+  },
+  "playlists": {
+    "playlists": "Playlists",
+    "likedVideos": "Vidéos j'aime",
+    "history": "Historique",
+    "watchLater": "À regarder plus tard",
+    "playAll": "Tout lire",
+    "shuffle": "Aléatoire",
+    "playlistEmpty": "La playlist est vide",
+    "saveVideoDesc": "Enregistrez des vidéos ou des Shorts pour créer votre première playlist",
+    "saveVideoDesc2": "Enregistrer des vidéos ou des Shorts dans cette playlist",
+    "queue": "File d'attente"
+  },
+  "nav": {
+    "home": "Accueil",
+    "shorts": "Shorts",
+    "add": "Créer",
+    "subscriptions": "Abonnements",
+    "you": "Vous"
+  },
+  "navigation": {
+    "home": "Accueil",
+    "shorts": "Shorts",
+    "subscriptions": "Abonnements",
+    "you": "Vous"
+  }
+}

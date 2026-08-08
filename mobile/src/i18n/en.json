@@ -1,0 +1,87 @@
+{
+  "profile": {
+    "account": "Account",
+    "viewChannel": "View channel",
+    "history": "History",
+    "watchLater": "Watch Later",
+    "likedVideos": "Liked Videos",
+    "playlists": "Playlists",
+    "vynraStudio": "Vynra Studio",
+    "language": "Language (English)",
+    "appearance": "Appearance (Dark)",
+    "settings": "Settings",
+    "logout": "Log out",
+    "comingSoon": "Coming Soon",
+    "comingSoonDesc": "{{action}} settings will be available soon!"
+  },
+  "common": {
+    "views": "views",
+    "subscribers": "subscribers",
+    "videos": "videos",
+    "cancel": "Cancel",
+    "save": "Save"
+  },
+  "home": {
+    "shorts": "Shorts"
+  },
+  "channel": {
+    "home": "Home",
+    "videos": "Videos",
+    "playlists": "Playlists",
+    "community": "Community",
+    "subscribe": "Subscribe",
+    "subscribed": "Subscribed"
+  },
+  "explore": {
+    "trending": "Trending",
+    "music": "Music",
+    "gaming": "Gaming",
+    "news": "News",
+    "movies": "Movies",
+    "fashion": "Fashion",
+    "learning": "Learning",
+    "live": "Live",
+    "sports": "Sports"
+  },
+  "auth": {
+    "welcomeBack": "Welcome Back",
+    "loginToContinue": "Login to continue",
+    "createAccount": "Create Account",
+    "joinUs": "Join Vynra today",
+    "username": "Username",
+    "email": "Email",
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "login": "Login",
+    "register": "Register",
+    "noAccount": "Don't have an account?",
+    "haveAccount": "Already have an account?"
+  },
+  "video": {
+    "subscribe": "Subscribe",
+    "subscribed": "Subscribed",
+    "comments": "Comments",
+    "upNext": "Up Next",
+    "addComment": "Add a comment..."
+  },
+  "subscriptions": {
+    "subscriptions": "Subscriptions",
+    "latest": "Latest from your channels",
+    "noSubscriptions": "You have no subscriptions yet"
+  },
+  "playlists": {
+    "playlists": "Playlists",
+    "likedVideos": "Liked Videos",
+    "history": "History",
+    "watchLater": "Watch Later",
+    "playAll": "Play All",
+    "shuffle": "Shuffle"
+  },
+  "nav": {
+    "home": "Home",
+    "shorts": "Shorts",
+    "add": "Add",
+    "subscriptions": "Subscriptions",
+    "you": "You"
+  }
+}

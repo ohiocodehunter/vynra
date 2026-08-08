@@ -1,0 +1,105 @@
+{
+  "profile": {
+    "account": "账号",
+    "viewChannel": "查看频道",
+    "history": "历史记录",
+    "watchLater": "稍后观看",
+    "likedVideos": "顶过的视频",
+    "playlists": "播放列表",
+    "vynraStudio": "Vynra Studio",
+    "language": "语言",
+    "appearance": "外观",
+    "settings": "设置",
+    "logout": "退出登录",
+    "comingSoon": "即将推出",
+    "comingSoonDesc": "{{action}} 设置即将推出！"
+  },
+  "common": {
+    "views": "次观看",
+    "subscribers": "位订阅者",
+    "videos": "个视频",
+    "cancel": "取消",
+    "save": "保存",
+    "recently": "最近",
+    "unknown": "未知",
+    "share": "分享"
+  },
+  "home": {
+    "shorts": "短视频",
+    "noShorts": "没有短视频",
+    "noVideos": "未找到视频"
+  },
+  "channel": {
+    "home": "首页",
+    "videos": "视频",
+    "playlists": "播放列表",
+    "community": "社区",
+    "subscribe": "订阅",
+    "subscribed": "已订阅"
+  },
+  "explore": {
+    "trending": "时下流行",
+    "music": "音乐",
+    "gaming": "游戏",
+    "news": "新闻",
+    "movies": "电影",
+    "fashion": "时尚",
+    "learning": "学习",
+    "live": "直播",
+    "sports": "体育"
+  },
+  "auth": {
+    "welcomeBack": "欢迎回来",
+    "loginToContinue": "请登录以继续",
+    "createAccount": "创建账号",
+    "joinUs": "今天就加入 Vynra",
+    "username": "用户名",
+    "email": "电子邮件",
+    "password": "密码",
+    "confirmPassword": "确认密码",
+    "login": "登录",
+    "register": "注册",
+    "noAccount": "没有账号？",
+    "haveAccount": "已有账号？"
+  },
+  "video": {
+    "subscribe": "订阅",
+    "subscribed": "已订阅",
+    "comments": "评论",
+    "upNext": "接下来播放",
+    "addComment": "添加评论...",
+    "dislike": "踩",
+    "post": "发布",
+    "noComments": "暂无评论。"
+  },
+  "subscriptions": {
+    "subscriptions": "订阅",
+    "latest": "频道的最新内容",
+    "noSubscriptions": "您还没有订阅"
+  },
+  "playlists": {
+    "playlists": "播放列表",
+    "likedVideos": "顶过的视频",
+    "history": "历史记录",
+    "watchLater": "稍后观看",
+    "playAll": "全部播放",
+    "shuffle": "随机播放",
+    "playlistEmpty": "播放列表是空的",
+    "saveVideoDesc": "保存视频或短视频以创建您的第一个播放列表",
+    "saveVideoDesc2": "将视频或短视频保存到此播放列表",
+    "queue": "队列"
+  },
+  "nav": {
+    "home": "首页",
+    "shorts": "短视频",
+    "add": "添加",
+    "subscriptions": "订阅",
+    "you": "您"
+  },
+  "navigation": {
+    "home": "首页",
+    "shorts": "短视频",
+    "subscriptions": "订阅",
+    "you": "您"
+  }
+}

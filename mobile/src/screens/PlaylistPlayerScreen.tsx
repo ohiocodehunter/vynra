@@ -11,6 +11,7 @@ import {
   ListVideo, Play
 } from 'lucide-react-native';
 import { formatDistanceToNow } from 'date-fns';
+import { useTranslation } from 'react-i18next';
 
 const { width: W, height: H } = Dimensions.get('window');
 
@@ -20,6 +21,7 @@ const isShort = (video: any) =>
   (video?.height && video?.width && video.height > video.width);
 
 export default function PlaylistPlayerScreen() {
+  const { t } = useTranslation();
   const navigation = useNavigation<any>();
   const route = useRoute<any>();
   const insets = useSafeAreaInsets();
@@ -92,7 +94,7 @@ export default function PlaylistPlayerScreen() {
           <ChevronLeft color="#fff" size={26} />
         </TouchableOpacity>
         <Text style={{ color: '#888', textAlign: 'center', marginTop: 60, fontSize: 16 }}>
-          Playlist is empty
+          {t('playlists.playlistEmpty', 'Playlist is empty')}
         </Text>
       </View>
     );
@@ -171,12 +173,12 @@ export default function PlaylistPlayerScreen() {
           <Text style={styles.videoTitle} numberOfLines={2}>{currentVideo.title}</Text>
           <Text style={styles.videoMeta}>
             {currentVideo.creator?.username}
-            {currentVideo.views ? ` • ${currentVideo.views.toLocaleString()} views` : ''}
+            {currentVideo.views ? ` • ${currentVideo.views.toLocaleString()} ${t('common.views')}` : ''}
           </Text>
         </View>
         {short && (
           <View style={styles.shortBadge}>
-            <Text style={styles.shortBadgeText}>Short</Text>
+            <Text style={styles.shortBadgeText}>{t('home.shorts')}</Text>
           </View>
         )}
       </View>
@@ -196,7 +198,7 @@ export default function PlaylistPlayerScreen() {
         pointerEvents={showQueue ? 'auto' : 'none'}
       >
         <View style={styles.queueHeader}>
-          <Text style={styles.queueTitle}>Queue</Text>
+          <Text style={styles.queueTitle}>{t('playlists.queue', 'Queue')}</Text>
           <TouchableOpacity onPress={toggleQueue}>
             <ChevronRight color="#fff" size={22} />
           </TouchableOpacity>

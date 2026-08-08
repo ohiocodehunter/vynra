@@ -8,6 +8,7 @@ import { useNavigation, useRoute, useFocusEffect } from '@react-navigation/nativ
 import { ChevronLeft, ListVideo, Play } from 'lucide-react-native';
 import client from '../api/client';
 import { formatDistanceToNow } from 'date-fns';
+import { useTranslation } from 'react-i18next';
 
 const isShort = (video: any) =>
   video?.tags?.includes('shorts') ||
@@ -15,6 +16,7 @@ const isShort = (video: any) =>
   (video?.height && video?.width && video.height > video.width);
 
 export default function PlaylistsScreen() {
+  const { t } = useTranslation();
   const navigation = useNavigation<any>();
   const route = useRoute<any>();
   const playlistId = route.params?.playlistId;
@@ -75,7 +77,7 @@ export default function PlaylistsScreen() {
           <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
             <ChevronLeft color="#fff" size={26} />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>My Playlists</Text>
+          <Text style={styles.headerTitle}>{t('playlists.playlists', 'My Playlists')}</Text>
         </View>
 
         {loading ? (
@@ -125,10 +127,10 @@ export default function PlaylistsScreen() {
                     <Text style={styles.playlistName} numberOfLines={1}>{item.name}</Text>
                     <View style={styles.playlistMeta}>
                       {videoCount > 0 && (
-                        <Text style={styles.metaChip}>🎬 {videoCount} video{videoCount !== 1 ? 's' : ''}</Text>
+                        <Text style={styles.metaChip}>🎬 {videoCount} {t('common.videos')}</Text>
                       )}
                       {shortCount > 0 && (
-                        <Text style={styles.metaChipShort}>⚡ {shortCount} short{shortCount !== 1 ? 's' : ''}</Text>
+                        <Text style={styles.metaChipShort}>⚡ {shortCount} {t('home.shorts')}</Text>
                       )}
                     </View>
                     {item.createdAt && (
@@ -145,9 +147,9 @@ export default function PlaylistsScreen() {
             ListEmptyComponent={
               <View style={styles.empty}>
                 <ListVideo color="#333" size={56} />
-                <Text style={styles.emptyTitle}>No playlists yet</Text>
+                <Text style={styles.emptyTitle}>{t('playlists.playlistEmpty', 'No playlists yet')}</Text>
                 <Text style={styles.emptySubtext}>
-                  Tap Save on any video or short to create your first playlist
+                  {t('playlists.saveVideoDesc', 'Tap Save on any video or short to create your first playlist')}
                 </Text>
               </View>
             }
@@ -173,7 +175,7 @@ export default function PlaylistsScreen() {
         <View style={{ flex: 1 }}>
           <Text style={styles.headerTitle} numberOfLines={1}>{playlistName}</Text>
           {!loading && (
-            <Text style={styles.headerSub}>{videos.length} video{videos.length !== 1 ? 's' : ''}</Text>
+            <Text style={styles.headerSub}>{videos.length} {t('common.videos')}</Text>
           )}
         </View>
         {/* Play all button */}
@@ -188,7 +190,7 @@ export default function PlaylistsScreen() {
             }
           >
             <Play color="#fff" size={14} fill="#fff" />
-            <Text style={styles.playAllText}>Play All</Text>
+            <Text style={styles.playAllText}>{t('playlists.playAll', 'Play All')}</Text>
           </TouchableOpacity>
         )}
       </View>
@@ -223,7 +225,7 @@ export default function PlaylistsScreen() {
                   />
                   {short && (
                     <View style={styles.shortBadge}>
-                      <Text style={styles.shortBadgeText}>Short</Text>
+                      <Text style={styles.shortBadgeText}>{t('home.shorts')}</Text>
                     </View>
                   )}
                   <View style={styles.indexBadge}>
@@ -235,7 +237,7 @@ export default function PlaylistsScreen() {
                   <Text style={styles.videoTitle} numberOfLines={2}>{item.title}</Text>
                   <Text style={styles.videoMeta}>{item.creator?.username}</Text>
                   <Text style={styles.videoMeta}>
-                    {item.views?.toLocaleString()} views
+                    {item.views?.toLocaleString()} {t('common.views')}
                     {item.createdAt
                       ? ` • ${formatDistanceToNow(new Date(item.createdAt), { addSuffix: true })}`
                       : ''}
@@ -247,8 +249,8 @@ export default function PlaylistsScreen() {
           ListEmptyComponent={
             <View style={styles.empty}>
               <ListVideo color="#333" size={48} />
-              <Text style={styles.emptyTitle}>Playlist is empty</Text>
-              <Text style={styles.emptySubtext}>Save videos or shorts to this playlist</Text>
+              <Text style={styles.emptyTitle}>{t('playlists.playlistEmpty', 'Playlist is empty')}</Text>
+              <Text style={styles.emptySubtext}>{t('playlists.saveVideoDesc2', 'Save videos or shorts to this playlist')}</Text>
             </View>
           }
         />

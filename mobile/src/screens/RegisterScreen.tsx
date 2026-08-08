@@ -5,8 +5,10 @@ import { useAuth } from '../context/AuthContext';
 import apiClient from '../api/client';
 import { useNavigation } from '@react-navigation/native';
 import { ChevronLeft } from 'lucide-react-native';
+import { useTranslation } from 'react-i18next';
 
 export default function RegisterScreen() {
+  const { t } = useTranslation();
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -42,12 +44,12 @@ export default function RegisterScreen() {
 
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.content}>
-          <Text style={styles.title}>Create Account</Text>
-          <Text style={styles.subtitle}>Join Vynra today</Text>
+          <Text style={styles.title}>{t('auth.createAccount')}</Text>
+          <Text style={styles.subtitle}>{t('auth.joinUs')}</Text>
 
           <TextInput
             style={styles.input}
-            placeholder="Username"
+            placeholder={t('auth.username', 'Username')}
             placeholderTextColor="#888"
             value={username}
             onChangeText={setUsername}
@@ -56,7 +58,7 @@ export default function RegisterScreen() {
 
           <TextInput
             style={styles.input}
-            placeholder="Email address"
+            placeholder={t('auth.email', 'Email address')}
             placeholderTextColor="#888"
             value={email}
             onChangeText={setEmail}
@@ -66,7 +68,7 @@ export default function RegisterScreen() {
 
           <TextInput
             style={styles.input}
-            placeholder="Password"
+            placeholder={t('auth.password', 'Password')}
             placeholderTextColor="#888"
             value={password}
             onChangeText={setPassword}
@@ -77,14 +79,14 @@ export default function RegisterScreen() {
             {loading ? (
               <ActivityIndicator color="#000" />
             ) : (
-              <Text style={styles.buttonText}>Sign Up</Text>
+              <Text style={styles.buttonText}>{t('auth.register', 'Sign Up')}</Text>
             )}
           </TouchableOpacity>
 
           <View style={styles.footer}>
-            <Text style={styles.footerText}>Already have an account? </Text>
+            <Text style={styles.footerText}>{t('auth.haveAccount')} </Text>
             <TouchableOpacity onPress={() => navigation.navigate('Login')}>
-              <Text style={styles.linkText}>Log in</Text>
+              <Text style={styles.linkText}>{t('auth.login', 'Log in')}</Text>
             </TouchableOpacity>
           </View>
         </View>

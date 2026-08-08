@@ -13,8 +13,10 @@ const SHORTS_HEIGHT = WINDOW_HEIGHT - 50;
 
 import { ThumbsUp, MessageSquare, Share2, MoreVertical } from 'lucide-react-native';
 import SaveSheet from '../components/SaveSheet';
+import { useTranslation } from 'react-i18next';
 
 function CommentsModal({ videoId, visible, onClose }: { videoId: string, visible: boolean, onClose: () => void }) {
+  const { t } = useTranslation();
   const [comments, setComments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [text, setText] = useState('');
@@ -56,8 +58,8 @@ function CommentsModal({ videoId, visible, onClose }: { videoId: string, visible
           behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         >
           <View style={styles.modalHeader}>
-            <Text style={styles.modalTitle}>Comments</Text>
-            <TouchableOpacity onPress={onClose}><Text style={styles.closeText}>Close</Text></TouchableOpacity>
+            <Text style={styles.modalTitle}>{t('video.comments', 'Comments')}</Text>
+            <TouchableOpacity onPress={onClose}><Text style={styles.closeText}>{t('common.cancel', 'Close')}</Text></TouchableOpacity>
           </View>
           {loading ? <ActivityIndicator style={{marginTop: 20}} color="#fff" /> : (
             <FlatList
@@ -69,24 +71,24 @@ function CommentsModal({ videoId, visible, onClose }: { videoId: string, visible
                   <Text style={styles.commentText}>{item.text}</Text>
                 </View>
               )}
-              ListEmptyComponent={<Text style={{color: '#888', padding: 16}}>No comments yet.</Text>}
+              ListEmptyComponent={<Text style={{color: '#888', padding: 16}}>{t('video.noComments', 'No comments yet.')}</Text>}
             />
           )}
           {user ? (
             <View style={styles.commentInputRow}>
               <TextInput
                 style={styles.commentInput}
-                placeholder="Add a comment..."
+                placeholder={t('video.addComment', 'Add a comment...')}
                 placeholderTextColor="#888"
                 value={text}
                 onChangeText={setText}
               />
               <TouchableOpacity onPress={postComment} style={styles.postBtn}>
-                <Text style={styles.postBtnText}>Post</Text>
+                <Text style={styles.postBtnText}>{t('video.post', 'Post')}</Text>
               </TouchableOpacity>
             </View>
           ) : (
-            <Text style={{color: '#888', padding: 16, textAlign: 'center'}}>Log in to comment</Text>
+            <Text style={{color: '#888', padding: 16, textAlign: 'center'}}>{t('auth.loginToContinue', 'Log in to comment')}</Text>
           )}
         </KeyboardAvoidingView>
       </View>
@@ -96,6 +98,7 @@ function CommentsModal({ videoId, visible, onClose }: { videoId: string, visible
 
 
 function ShortVideoItem({ item, isActive, height }: { item: Video, isActive: boolean, height: number }) {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const [likes, setLikes] = useState(item.likes || 0);
   const [userAction, setUserAction] = useState<'like' | 'dislike' | null>(null);
@@ -215,7 +218,7 @@ function ShortVideoItem({ item, isActive, height }: { item: Video, isActive: boo
           />
           <Text style={styles.channelName}>@{item.creator?.username}</Text>
           <TouchableOpacity style={styles.subscribeBtn}>
-            <Text style={styles.subscribeBtnText}>Subscribe</Text>
+            <Text style={styles.subscribeBtnText}>{t('video.subscribe', 'Subscribe')}</Text>
           </TouchableOpacity>
         </View>
         <Text style={styles.title} numberOfLines={2}>{item.title}</Text>
@@ -235,14 +238,14 @@ function ShortVideoItem({ item, isActive, height }: { item: Video, isActive: boo
           <View style={styles.iconWrapper}>
             <MessageSquare color="#fff" size={28} />
           </View>
-          <Text style={styles.actionText}>Comment</Text>
+          <Text style={styles.actionText}>{t('video.comments', 'Comment')}</Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.actionBtn} onPress={handleShare}>
           <View style={styles.iconWrapper}>
             <Share2 color="#fff" size={28} />
           </View>
-          <Text style={styles.actionText}>Share</Text>
+          <Text style={styles.actionText}>{t('common.share', 'Share')}</Text>
         </TouchableOpacity>
         
         <TouchableOpacity style={styles.actionBtn} onPress={() => setShowPlaylist(true)}>
@@ -260,6 +263,7 @@ function ShortVideoItem({ item, isActive, height }: { item: Video, isActive: boo
 import { useIsFocused } from '@react-navigation/native';
 
 export default function ShortsScreen({ route }: any) {
+  const { t } = useTranslation();
   const [videos, setVideos] = useState<Video[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -349,7 +353,7 @@ export default function ShortsScreen({ route }: any) {
         removeClippedSubviews={true}
         ListEmptyComponent={() => (
           <View style={[styles.loaderContainer, { height: containerHeight }]}>
-            <Text style={{ color: '#888', fontSize: 16 }}>No shorts available</Text>
+            <Text style={{ color: '#888', fontSize: 16 }}>{t('home.noShorts', 'No shorts available')}</Text>
           </View>
         )}
       />

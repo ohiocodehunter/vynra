@@ -6,12 +6,16 @@ import client from '../api/client';
 import TopBar from '../components/TopBar';
 import { formatDistanceToNow } from 'date-fns';
 import { socket } from '../api/socket';
+import { useTheme } from '../context/ThemeContext';
+import { useTranslation } from 'react-i18next';
 
 export default function SubscriptionsScreen() {
+  const { t } = useTranslation();
   const [channels, setChannels] = useState<any[]>([]);
   const [videos, setVideos] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const navigation = useNavigation<any>();
+  const { colors } = useTheme();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -53,13 +57,13 @@ export default function SubscriptionsScreen() {
       onPress={() => navigation.navigate('VideoPlayer', { video: item })}
       activeOpacity={0.8}
     >
-      <Image source={{ uri: item.thumbnailUrl }} style={styles.thumbnail} />
+      <Image source={{ uri: item.thumbnailUrl }} style={[styles.thumbnail, { backgroundColor: colors.border }]} />
       <View style={styles.infoContainer}>
-        <Image source={{ uri: item.creator?.avatarUrl || 'https://via.placeholder.com/40' }} style={styles.avatar} />
+        <Image source={{ uri: item.creator?.avatarUrl || 'https://via.placeholder.com/40' }} style={[styles.avatar, { backgroundColor: colors.border }]} />
         <View style={styles.textContainer}>
-          <Text style={styles.title} numberOfLines={2}>{item.title}</Text>
-          <Text style={styles.details}>
-            {item.creator?.username} • {item.views || 0} views • {item.createdAt ? formatDistanceToNow(new Date(item.createdAt), { addSuffix: true }) : 'Recently'}
+          <Text style={[styles.title, { color: colors.text }]} numberOfLines={2}>{item.title}</Text>
+          <Text style={[styles.details, { color: colors.textSecondary }]}>
+            {item.creator?.username} • {item.views || 0} {t('common.views')} • {item.createdAt ? formatDistanceToNow(new Date(item.createdAt), { addSuffix: true }) : t('common.recently', 'Recently')}
           </Text>
         </View>
       </View>
@@ -67,12 +71,12 @@ export default function SubscriptionsScreen() {
   );
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
       <TopBar />
       
       {loading ? (
         <View style={styles.loader}>
-          <ActivityIndicator size="large" color="#fff" />
+          <ActivityIndicator size="large" color={colors.primary} />
         </View>
       ) : (
         <FlatList
@@ -83,7 +87,7 @@ export default function SubscriptionsScreen() {
           showsVerticalScrollIndicator={false}
           ListHeaderComponent={() => (
             channels.length > 0 ? (
-              <View style={styles.channelsContainer}>
+              <View style={[styles.channelsContainer, { borderBottomColor: colors.border }]}>
                 <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.channelsScroll}>
                   {channels.map((channel: any) => (
                     <TouchableOpacity 
@@ -91,8 +95,8 @@ export default function SubscriptionsScreen() {
                       style={styles.channelItem}
                       onPress={() => navigation.navigate('Channel', { username: channel.username })}
                     >
-                      <Image source={{ uri: channel.avatarUrl || 'https://via.placeholder.com/60' }} style={styles.channelAvatar} />
-                      <Text style={styles.channelName} numberOfLines={1}>
+                      <Image source={{ uri: channel.avatarUrl || 'https://via.placeholder.com/60' }} style={[styles.channelAvatar, { borderColor: colors.primary, backgroundColor: colors.border }]} />
+                      <Text style={[styles.channelName, { color: colors.textSecondary }]} numberOfLines={1}>
                         {channel.channelName || channel.username}
                       </Text>
                     </TouchableOpacity>
@@ -103,7 +107,7 @@ export default function SubscriptionsScreen() {
           )}
           ListEmptyComponent={() => (
             <View style={styles.emptyState}>
-              <Text style={styles.emptyText}>No videos from your subscriptions yet.</Text>
+              <Text style={[styles.emptyText, { color: colors.textSecondary }]}>{t('home.noVideos', 'No videos from your subscriptions yet.')}</Text>
             </View>
           )}
         />
@@ -113,85 +117,21 @@ export default function SubscriptionsScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#0f0f0f',
-  },
-  loader: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  list: {
-    paddingBottom: 20,
-  },
-  channelsContainer: {
-    borderBottomWidth: 1,
-    borderBottomColor: '#222',
-    paddingVertical: 12,
-    marginBottom: 16,
-  },
-  channelsScroll: {
-    paddingHorizontal: 12,
-  },
-  channelItem: {
-    alignItems: 'center',
-    marginHorizontal: 8,
-    width: 64,
-  },
-  channelAvatar: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: '#333',
-    marginBottom: 6,
-    borderWidth: 2,
-    borderColor: '#3ea6ff',
-  },
-  channelName: {
-    color: '#aaa',
-    fontSize: 12,
-    textAlign: 'center',
-  },
-  card: {
-    marginBottom: 20,
-  },
-  thumbnail: {
-    width: '100%',
-    aspectRatio: 16 / 9,
-    backgroundColor: '#222',
-  },
-  infoContainer: {
-    flexDirection: 'row',
-    padding: 12,
-  },
-  avatar: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    marginRight: 12,
-    backgroundColor: '#333',
-  },
-  textContainer: {
-    flex: 1,
-  },
-  title: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '500',
-    marginBottom: 4,
-  },
-  details: {
-    color: '#aaa',
-    fontSize: 14,
-  },
-  emptyState: {
-    padding: 40,
-    alignItems: 'center',
-  },
-  emptyText: {
-    color: '#888',
-    fontSize: 16,
-    textAlign: 'center',
-  }
+  container: { flex: 1 },
+  loader: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+  list: { paddingBottom: 20 },
+  channelsContainer: { borderBottomWidth: 1, paddingVertical: 12, marginBottom: 16 },
+  channelsScroll: { paddingHorizontal: 12 },
+  channelItem: { alignItems: 'center', marginHorizontal: 8, width: 64 },
+  channelAvatar: { width: 56, height: 56, borderRadius: 28, marginBottom: 6, borderWidth: 2 },
+  channelName: { fontSize: 12, textAlign: 'center' },
+  card: { marginBottom: 20 },
+  thumbnail: { width: '100%', aspectRatio: 16 / 9 },
+  infoContainer: { flexDirection: 'row', padding: 12 },
+  avatar: { width: 40, height: 40, borderRadius: 20, marginRight: 12 },
+  textContainer: { flex: 1 },
+  title: { fontSize: 16, fontWeight: '500', marginBottom: 4 },
+  details: { fontSize: 14 },
+  emptyState: { padding: 40, alignItems: 'center' },
+  emptyText: { fontSize: 16, textAlign: 'center' }
 });

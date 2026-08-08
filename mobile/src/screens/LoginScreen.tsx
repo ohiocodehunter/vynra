@@ -4,8 +4,10 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '../context/AuthContext';
 import apiClient from '../api/client';
 import { useNavigation } from '@react-navigation/native';
+import { useTranslation } from 'react-i18next';
 
 export default function LoginScreen() {
+  const { t } = useTranslation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -35,12 +37,12 @@ export default function LoginScreen() {
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
         <Image source={require('../../assets/logo.png')} style={styles.logo} />
-        <Text style={styles.title}>Welcome to Vynra</Text>
-        <Text style={styles.subtitle}>Log in to continue</Text>
+        <Text style={styles.title}>{t('auth.welcomeBack')}</Text>
+        <Text style={styles.subtitle}>{t('auth.loginToContinue')}</Text>
 
         <TextInput
           style={styles.input}
-          placeholder="Email address"
+          placeholder={t('auth.email', 'Email address')}
           placeholderTextColor="#888"
           value={email}
           onChangeText={setEmail}
@@ -50,7 +52,7 @@ export default function LoginScreen() {
 
         <TextInput
           style={styles.input}
-          placeholder="Password"
+          placeholder={t('auth.password', 'Password')}
           placeholderTextColor="#888"
           value={password}
           onChangeText={setPassword}
@@ -61,14 +63,14 @@ export default function LoginScreen() {
           {loading ? (
             <ActivityIndicator color="#fff" />
           ) : (
-            <Text style={styles.buttonText}>Log In</Text>
+            <Text style={styles.buttonText}>{t('auth.login')}</Text>
           )}
         </TouchableOpacity>
 
         <View style={styles.footer}>
-          <Text style={styles.footerText}>Don't have an account? </Text>
+          <Text style={styles.footerText}>{t('auth.noAccount')} </Text>
           <TouchableOpacity onPress={() => navigation.navigate('Register')}>
-            <Text style={styles.linkText}>Sign up</Text>
+            <Text style={styles.linkText}>{t('auth.register')}</Text>
           </TouchableOpacity>
         </View>
       </View>

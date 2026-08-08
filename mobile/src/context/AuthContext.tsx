@@ -29,11 +29,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         if (token) {
           apiClient.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-          const res = await apiClient.get('/auth/me');
-          if (res.data) {
-            setUser(res.data);
-            await AsyncStorage.setItem('user', JSON.stringify(res.data));
-          }
+          // Run API call in the background to not block app startup
+          apiClient.get('/auth/me')
+            .then(async (res) => {
+              if (res.data) {
+                setUser(res.data);
+                await AsyncStorage.setItem('user', JSON.stringify(res.data));
+              }
+            })
+            .catch(async (error) => {
+              console.error('Background auth verification failed:', error);
+              // If unauthorized (e.g. 401), we might want to log out
+              if (error.response?.status === 401) {
+                await AsyncStorage.removeItem('token');
+                await AsyncStorage.removeItem('user');
+                delete apiClient.defaults.headers.common['Authorization'];
+                setUser(null);
+              }
+            });
         }
       } catch (error) {
         console.error('Failed to load user auth state:', error);

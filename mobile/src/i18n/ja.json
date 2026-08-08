@@ -1,0 +1,105 @@
+{
+  "profile": {
+    "account": "アカウント",
+    "viewChannel": "チャンネルを見る",
+    "history": "履歴",
+    "watchLater": "後で見る",
+    "likedVideos": "高く評価した動画",
+    "playlists": "プレイリスト",
+    "vynraStudio": "Vynra Studio",
+    "language": "言語",
+    "appearance": "外観",
+    "settings": "設定",
+    "logout": "ログアウト",
+    "comingSoon": "近日公開",
+    "comingSoonDesc": "{{action}} の設定はまもなく利用可能になります！"
+  },
+  "common": {
+    "views": "回視聴",
+    "subscribers": "人のチャンネル登録者",
+    "videos": "本の動画",
+    "cancel": "キャンセル",
+    "save": "保存",
+    "recently": "最近",
+    "unknown": "不明",
+    "share": "共有"
+  },
+  "home": {
+    "shorts": "ショート",
+    "noShorts": "ショートがありません",
+    "noVideos": "動画が見つかりません"
+  },
+  "channel": {
+    "home": "ホーム",
+    "videos": "動画",
+    "playlists": "プレイリスト",
+    "community": "コミュニティ",
+    "subscribe": "チャンネル登録",
+    "subscribed": "登録済み"
+  },
+  "explore": {
+    "trending": "急上昇",
+    "music": "音楽",
+    "gaming": "ゲーム",
+    "news": "ニュース",
+    "movies": "映画",
+    "fashion": "ファッション",
+    "learning": "学び",
+    "live": "ライブ",
+    "sports": "スポーツ"
+  },
+  "auth": {
+    "welcomeBack": "お帰りなさい",
+    "loginToContinue": "ログインして続ける",
+    "createAccount": "アカウント作成",
+    "joinUs": "今日 Vynra に参加する",
+    "username": "ユーザー名",
+    "email": "メールアドレス",
+    "password": "パスワード",
+    "confirmPassword": "パスワード（確認）",
+    "login": "ログイン",
+    "register": "登録",
+    "noAccount": "アカウントを持っていませんか？",
+    "haveAccount": "すでにアカウントを持っていますか？"
+  },
+  "video": {
+    "subscribe": "チャンネル登録",
+    "subscribed": "登録済み",
+    "comments": "コメント",
+    "upNext": "次の動画",
+    "addComment": "コメントを追加...",
+    "dislike": "低評価",
+    "post": "投稿",
+    "noComments": "まだコメントはありません。"
+  },
+  "subscriptions": {
+    "subscriptions": "登録チャンネル",
+    "latest": "登録チャンネルからの最新",
+    "noSubscriptions": "まだ登録チャンネルはありません"
+  },
+  "playlists": {
+    "playlists": "プレイリスト",
+    "likedVideos": "高く評価した動画",
+    "history": "履歴",
+    "watchLater": "後で見る",
+    "playAll": "すべて再生",
+    "shuffle": "シャッフル",
+    "playlistEmpty": "プレイリストは空です",
+    "saveVideoDesc": "動画やショートを保存して最初のプレイリストを作成します",
+    "saveVideoDesc2": "このプレイリストに動画やショートを保存します",
+    "queue": "キュー"
+  },
+  "nav": {
+    "home": "ホーム",
+    "shorts": "ショート",
+    "add": "追加",
+    "subscriptions": "登録チャンネル",
+    "you": "マイページ"
+  },
+  "navigation": {
+    "home": "ホーム",
+    "shorts": "ショート",
+    "subscriptions": "登録チャンネル",
+    "you": "マイページ"
+  }
+}

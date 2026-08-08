@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import styles from './page.module.css';
 import { studioService, Video } from '@/lib/api';
-import { Eye, Globe, Lock, EyeOff, Edit2, Trash2, ExternalLink } from 'lucide-react';
+import { Eye, Globe, Lock, EyeOff, Edit2, Trash2, ExternalLink, Loader2, X } from 'lucide-react';
 import Link from 'next/link';
 
 export default function StudioContent() {
@@ -111,12 +111,25 @@ export default function StudioContent() {
                   <td>
                     <div className={styles.videoCell}>
                       <div className={styles.thumbnailContainer}>
-                        {video.thumbnailUrl && (
+                        {video.status === 'processing' ? (
+                          <div className={styles.processingThumb}>
+                            <Loader2 size={24} className={styles.spinner} />
+                            <span style={{ fontSize: '0.7rem', marginTop: '4px' }}>Processing</span>
+                          </div>
+                        ) : video.status === 'failed' || video.status === 'private' && !video.thumbnailUrl ? (
+                          <div className={styles.failedThumb}>
+                            <X size={24} />
+                            <span style={{ fontSize: '0.7rem', marginTop: '4px' }}>Failed</span>
+                          </div>
+                        ) : video.thumbnailUrl ? (
                           <img src={video.thumbnailUrl} alt={video.title} className={styles.thumbnail} />
+                        ) : null}
+                        
+                        {(video.status === 'published' || (video.duration > 0 && video.thumbnailUrl)) && (
+                          <div className={styles.duration}>
+                            {Math.floor(video.duration / 60)}:{Math.floor(video.duration % 60).toString().padStart(2, '0')}
+                          </div>
                         )}
-                        <div className={styles.duration}>
-                          {Math.floor(video.duration / 60)}:{Math.floor(video.duration % 60).toString().padStart(2, '0')}
-                        </div>
                       </div>
                       <div className={styles.videoInfo}>
                         <div className={styles.videoTitle}>{video.title}</div>
@@ -127,7 +140,9 @@ export default function StudioContent() {
                   <td>
                     <div className={styles.visibilityBadge}>
                       {getVisibilityIcon(video.visibility || 'public')}
-                      <span style={{ textTransform: 'capitalize' }}>{video.visibility || 'Public'}</span>
+                      <span style={{ textTransform: 'capitalize' }}>
+                        {video.status === 'processing' ? 'Processing' : video.status === 'failed' ? 'Failed' : video.visibility || 'Public'}
+                      </span>
                     </div>
                   </td>
                   <td>
@@ -140,11 +155,17 @@ export default function StudioContent() {
                       <button className={styles.actionBtn} onClick={() => handleEditClick(video)} title="Edit">
                         <Edit2 size={18} />
                       </button>
-                      <Link href={`/watch?v=${video._id}`} target="_blank">
-                        <button className={styles.actionBtn} title="View on Vynra">
+                      {video.status === 'published' ? (
+                        <Link href={`/watch?v=${video._id}`} target="_blank">
+                          <button className={styles.actionBtn} title="View on Vynra">
+                            <ExternalLink size={18} />
+                          </button>
+                        </Link>
+                      ) : (
+                        <button className={styles.actionBtn} title="Video not published yet" disabled style={{ opacity: 0.5, cursor: 'not-allowed' }}>
                           <ExternalLink size={18} />
                         </button>
-                      </Link>
+                      )}
                       <button className={`${styles.actionBtn} ${styles.deleteBtn}`} onClick={() => setDeletingVideo(video)} title="Delete">
                         <Trash2 size={18} />
                       </button>

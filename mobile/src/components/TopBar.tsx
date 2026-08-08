@@ -4,12 +4,14 @@ import { Search, Bell } from 'lucide-react-native';
 import { useNavigation } from '@react-navigation/native';
 import { io } from 'socket.io-client';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 
 const SOCKET_URL = 'http://172.168.6.97:5001';
 
 export default function TopBar() {
   const navigation = useNavigation<any>();
   const { user } = useAuth();
+  const { colors } = useTheme();
   const [unreadCount, setUnreadCount] = useState(0);
 
   useEffect(() => {
@@ -33,19 +35,19 @@ export default function TopBar() {
   }, [user]);
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       <View style={styles.logoContainer}>
         <Image 
           source={require('../../assets/logo.png')} 
           style={styles.logo} 
           resizeMode="contain"
         />
-        <Text style={styles.brandText}>Vynra</Text>
+        <Text style={[styles.brandText, { color: colors.text }]}>Vynra</Text>
       </View>
       
       <View style={styles.actionsContainer}>
         <TouchableOpacity style={styles.iconButton}>
-          <Bell color="#fff" size={24} />
+          <Bell color={colors.text} size={24} />
           {unreadCount > 0 && (
             <View style={styles.badge}>
               <Text style={styles.badgeText}>{unreadCount}</Text>
@@ -56,7 +58,7 @@ export default function TopBar() {
           style={styles.iconButton}
           onPress={() => navigation.navigate('Explore')}
         >
-          <Search color="#fff" size={24} />
+          <Search color={colors.text} size={24} />
         </TouchableOpacity>
       </View>
     </View>
@@ -70,7 +72,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 16,
     paddingVertical: 10,
-    backgroundColor: '#0f0f0f',
   },
   logoContainer: {
     flexDirection: 'row',
@@ -82,7 +83,6 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   brandText: {
-    color: '#fff',
     fontSize: 20,
     fontWeight: 'bold',
   },

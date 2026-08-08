@@ -5,8 +5,10 @@ import { Search } from 'lucide-react-native';
 import apiClient from '../api/client';
 import { Video, User } from '../types';
 import { useNavigation } from '@react-navigation/native';
+import { useTranslation } from 'react-i18next';
 
 export default function ExploreScreen() {
+  const { t } = useTranslation();
   const [query, setQuery] = useState('');
   const [videos, setVideos] = useState<Video[]>([]);
   const [channels, setChannels] = useState<User[]>([]);
@@ -67,7 +69,7 @@ export default function ExploreScreen() {
           <Image source={{ uri: channel.avatarUrl || 'https://via.placeholder.com/60' }} style={styles.channelAvatar} />
           <View style={styles.channelInfo}>
             <Text style={styles.channelNameTitle}>{channel.username}</Text>
-            <Text style={styles.channelSubscribers}>{channel.subscribersCount || 0} subscribers</Text>
+            <Text style={styles.channelSubscribers}>{channel.subscribersCount || 0} {t('common.subscribers')}</Text>
           </View>
         </TouchableOpacity>
       );
@@ -82,7 +84,7 @@ export default function ExploreScreen() {
         <Image source={{ uri: video.thumbnailUrl }} style={styles.thumbnail} />
         <View style={styles.videoInfo}>
           <Text style={styles.videoTitle} numberOfLines={2}>{video.title}</Text>
-          <Text style={styles.channelName}>{video.creator?.username || 'Unknown'} • {video.views} views</Text>
+          <Text style={styles.channelName}>{video.creator?.username || 'Unknown'} • {video.views} {t('common.views')}</Text>
         </View>
       </TouchableOpacity>
     );
@@ -100,7 +102,7 @@ export default function ExploreScreen() {
           <Search color="#888" size={20} style={styles.searchIcon} />
           <TextInput
             style={styles.searchInput}
-            placeholder="Search videos..."
+            placeholder={t('explore.searchPlaceholder', 'Search videos...')}
             placeholderTextColor="#888"
             value={query}
             onChangeText={setQuery}
@@ -118,11 +120,11 @@ export default function ExploreScreen() {
           renderItem={renderItem}
           ListEmptyComponent={
             query ? (
-              <Text style={styles.emptyText}>No results found for "{query}"</Text>
+              <Text style={styles.emptyText}>{t('explore.noResults', 'No results found for')} "{query}"</Text>
             ) : (
               <View style={styles.exploreCategories}>
-                <Text style={styles.categoryTitle}>Explore</Text>
-                <Text style={styles.categoryDesc}>Search for your favorite videos</Text>
+                <Text style={styles.categoryTitle}>{t('explore.explore', 'Explore')}</Text>
+                <Text style={styles.categoryDesc}>{t('explore.searchDesc', 'Search for your favorite videos')}</Text>
               </View>
             )
           }

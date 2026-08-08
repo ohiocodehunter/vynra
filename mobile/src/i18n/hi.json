@@ -1,0 +1,87 @@
+{
+  "profile": {
+    "account": "खाता (Account)",
+    "viewChannel": "चैनल देखें",
+    "history": "इतिहास (History)",
+    "watchLater": "बाद में देखें (Watch Later)",
+    "likedVideos": "पसंद किए गए वीडियो (Liked)",
+    "playlists": "प्लेलिस्ट (Playlists)",
+    "vynraStudio": "Vynra Studio",
+    "language": "भाषा (Hindi)",
+    "appearance": "दिखावट (Dark)",
+    "settings": "सेटिंग्स (Settings)",
+    "logout": "लॉग आउट (Logout)",
+    "comingSoon": "जल्द आ रहा है",
+    "comingSoonDesc": "{{action}} सेटिंग्स जल्द ही उपलब्ध होंगी!"
+  },
+  "common": {
+    "views": "व्यूज़",
+    "subscribers": "सब्सक्राइबर",
+    "videos": "वीडियो",
+    "cancel": "रद्द करें",
+    "save": "सहेजें"
+  },
+  "home": {
+    "shorts": "शॉर्ट्स"
+  },
+  "channel": {
+    "home": "होम",
+    "videos": "वीडियो",
+    "playlists": "प्लेलिस्ट",
+    "community": "कम्युनिटी",
+    "subscribe": "सब्सक्राइब करें",
+    "subscribed": "सब्सक्राइब्ड"
+  },
+  "explore": {
+    "trending": "ट्रेंडिंग",
+    "music": "संगीत",
+    "gaming": "गेमिंग",
+    "news": "समाचार",
+    "movies": "फ़िल्में",
+    "fashion": "फ़ैशन",
+    "learning": "शिक्षा",
+    "live": "लाइव",
+    "sports": "खेल"
+  },
+  "auth": {
+    "welcomeBack": "वापसी पर स्वागत है",
+    "loginToContinue": "जारी रखने के लिए लॉगिन करें",
+    "createAccount": "खाता बनाएं",
+    "joinUs": "आज ही Vynra से जुड़ें",
+    "username": "उपयोगकर्ता नाम",
+    "email": "ईमेल",
+    "password": "पासवर्ड",
+    "confirmPassword": "पासवर्ड की पुष्टि करें",
+    "login": "लॉगिन",
+    "register": "रजिस्टर",
+    "noAccount": "खाता नहीं है?",
+    "haveAccount": "क्या आपके पास पहले से खाता है?"
+  },
+  "video": {
+    "subscribe": "सब्सक्राइब करें",
+    "subscribed": "सब्सक्राइब्ड",
+    "comments": "टिप्पणियाँ",
+    "upNext": "अगला वीडियो",
+    "addComment": "टिप्पणी जोड़ें..."
+  },
+  "subscriptions": {
+    "subscriptions": "सदस्यताएं",
+    "latest": "आपके चैनलों से नवीनतम",
+    "noSubscriptions": "आपकी कोई सदस्यता नहीं है"
+  },
+  "playlists": {
+    "playlists": "प्लेलिस्ट",
+    "likedVideos": "पसंद किए गए वीडियो",
+    "history": "इतिहास",
+    "watchLater": "बाद में देखें",
+    "playAll": "सभी चलाएं",
+    "shuffle": "शफ़ल"
+  },
+  "nav": {
+    "home": "होम",
+    "shorts": "शॉर्ट्स",
+    "add": "जोड़ें",
+    "subscriptions": "सदस्यताएं",
+    "you": "आप"
+  }
+}

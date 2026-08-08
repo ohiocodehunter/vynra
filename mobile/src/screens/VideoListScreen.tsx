@@ -5,8 +5,10 @@ import { useRoute, useNavigation } from '@react-navigation/native';
 import { ChevronLeft } from 'lucide-react-native';
 import client from '../api/client';
 import { formatDistanceToNow } from 'date-fns';
+import { useTranslation } from 'react-i18next';
 
 export default function VideoListScreen() {
+  const { t } = useTranslation();
   const route = useRoute<any>();
   const navigation = useNavigation<any>();
   const { title, endpoint } = route.params;
@@ -55,7 +57,7 @@ export default function VideoListScreen() {
           <View style={styles.textDetails}>
             <Text style={styles.videoTitle} numberOfLines={2}>{video.title}</Text>
             <Text style={styles.videoStats}>
-              {video.creator?.username} • {video.views || 0} views • {video.createdAt ? formatDistanceToNow(new Date(video.createdAt), { addSuffix: true }) : 'Recently'}
+              {video.creator?.username} • {video.views || 0} {t('common.views')} • {video.createdAt ? formatDistanceToNow(new Date(video.createdAt), { addSuffix: true }) : t('common.recently', 'Recently')}
             </Text>
           </View>
         </View>
@@ -88,7 +90,7 @@ export default function VideoListScreen() {
           contentContainerStyle={styles.listContent}
           ListEmptyComponent={() => (
             <View style={styles.centerContainer}>
-              <Text style={styles.emptyText}>No videos found in {title}.</Text>
+              <Text style={styles.emptyText}>{t('home.noVideos', 'No videos found in {{title}}.', { title })}</Text>
             </View>
           )}
         />

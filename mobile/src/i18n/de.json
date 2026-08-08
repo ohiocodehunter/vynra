@@ -1,0 +1,105 @@
+{
+  "profile": {
+    "account": "Konto",
+    "viewChannel": "Kanal ansehen",
+    "history": "Verlauf",
+    "watchLater": "Später ansehen",
+    "likedVideos": "Zustimmungen",
+    "playlists": "Playlists",
+    "vynraStudio": "Vynra Studio",
+    "language": "Sprache",
+    "appearance": "Erscheinungsbild",
+    "settings": "Einstellungen",
+    "logout": "Abmelden",
+    "comingSoon": "Demnächst",
+    "comingSoonDesc": "Die Einstellungen für {{action}} sind bald verfügbar!"
+  },
+  "common": {
+    "views": "Aufrufe",
+    "subscribers": "Abonnenten",
+    "videos": "Videos",
+    "cancel": "Abbrechen",
+    "save": "Speichern",
+    "recently": "Kürzlich",
+    "unknown": "Unbekannt",
+    "share": "Teilen"
+  },
+  "home": {
+    "shorts": "Shorts",
+    "noShorts": "Keine Shorts verfügbar",
+    "noVideos": "Keine Videos gefunden"
+  },
+  "channel": {
+    "home": "Startseite",
+    "videos": "Videos",
+    "playlists": "Playlists",
+    "community": "Community",
+    "subscribe": "Abonnieren",
+    "subscribed": "Abonniert"
+  },
+  "explore": {
+    "trending": "Trends",
+    "music": "Musik",
+    "gaming": "Gaming",
+    "news": "Nachrichten",
+    "movies": "Filme",
+    "fashion": "Mode",
+    "learning": "Lernen",
+    "live": "Live",
+    "sports": "Sport"
+  },
+  "auth": {
+    "welcomeBack": "Willkommen zurück",
+    "loginToContinue": "Melden Sie sich an, um fortzufahren",
+    "createAccount": "Konto erstellen",
+    "joinUs": "Treten Sie Vynra noch heute bei",
+    "username": "Benutzername",
+    "email": "E-Mail-Adresse",
+    "password": "Passwort",
+    "confirmPassword": "Passwort bestätigen",
+    "login": "Anmelden",
+    "register": "Registrieren",
+    "noAccount": "Sie haben noch kein Konto?",
+    "haveAccount": "Sie haben bereits ein Konto?"
+  },
+  "video": {
+    "subscribe": "Abonnieren",
+    "subscribed": "Abonniert",
+    "comments": "Kommentare",
+    "upNext": "Als Nächstes",
+    "addComment": "Kommentar hinzufügen...",
+    "dislike": "Mag ich nicht",
+    "post": "Posten",
+    "noComments": "Noch keine Kommentare."
+  },
+  "subscriptions": {
+    "subscriptions": "Abos",
+    "latest": "Das Neueste von deinen Kanälen",
+    "noSubscriptions": "Du hast noch keine Abos"
+  },
+  "playlists": {
+    "playlists": "Playlists",
+    "likedVideos": "Zustimmungen",
+    "history": "Verlauf",
+    "watchLater": "Später ansehen",
+    "playAll": "Alle abspielen",
+    "shuffle": "Mischen",
+    "playlistEmpty": "Die Playlist ist leer",
+    "saveVideoDesc": "Speichere Videos oder Shorts, um deine erste Playlist zu erstellen",
+    "saveVideoDesc2": "Speichere Videos oder Shorts in dieser Playlist",
+    "queue": "Warteschlange"
+  },
+  "nav": {
+    "home": "Startseite",
+    "shorts": "Shorts",
+    "add": "Erstellen",
+    "subscriptions": "Abos",
+    "you": "Du"
+  },
+  "navigation": {
+    "home": "Startseite",
+    "shorts": "Shorts",
+    "subscriptions": "Abos",
+    "you": "Du"
+  }
+}

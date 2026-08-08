@@ -1,0 +1,105 @@
+{
+  "profile": {
+    "account": "계정",
+    "viewChannel": "채널 보기",
+    "history": "시청 기록",
+    "watchLater": "나중에 볼 동영상",
+    "likedVideos": "좋아요 표시한 동영상",
+    "playlists": "재생목록",
+    "vynraStudio": "Vynra Studio",
+    "language": "언어",
+    "appearance": "디자인",
+    "settings": "설정",
+    "logout": "로그아웃",
+    "comingSoon": "곧 출시됨",
+    "comingSoonDesc": "{{action}} 설정이 곧 제공될 예정입니다!"
+  },
+  "common": {
+    "views": "조회수",
+    "subscribers": "구독자",
+    "videos": "동영상",
+    "cancel": "취소",
+    "save": "저장",
+    "recently": "최근",
+    "unknown": "알 수 없음",
+    "share": "공유"
+  },
+  "home": {
+    "shorts": "Shorts",
+    "noShorts": "Shorts가 없습니다",
+    "noVideos": "동영상을 찾을 수 없습니다"
+  },
+  "channel": {
+    "home": "홈",
+    "videos": "동영상",
+    "playlists": "재생목록",
+    "community": "커뮤니티",
+    "subscribe": "구독",
+    "subscribed": "구독중"
+  },
+  "explore": {
+    "trending": "인기",
+    "music": "음악",
+    "gaming": "게임",
+    "news": "뉴스",
+    "movies": "영화",
+    "fashion": "패션",
+    "learning": "학습",
+    "live": "라이브",
+    "sports": "스포츠"
+  },
+  "auth": {
+    "welcomeBack": "다시 오신 것을 환영합니다",
+    "loginToContinue": "계속하려면 로그인하세요",
+    "createAccount": "계정 만들기",
+    "joinUs": "오늘 Vynra에 가입하세요",
+    "username": "사용자 이름",
+    "email": "이메일",
+    "password": "비밀번호",
+    "confirmPassword": "비밀번호 확인",
+    "login": "로그인",
+    "register": "가입하기",
+    "noAccount": "계정이 없으신가요?",
+    "haveAccount": "이미 계정이 있으신가요?"
+  },
+  "video": {
+    "subscribe": "구독",
+    "subscribed": "구독중",
+    "comments": "댓글",
+    "upNext": "다음 동영상",
+    "addComment": "댓글 추가...",
+    "dislike": "싫어요",
+    "post": "게시",
+    "noComments": "아직 댓글이 없습니다."
+  },
+  "subscriptions": {
+    "subscriptions": "구독",
+    "latest": "구독한 채널의 최신 동영상",
+    "noSubscriptions": "아직 구독한 채널이 없습니다"
+  },
+  "playlists": {
+    "playlists": "재생목록",
+    "likedVideos": "좋아요 표시한 동영상",
+    "history": "시청 기록",
+    "watchLater": "나중에 볼 동영상",
+    "playAll": "모두 재생",
+    "shuffle": "셔플",
+    "playlistEmpty": "재생목록이 비어 있습니다",
+    "saveVideoDesc": "동영상이나 Shorts를 저장하여 첫 번째 재생목록을 만드세요",
+    "saveVideoDesc2": "이 재생목록에 동영상이나 Shorts를 저장하세요",
+    "queue": "대기열"
+  },
+  "nav": {
+    "home": "홈",
+    "shorts": "Shorts",
+    "add": "만들기",
+    "subscriptions": "구독",
+    "you": "나"
+  },
+  "navigation": {
+    "home": "홈",
+    "shorts": "Shorts",
+    "subscriptions": "구독",
+    "you": "나"
+  }
+}

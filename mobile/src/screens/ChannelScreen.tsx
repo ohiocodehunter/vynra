@@ -6,12 +6,16 @@ import { ChevronLeft } from 'lucide-react-native';
 import client from '../api/client';
 import { socket } from '../api/socket';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
+import { useTranslation } from 'react-i18next';
 
 export default function ChannelScreen() {
+  const { t } = useTranslation();
   const route = useRoute<any>();
   const navigation = useNavigation<any>();
   const { username } = route.params;
   const { user: currentUser } = useAuth();
+  const { colors, isDark } = useTheme();
   
   const [channel, setChannel] = useState<any>(null);
   const [videos, setVideos] = useState<any[]>([]);
@@ -88,16 +92,16 @@ export default function ChannelScreen() {
 
   if (loading) {
     return (
-      <SafeAreaView style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#fff" />
+      <SafeAreaView style={[styles.loadingContainer, { backgroundColor: colors.background }]}>
+        <ActivityIndicator size="large" color={colors.primary} />
       </SafeAreaView>
     );
   }
 
   if (!channel) {
     return (
-      <SafeAreaView style={styles.loadingContainer}>
-        <Text style={{color: '#fff'}}>Channel not found</Text>
+      <SafeAreaView style={[styles.loadingContainer, { backgroundColor: colors.background }]}>
+        <Text style={{color: colors.text}}>Channel not found</Text>
       </SafeAreaView>
     );
   }
@@ -107,16 +111,16 @@ export default function ChannelScreen() {
       style={styles.videoCard}
       onPress={() => navigation.navigate(activeTab === 'shorts' ? 'Shorts' : 'VideoPlayer', { video: item })}
     >
-      <Image source={{ uri: item.thumbnailUrl }} style={[styles.thumbnail, activeTab === 'shorts' && { aspectRatio: 9 / 16 }]} />
+      <Image source={{ uri: item.thumbnailUrl }} style={[styles.thumbnail, { backgroundColor: colors.border }, activeTab === 'shorts' && { aspectRatio: 9 / 16 }]} />
       <View style={styles.videoInfo}>
-        <Text style={styles.videoTitle} numberOfLines={2}>{item.title}</Text>
-        <Text style={styles.videoStats}>{item.views || 0} views</Text>
+        <Text style={[styles.videoTitle, { color: colors.text }]} numberOfLines={2}>{item.title}</Text>
+        <Text style={[styles.videoStats, { color: colors.textSecondary }]}>{item.views || 0} {t('common.views')}</Text>
       </View>
     </TouchableOpacity>
   );
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
           <ChevronLeft color="#fff" size={28} />
@@ -137,38 +141,38 @@ export default function ChannelScreen() {
             <View style={styles.profileDetails}>
               <Image 
                 source={{ uri: channel.avatarUrl || 'https://via.placeholder.com/100' }} 
-                style={styles.avatar} 
+                style={[styles.avatar, { borderColor: colors.background, backgroundColor: colors.border }]} 
               />
-              <Text style={styles.channelName}>{channel.channelName || channel.username}</Text>
-              <Text style={styles.subscribers}>{channel.subscribersCount || 0} subscribers • {videos.length} videos</Text>
+              <Text style={[styles.channelName, { color: colors.text }]}>{channel.channelName || channel.username}</Text>
+              <Text style={[styles.subscribers, { color: colors.textSecondary }]}>{channel.subscribersCount || 0} {t('common.subscribers')} • {videos.length} {t('common.videos')}</Text>
               
-              <Text style={styles.bio} numberOfLines={2}>{channel.bio || 'No description available.'}</Text>
+              <Text style={[styles.bio, { color: colors.textSecondary }]} numberOfLines={2}>{channel.bio || 'No description available.'}</Text>
               
               {!isOwner && (
                 <TouchableOpacity 
-                  style={[styles.subscribeBtn, isSubscribed && styles.subscribedBtn]}
+                  style={[styles.subscribeBtn, { backgroundColor: colors.text }, isSubscribed && [styles.subscribedBtn, { backgroundColor: colors.border }]]}
                   onPress={handleSubscribe}
                   disabled={subscribing}
                 >
-                  <Text style={[styles.subscribeBtnText, isSubscribed && styles.subscribedText]}>
-                    {isSubscribed ? 'Subscribed' : 'Subscribe'}
+                  <Text style={[styles.subscribeBtnText, { color: colors.background }, isSubscribed && [styles.subscribedText, { color: colors.text }]]}>
+                    {isSubscribed ? t('channel.subscribed') : t('channel.subscribe')}
                   </Text>
                 </TouchableOpacity>
               )}
             </View>
             
-            <View style={styles.tabsContainer}>
+            <View style={[styles.tabsContainer, { borderBottomColor: colors.border }]}>
               <TouchableOpacity 
-                style={[styles.tab, activeTab === 'videos' && styles.activeTab]}
+                style={[styles.tab, activeTab === 'videos' && [styles.activeTab, { borderBottomColor: colors.text }]]}
                 onPress={() => setActiveTab('videos')}
               >
-                <Text style={[styles.tabText, activeTab === 'videos' && styles.activeTabText]}>Videos</Text>
+                <Text style={[styles.tabText, { color: colors.textSecondary }, activeTab === 'videos' && [styles.activeTabText, { color: colors.text }]]}>{t('channel.videos')}</Text>
               </TouchableOpacity>
               <TouchableOpacity 
-                style={[styles.tab, activeTab === 'shorts' && styles.activeTab]}
+                style={[styles.tab, activeTab === 'shorts' && [styles.activeTab, { borderBottomColor: colors.text }]]}
                 onPress={() => setActiveTab('shorts')}
               >
-                <Text style={[styles.tabText, activeTab === 'shorts' && styles.activeTabText]}>Shorts</Text>
+                <Text style={[styles.tabText, { color: colors.textSecondary }, activeTab === 'shorts' && [styles.activeTabText, { color: colors.text }]]}>{t('home.shorts')}</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -177,7 +181,7 @@ export default function ChannelScreen() {
         contentContainerStyle={styles.listContent}
         ListEmptyComponent={() => (
           <View style={styles.emptyState}>
-            <Text style={styles.emptyText}>No {activeTab} yet.</Text>
+            <Text style={[styles.emptyText, { color: colors.textSecondary }]}>No {activeTab} yet.</Text>
           </View>
         )}
       />
@@ -186,138 +190,32 @@ export default function ChannelScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#0f0f0f',
-  },
-  loadingContainer: {
-    flex: 1,
-    backgroundColor: '#0f0f0f',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  header: {
-    position: 'absolute',
-    top: 40,
-    left: 10,
-    zIndex: 10,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    borderRadius: 20,
-    padding: 4,
-  },
-  backBtn: {
-    padding: 4,
-  },
-  channelProfileContainer: {
-    marginBottom: 16,
-  },
-  banner: {
-    width: '100%',
-    height: 120,
-  },
-  profileDetails: {
-    alignItems: 'center',
-    marginTop: -40,
-    paddingHorizontal: 16,
-  },
-  avatar: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    borderWidth: 4,
-    borderColor: '#0f0f0f',
-    backgroundColor: '#333',
-    marginBottom: 8,
-  },
-  channelName: {
-    color: '#fff',
-    fontSize: 22,
-    fontWeight: 'bold',
-    marginBottom: 4,
-  },
-  subscribers: {
-    color: '#aaa',
-    fontSize: 14,
-    marginBottom: 8,
-  },
-  bio: {
-    color: '#ccc',
-    fontSize: 14,
-    textAlign: 'center',
-    marginBottom: 16,
-  },
-  subscribeBtn: {
-    backgroundColor: '#fff',
-    paddingHorizontal: 24,
-    paddingVertical: 8,
-    borderRadius: 24,
-    marginBottom: 16,
-  },
-  subscribedBtn: {
-    backgroundColor: '#222',
-  },
-  subscribeBtnText: {
-    color: '#0f0f0f',
-    fontWeight: 'bold',
-    fontSize: 16,
-  },
-  subscribedText: {
-    color: '#fff',
-  },
-  tabsContainer: {
-    flexDirection: 'row',
-    borderBottomWidth: 1,
-    borderBottomColor: '#222',
-  },
-  tab: {
-    flex: 1,
-    alignItems: 'center',
-    paddingVertical: 12,
-  },
-  activeTab: {
-    borderBottomWidth: 2,
-    borderBottomColor: '#fff',
-  },
-  tabText: {
-    color: '#888',
-    fontWeight: 'bold',
-  },
-  activeTabText: {
-    color: '#fff',
-  },
-  listContent: {
-    paddingBottom: 20,
-  },
-  videoCard: {
-    flex: 1,
-    margin: 4,
-    maxWidth: '50%',
-  },
-  thumbnail: {
-    width: '100%',
-    aspectRatio: 16 / 9,
-    borderRadius: 8,
-    backgroundColor: '#222',
-  },
-  videoInfo: {
-    paddingVertical: 8,
-  },
-  videoTitle: {
-    color: '#fff',
-    fontSize: 14,
-    fontWeight: '500',
-    marginBottom: 4,
-  },
-  videoStats: {
-    color: '#aaa',
-    fontSize: 12,
-  },
-  emptyState: {
-    padding: 32,
-    alignItems: 'center',
-  },
-  emptyText: {
-    color: '#888',
-    fontSize: 16,
-  }
+  container: { flex: 1 },
+  loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+  header: { position: 'absolute', top: 40, left: 10, zIndex: 10, backgroundColor: 'rgba(0,0,0,0.5)', borderRadius: 20, padding: 4 },
+  backBtn: { padding: 4 },
+  channelProfileContainer: { marginBottom: 16 },
+  banner: { width: '100%', height: 120 },
+  profileDetails: { alignItems: 'center', marginTop: -40, paddingHorizontal: 16 },
+  avatar: { width: 80, height: 80, borderRadius: 40, borderWidth: 4, marginBottom: 8 },
+  channelName: { fontSize: 22, fontWeight: 'bold', marginBottom: 4 },
+  subscribers: { fontSize: 14, marginBottom: 8 },
+  bio: { fontSize: 14, textAlign: 'center', marginBottom: 16 },
+  subscribeBtn: { paddingHorizontal: 24, paddingVertical: 8, borderRadius: 24, marginBottom: 16 },
+  subscribedBtn: {},
+  subscribeBtnText: { fontWeight: 'bold', fontSize: 16 },
+  subscribedText: {},
+  tabsContainer: { flexDirection: 'row', borderBottomWidth: 1 },
+  tab: { flex: 1, alignItems: 'center', paddingVertical: 12 },
+  activeTab: { borderBottomWidth: 2 },
+  tabText: { fontWeight: 'bold' },
+  activeTabText: {},
+  listContent: { paddingBottom: 20 },
+  videoCard: { flex: 1, margin: 4, maxWidth: '50%' },
+  thumbnail: { width: '100%', aspectRatio: 16 / 9, borderRadius: 8 },
+  videoInfo: { paddingVertical: 8 },
+  videoTitle: { fontSize: 14, fontWeight: '500', marginBottom: 4 },
+  videoStats: { fontSize: 12 },
+  emptyState: { padding: 32, alignItems: 'center' },
+  emptyText: { fontSize: 16 }
 });
