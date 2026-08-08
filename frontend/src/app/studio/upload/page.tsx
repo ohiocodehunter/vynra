@@ -347,7 +347,7 @@ export default function StudioUpload() {
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Tell viewers about your video (or leave blank — AI will generate one)"
-              maxLength={5000}
+              maxLength={2000}
             />
           </div>
 

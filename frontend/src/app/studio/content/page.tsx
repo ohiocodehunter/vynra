@@ -200,6 +200,7 @@ export default function StudioContent() {
                 className={styles.textarea} 
                 value={editDesc}
                 onChange={(e) => setEditDesc(e.target.value)}
+                maxLength={2000}
               />
             </div>
 

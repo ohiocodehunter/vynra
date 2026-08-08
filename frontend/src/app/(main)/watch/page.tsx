@@ -11,6 +11,7 @@ import VideoActions from '@/components/video/VideoActions';
 import CommentsSection from '@/components/video/CommentsSection';
 import SubscribeButton from '@/components/video/SubscribeButton';
 import UpNextSidebar from '@/components/video/UpNextSidebar';
+import VideoDescriptionBox from '@/components/video/VideoDescriptionBox';
 import WatchChannelInfo from '@/components/video/WatchChannelInfo';
 
 function formatDuration(seconds: number) {
@@ -65,12 +66,11 @@ export default async function WatchPage({ searchParams }: { searchParams: Promis
             <VideoActions initialVideo={video} />
           </div>
 
-          <div className={styles.descriptionBox}>
-            <p className={styles.descriptionStats}>{video.views.toLocaleString()} views • {new Date(video.createdAt).toLocaleDateString()}</p>
-            <p className={styles.descriptionText}>
-              {video.description || 'No description provided.'}
-            </p>
-          </div>
+          <VideoDescriptionBox 
+            views={video.views} 
+            createdAt={video.createdAt} 
+            description={video.description} 
+          />
         </div>
 
         {/* Comments Section */}

@@ -45,6 +45,7 @@ export default function VideoPlayerScreen() {
   const [subscribing, setSubscribing] = React.useState(false);
   const [showComments, setShowComments] = React.useState(false);
   const [showSave, setShowSave] = React.useState(false);
+  const [descExpanded, setDescExpanded] = React.useState(false);
 
   // Action states
   const [likes, setLikes] = React.useState<number>(video.likes || 0);
@@ -337,9 +338,21 @@ export default function VideoPlayerScreen() {
         </TouchableOpacity>
 
         {video.description ? (
-          <View style={styles.descriptionBox}>
-            <Text style={styles.descriptionText}>{video.description}</Text>
-          </View>
+          <TouchableOpacity 
+            style={styles.descriptionBox} 
+            activeOpacity={0.8} 
+            onPress={() => setDescExpanded(!descExpanded)}
+          >
+            <Text 
+              style={styles.descriptionText} 
+              numberOfLines={descExpanded ? undefined : 2}
+            >
+              {video.description}
+            </Text>
+            <Text style={{ color: '#fff', fontSize: 14, fontWeight: '600', marginTop: 4 }}>
+              {descExpanded ? t('common.showLess', 'Show less') : t('common.showMore', '...more')}
+            </Text>
+          </TouchableOpacity>
         ) : null}
       </ScrollView>
       )}
