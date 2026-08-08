@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import styles from './page.module.css';
 import { Upload as UploadIcon, FileVideo, X, Loader2 } from 'lucide-react';
 import Link from 'next/link';
+import { getApiUrl } from '@/lib/api';
 
 export default function StudioUpload() {
   const { isAuthenticated, user, isLoading } = useAuth();
@@ -37,7 +38,7 @@ export default function StudioUpload() {
     if (uploadSuccess && processingStatus === 'processing' && videoId) {
       intervalId = setInterval(async () => {
         try {
-          const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api'}/videos/${videoId}?polling=true`);
+          const response = await fetch(`${getApiUrl()}/videos/${videoId}?polling=true`);
           if (response.ok) {
             const data = await response.json();
             if (data.status === 'published') {
@@ -118,7 +119,7 @@ export default function StudioUpload() {
     
     // Use XMLHttpRequest for reliable upload progress
     const xhr = new XMLHttpRequest();
-    xhr.open('POST', `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api'}/videos/upload`);
+    xhr.open('POST', `${getApiUrl()}/videos/upload`);
     if (token) {
       xhr.setRequestHeader('Authorization', `Bearer ${token}`);
     }

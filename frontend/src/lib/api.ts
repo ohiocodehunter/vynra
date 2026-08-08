@@ -1,7 +1,18 @@
 import axios from 'axios';
 
+export const getApiUrl = () => {
+  let url = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api';
+  if (typeof window !== 'undefined') {
+    const { hostname, protocol } = window.location;
+    if (hostname !== 'localhost' && !url.includes(hostname)) {
+      url = `${protocol}//${hostname}:5001/api`;
+    }
+  }
+  return url;
+};
+
 const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api',
+  baseURL: getApiUrl(),
   headers: {
     'Content-Type': 'application/json',
   },
