@@ -341,13 +341,23 @@ export default function StudioUpload() {
           </div>
           
           <div className={styles.formGroup}>
-            <label className={styles.label}>Description</label>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+              <label className={styles.label} style={{ marginBottom: 0 }}>Description</label>
+              <span className={styles.label} style={{ marginBottom: 0, fontSize: '0.8rem', color: description.trim().split(/\s+/).filter(w => w.length > 0).length > 2000 ? '#ff4a4a' : 'var(--text-secondary)' }}>
+                {description.trim().split(/\s+/).filter(w => w.length > 0).length} / 2000 words
+              </span>
+            </div>
             <textarea 
               className={styles.textarea} 
               value={description}
-              onChange={(e) => setDescription(e.target.value)}
+              onChange={(e) => {
+                const text = e.target.value;
+                const words = text.trim().split(/\s+/).filter(w => w.length > 0);
+                if (words.length <= 2000 || text.length < description.length) {
+                  setDescription(text);
+                }
+              }}
               placeholder="Tell viewers about your video (or leave blank — AI will generate one)"
-              maxLength={2000}
             />
           </div>
 

@@ -195,12 +195,23 @@ export default function StudioContent() {
             </div>
             
             <div className={styles.formGroup}>
-              <label className={styles.label}>Description</label>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                <label className={styles.label} style={{ marginBottom: 0 }}>Description</label>
+                <span className={styles.label} style={{ marginBottom: 0, fontSize: '0.8rem', color: editDesc.trim().split(/\s+/).filter(w => w.length > 0).length > 2000 ? '#ff4a4a' : 'var(--text-secondary)' }}>
+                  {editDesc.trim().split(/\s+/).filter(w => w.length > 0).length} / 2000 words
+                </span>
+              </div>
               <textarea 
                 className={styles.textarea} 
                 value={editDesc}
-                onChange={(e) => setEditDesc(e.target.value)}
-                maxLength={2000}
+                onChange={(e) => {
+                  const text = e.target.value;
+                  const words = text.trim().split(/\s+/).filter(w => w.length > 0);
+                  // Allow typing if under 2000 words, OR if they are deleting/backspacing
+                  if (words.length <= 2000 || text.length < editDesc.length) {
+                    setEditDesc(text);
+                  }
+                }}
               />
             </div>
 
