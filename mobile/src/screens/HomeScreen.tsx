@@ -60,7 +60,7 @@ export default function HomeScreen() {
     }
 
     while (regularIndex < regularVideos.length) {
-      for (let i = 0; i < 5 && regularIndex < regularVideos.length; i++) {
+      for (let i = 0; i < 10 && regularIndex < regularVideos.length; i++) {
         feed.push({ type: 'regular', id: regularVideos[regularIndex]._id, video: regularVideos[regularIndex] });
         regularIndex++;
       }
